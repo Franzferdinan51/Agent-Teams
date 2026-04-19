@@ -1,5 +1,9 @@
 # 🤖 AgentTeams v1.0.0
 
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Franzferdinan51/Agent-Teams)
+[![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
+
 **The ultimate multi-agent collaboration system.** Spawn, coordinate, and orchestrate multiple specialized agents for complex tasks — with a giant AI Senate, decentralized P2P mesh, and hive mind intelligence.
 
 Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https://github.com/Franzferdinan51/duck-cli).
