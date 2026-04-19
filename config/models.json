@@ -1,0 +1,145 @@
+{
+  "_comment": "============================================================",
+  "_version": "1.0",
+  "_description": "Edit this file to configure YOUR models. All models are customizable.",
+  
+  "models": {
+    
+    "PRIMARY": {
+      "_note": "Your main agent model - used for most tasks",
+      "name": "CHANGE ME: Primary Agent",
+      "provider": "CHANGE ME: openai | anthropic | minimax | kimi | lmstudio | lmlink",
+      "model": "CHANGE ME: gpt-4o | claude-3-5-sonnet | MiniMax-M2.7 | moonshot-v1-8k | qwen3.5-9b | qwen3.6-35b",
+      "apiKey": "CHANGE ME: $YOUR_API_KEY or 'lm-studio' for local",
+      "endpoint": "CHANGE ME: see endpoints below",
+      "enabled": true,
+      "context": "CHANGE ME: 128000",
+      "speed": "CHANGE ME: fast | medium | slow",
+      "cost": "CHANGE ME: free | low | medium | high",
+      "bestFor": ["general", "agents", "research", "orchestration"]
+    },
+
+    "FAST_LOCAL": {
+      "_note": "Fast free local model - great for quick tasks",
+      "name": "CHANGE ME: Fast Local Model",
+      "provider": "CHANGE ME: lmstudio | lmlink",
+      "model": "CHANGE ME: qwen3.5-9b | llama-3-8b | mistral-7b",
+      "apiKey": "CHANGE ME: 'lm-studio' or set LM_STUDIO_KEY",
+      "endpoint": "CHANGE ME: http://localhost:1234/v1",
+      "enabled": true,
+      "context": "CHANGE ME: 32000",
+      "speed": "CHANGE ME: very-fast",
+      "cost": "CHANGE ME: free",
+      "bestFor": ["quick-tasks", "local-inference", "privacy"]
+    },
+
+    "VISION": {
+      "_note": "Screenshot and image analysis",
+      "name": "CHANGE ME: Vision Model",
+      "provider": "CHANGE ME: openai | anthropic | minimax | kimi",
+      "model": "CHANGE ME: gpt-4o | claude-3-5-sonnet | MiniMax-M2.7 | moonshot-v1-8k",
+      "apiKey": "CHANGE ME: $YOUR_API_KEY",
+      "endpoint": "CHANGE ME: see endpoints below",
+      "enabled": true,
+      "context": "CHANGE ME: 128000",
+      "speed": "CHANGE ME: fast",
+      "cost": "CHANGE ME: medium",
+      "bestFor": ["screenshots", "images", "visual-analysis"]
+    },
+
+    "REASONING": {
+      "_note": "Complex reasoning and analysis tasks",
+      "name": "CHANGE ME: Reasoning Model",
+      "provider": "CHANGE ME: anthropic | openai | minimax",
+      "model": "CHANGE ME: claude-3-5-sonnet | gpt-4o | MiniMax-M2.7",
+      "apiKey": "CHANGE ME: $YOUR_API_KEY",
+      "endpoint": "CHANGE ME: see endpoints below",
+      "enabled": true,
+      "context": "CHANGE ME: 200000",
+      "speed": "CHANGE ME: medium",
+      "cost": "CHANGE ME: high",
+      "bestFor": ["complex-reasoning", "analysis", "writing"]
+    },
+
+    "CODER": {
+      "_note": "Code-focused tasks",
+      "name": "CHANGE ME: Coding Model",
+      "provider": "CHANGE ME: openai | anthropic | minimax",
+      "model": "CHANGE ME: gpt-4o | claude-3-5-sonnet | glm-5",
+      "apiKey": "CHANGE ME: $YOUR_API_KEY",
+      "endpoint": "CHANGE ME: see endpoints below",
+      "enabled": true,
+      "context": "CHANGE ME: 128000",
+      "speed": "CHANGE ME: fast",
+      "cost": "CHANGE ME: medium",
+      "bestFor": ["code", "debugging", "refactoring"]
+    },
+
+    "LOCAL_WINDOWS": {
+      "_note": "Windows machine via LM Link (for users with dedicated GPU PC)",
+      "name": "CHANGE ME: Windows Local Model",
+      "provider": "CHANGE ME: lmlink",
+      "model": "CHANGE ME: qwen3.6-35b | llama-3-70b | mixtral",
+      "apiKey": "CHANGE ME: set LM_LINK_KEY",
+      "endpoint": "CHANGE ME: http://192.168.1.100:1234 (your Windows IP)",
+      "enabled": false,
+      "context": "CHANGE ME: 128000",
+      "speed": "CHANGE ME: fast",
+      "cost": "CHANGE ME: free",
+      "bestFor": ["terminal", "cli", "heavy-inference"]
+    }
+  },
+
+  "endpoints": {
+    "openai": "https://api.openai.com/v1/chat/completions",
+    "anthropic": "https://api.anthropic.com/v1/messages",
+    "minimax": "https://api.minimax.io/v1/chat/completions",
+    "kimi": "https://api.moonshot.cn/v1/chat/completions",
+    "lmstudio": "http://localhost:1234/v1",
+    "lmlink": "http://localhost:1234/v1"
+  },
+
+  "routing": {
+    "_note": "How to route tasks to models",
+    "default": "PRIMARY",
+    "fallbackChain": ["PRIMARY", "FAST_LOCAL"],
+    "byTask": {
+      "vision": "VISION",
+      "screenshot": "VISION",
+      "code": "CODER",
+      "debug": "CODER",
+      "research": "PRIMARY",
+      "reasoning": "REASONING",
+      "quick": "FAST_LOCAL",
+      "terminal": "LOCAL_WINDOWS"
+    }
+  },
+
+  "budget": {
+    "maxTokensPerTask": 50000,
+    "maxTimeMs": 300000,
+    "maxConcurrent": 5,
+    "dailyTokenLimit": 1000000,
+    "costLimitDaily": 100
+  },
+
+  "scoring": {
+    "enabled": true,
+    "trackSuccessRates": true,
+    "feedbackEnabled": true,
+    "autoRank": true
+  },
+
+  "memory": {
+    "enabled": true,
+    "persistSessions": true,
+    "crossSessionRecall": true,
+    "maxMemories": 10000
+  },
+
+  "tracing": {
+    "enabled": true,
+    "logDecisions": true,
+    "visualize": true
+  }
+}
