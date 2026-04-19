@@ -403,7 +403,7 @@
         // Dashboard
         async function loadDashboard() {
             document.getElementById('live-status').textContent = 'Live';
-            const data = await apiGet('/api/dashboard');
+            const data = await apiGet('/dashboard');
             if (data && data.stats) {
                 document.getElementById('stat-senators').textContent = data.stats.totalSenators || '-';
                 document.getElementById('stat-decrees').textContent = data.stats.activeDecrees || '-';
@@ -417,7 +417,7 @@
         
         // Senate - Decrees
         async function loadDecrees() {
-            const data = await apiGet('/api/decrees');
+            const data = await apiGet('/decrees');
             const html = data && data.decrees && data.decrees.length > 0 
                 ? data.decrees.map(d => 
                     '<div class="decree-card active">' +
@@ -434,7 +434,7 @@
         }
         
         async function loadSenators() {
-            const data = await apiGet('/api/senate');
+            const data = await apiGet('/senate');
             if (data && data.senators) {
                 document.getElementById('senator-count').textContent = data.total + ' Senators';
                 const parties = { quack: '#4a90d9', honey: '#f59e0b', claw: '#ef4444', independent: '#64748b' };
@@ -465,7 +465,7 @@
                 showToast('Please enter decree content', 'error');
                 return;
             }
-            const r = await apiPost('/api/decree', { title: title || content.substring(0, 30), content, authority: 'duckets', scope: 'universal', priority: 'high' });
+            const r = await apiPost('/decree', { title: title || content.substring(0, 30), content, authority: 'duckets', scope: 'universal', priority: 'high' });
             if (r.success) {
                 showToast('Decree issued!', 'success');
                 hideDecreeForm();
@@ -477,7 +477,7 @@
         
         // Voting
         async function loadVotes() {
-            const data = await apiGet('/api/votes');
+            const data = await apiGet('/votes');
             if (data && data.votes) {
                 const html = data.votes.map(v => {
                     const pct = Math.round((v.yes / (v.yes + v.no || 1)) * 100);
@@ -503,7 +503,7 @@
         
         // Agents
         async function loadAgents() {
-            const data = await apiGet('/api/scoring');
+            const data = await apiGet('/scoring');
             if (data && data.length > 0) {
                 const colors = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#06b6d4'];
                 const html = data.map((a, i) => 
@@ -526,7 +526,7 @@
         
         // Teams
         async function loadTeams() {
-            const data = await apiGet('/api/teams');
+            const data = await apiGet('/teams');
             if (data && data.teams && data.teams.length > 0) {
                 const html = data.teams.map(t => 
                     '<div class="team-card">' +
@@ -551,7 +551,7 @@
         async function spawnTeam() {
             const template = document.getElementById('team-template').value;
             const name = document.getElementById('team-name').value;
-            const r = await apiPost('/api/team/spawn', { template, name });
+            const r = await apiPost('/team/spawn', { template, name });
             if (r.success) {
                 showToast('Team spawned!', 'success');
                 hideTeamForm();
@@ -563,7 +563,7 @@
         
         // Memory
         async function loadMemories() {
-            const data = await apiGet('/api/memories');
+            const data = await apiGet('/memories');
             if (data && data.memories) {
                 renderMemories(data.memories);
             } else {
@@ -598,7 +598,7 @@
                 showToast('Please enter content', 'error');
                 return;
             }
-            const r = await apiPost('/api/memory', { content, category });
+            const r = await apiPost('/memory', { content, category });
             if (r.success) {
                 showToast('Memory saved!', 'success');
                 hideMemoryForm();
@@ -615,7 +615,7 @@
                 loadMemories();
                 return;
             }
-            const data = await apiGet('/api/memory/search?q=' + encodeURIComponent(q));
+            const data = await apiGet('/memory/search?q=' + encodeURIComponent(q));
             if (data && data.memories) {
                 renderMemories(data.memories);
             }
@@ -623,7 +623,7 @@
         
         // Workflows
         async function loadWorkflows() {
-            const data = await apiGet('/api/workflows');
+            const data = await apiGet('/workflows');
             if (data && data.workflows) {
                 const html = data.workflows.map(w => 
                     '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px">' +
@@ -639,7 +639,7 @@
         
         // Monitoring
         async function loadMonitoring() {
-            const data = await apiGet('/api/monitoring');
+            const data = await apiGet('/monitoring');
             if (data) {
                 document.getElementById('mon-cpu').textContent = data.cpu || 'Normal';
                 document.getElementById('mon-mem-used').textContent = data.memory?.used || '-';
