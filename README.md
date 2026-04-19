@@ -1,6 +1,6 @@
-# 🏛️ Hive Nation v1.9.5
+# 🏛️ Hive Nation v2.0.0
 
-[![Version](https://img.shields.io/badge/version-1.9.5-blue.svg)](https://github.com/Franzferdinan51/Agent-Teams)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/Franzferdinan51/Agent-Teams)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
@@ -28,7 +28,7 @@ node webui/server.js
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    🏛️ HIVE NATION v1.9.5 🏛️                      │
+│                    🏛️ HIVE NATION v2.0.0 🏛️                      │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
@@ -233,7 +233,7 @@ AgentTeams/
 ├── docs/
 │   ├── GOVERNANCE.md              # Government structure
 │   └── CHAIN-OF-COMMAND.md       # Command chain
-└── VERSION                        # v1.9.5
+└── VERSION                        # v2.0.0
 ```
 
 ---
@@ -344,4 +344,38 @@ MIT License
 
 ---
 
-**Version 1.9.5** — Built for production multi-agent governance 🏛️⚖️🦆
+**Version 2.0.0** — Built for production multi-agent governance 🏛️⚖️🦆
+
+---
+
+## 📋 Changelog v2.0.0
+
+### New Features
+- ✅ **Governance Pipeline** - Council → Senate → Teams workflow
+- ✅ **MCP Server** - 23 tools for LM Studio, Claude Desktop, mcporter
+- ✅ **BrowserOS Integration** - Full browser automation
+- ✅ **16 Team Templates** - Including Coalition for team-of-teams
+- ✅ **46 Councilors** - Adversarial deliberation for robust decisions
+- ✅ **94 Senators** - Three parties with weighted voting
+- ✅ **WebUI v2.0** - Live dashboard with all systems
+- ✅ **Quick Commands** - `hive-teams.sh` CLI tool
+- ✅ **Skills** - Agent Teams skill for OpenClaw
+
+### Services
+| Service | Port | Description |
+|---------|------|-------------|
+| WebUI | 3131 | Live dashboard |
+| Council | 3006 | 46 councilors |
+| MCP | 3456 | 23 tools |
+
+### Quick Start
+```bash
+# Start all services
+node webui/server.js
+node mcp-server.js
+
+# Governance pipeline
+node scripts/hive-workflow.js pipeline "Topic"
+```
+
+**Version 2.0.0** — Built for production multi-agent governance 🏛️⚖️🦆
