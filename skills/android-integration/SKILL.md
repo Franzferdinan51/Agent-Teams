@@ -4,12 +4,15 @@
 
 ### Best Frameworks
 
-| Framework | Description | Best For |
-|-----------|-------------|---------|
-| **Mobile-use** | General GUI automation for Android | Universal |
-| **Android-World** | Benchmark for autonomous tasks | Research |
-| **ADB** | Android Debug Bridge | Command access |
-| **Appium** | Cross-platform mobile testing | Testing |
+| Framework | Score | Description | Best For |
+|-----------|-------|-------------|---------|
+| **Mobile-use** | **100%** | Hierarchical agent + reflection | Universal |
+| **Droidrun** | 63.0% | Gemini 2.5 + Accessibility portal | Production |
+| **ADB** | — | Android Debug Bridge | Command access |
+| **AndroidWorld** | Benchmark | 116 tasks, 20 apps | Research |
+| **Appium** | — | Cross-platform testing | Testing |
+
+**Key insight:** Framework design + reflection loop beats raw model power. Mobile-use achieves 100% with hierarchical agents that re-evaluate after each action.
 
 ### Model Choices for Android
 
@@ -20,23 +23,39 @@
 | **kimi-k2.5** | Top-tier vision + coding | API |
 | **MiniMax-M2.7** | General agentic tasks | API |
 
-### Architecture
+### Architecture (Hierarchical Agent + Reflection)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                  ANDROID AGENT CONTROL                      │
+│              ANDROID AGENT (Hierarchical + Reflection)        │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐    │
-│  │  Agent     │────▶│   ADB       │────▶│  Android   │    │
-│  │  (Gemma4)  │     │  Bridge     │     │  Device    │    │
-│  └─────────────┘     └─────────────┘     └─────────────┘    │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │  AGENT LOOP (repeat until task complete)             │ │
+│  │                                                      │ │
+│  │   1. SCREENSHOT → Send to vision model             │ │
+│  │           ↓                                         │ │
+│  │   2. OBSERVE → Analyze UI (XML hierarchy)         │ │
+│  │           ↓                                         │ │
+│  │   3. PLAN → Determine action (tap, swipe, type)     │ │
+│  │           ↓                                         │ │
+│  │   4. ACT → Execute via ADB                         │ │
+│  │           ↓                                         │ │
+│  │   5. REFLECT → Did it work? Re-evaluate...         │ │
+│  │           ↓                                         │ │
+│  │   6. Repeat until complete                        │ │
+│  └──────────────────────────────────────────────────────┘ │
 │                                                             │
-│  Vision: Capture screen → Analyze → Determine action       │
-│  Action: Tap, swipe, type, launch app                      │
+│  ADB Bridge                                                │
+│  ┌─────────────┐     ┌─────────────┐                      │
+│  │  Vision     │     │  Android   │                      │
+│  │  (Gemma4)   │────▶│  Device    │                      │
+│  └─────────────┘     └─────────────┘                      │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+**Why reflection matters:** Mobile-use achieves 100% on AndroidWorld because it re-evaluates after each action. Not raw model power — framework + reflection.
 
 ### Key Tools
 
