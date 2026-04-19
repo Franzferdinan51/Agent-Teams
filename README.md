@@ -1,94 +1,116 @@
 # 🤖 AgentTeams
 
-A portable, self-contained multi-agent team coordination system with **Meta-Agent orchestration**, **AI Council deliberation**, and **Swarm Coding** for [OpenClaw](https://github.com/openclaw/openclaw) and Duck CLI.
+**Multi-Agent Collaboration System** — spawn, coordinate, and orchestrate multiple specialized agents for complex tasks.
 
-## Features
+Built for [OpenClaw](https://github.com/openclaw/openclaw) and Duck CLI.
 
-- **Team Orchestration** — Coordinate specialized agents
-- **Meta-Agent** — Plan → Execute → Critic → Heal → Learn cycle
-- **AI Council Integration** — Adversarial deliberation with 45 councilors
-- **Swarm Coding** — Complex builds with multiple specialists
-- **Shared Context** — Tasks, memory, and artifacts shared across team
-- **Portable** — Copy to any machine, self-contained
-- **Duck CLI Integration** — Works with sessions_spawn
+## The Core Idea
+
+> **The best AI systems don't use one big agent. They use a team of specialized agents working together.**
+
+AgentTeams gives you:
+- **Micro-Agents** — 25+ tiny specialists for granular tasks
+- **Team Agents** — Full roles (researcher, coder, reviewer, writer)
+- **Meta-Agent** — Plans → Executes → Critiques → Heals → Learns
+- **AI Council** — 45 councilors for adversarial deliberation
+- **Swarm Coding** — Multiple agents building together
 
 ## Quick Start
 
 ```bash
-# Clone
 git clone https://github.com/Franzferdinan51/Agent-Teams.git
 cd Agent-Teams
+chmod +x *.sh scripts/*.sh
 
-# Install
-npm install
+# List all agents
+./micro.sh list
 
-# Build
-npm run build
+# Spawn a micro-agent
+./micro.sh researcher "latest AI news"
 
-# Initialize session
-node dist/TeamCLI.js init "My Project"
+# Start a team session
+./team-session.sh init "My Project"
+
+# Spawn AI Council deliberation
+./spawn-council.sh "REST vs GraphQL?" adversarial
 ```
 
-## Team Roles
+## 🎯 Micro-Agents (25+ Tiny Specialists)
+
+Single-purpose agents for granular tasks. Spawn many in parallel.
+
+```bash
+# Research 5 topics simultaneously
+./micro.sh researcher "AI frameworks 2024" &
+./micro.sh researcher "Best databases for startups" &
+./micro.sh researcher "Cloud hosting options" &
+./micro.sh researcher "CI/CD pipelines" &
+./micro.sh researcher "Testing frameworks" &
+wait
+```
+
+| Category | Agents |
+|----------|--------|
+| Research | `researcher`, `researcher-deep`, `comparer`, `summarizer` |
+| Coding | `coder`, `debugger`, `bug-hunt`, `optimizer`, `security-scan` |
+| Testing | `test-writer`, `code-review`, `review-summary` |
+| API/DB | `api-designer`, `db-designer`, `query-writer` |
+| Docs | `doc-writer`, `readme-writer`, `changelog-writer` |
+| Git | `commit-writer`, `pr-writer` |
+| Planning | `planner`, `architect` |
+
+## 👥 Team Agents
+
+Full roles for complex collaborative work.
 
 | Role | Description |
-|------|-------------|
-| **researcher** | Web search, summarize, gather info |
-| **coder** | Write code, implement features |
-| **reviewer** | Code review, quality check |
-| **writer** | Documentation, reports |
-| **council** | AI deliberation, adversarial decision making |
-| **meta** | Meta-agent orchestration for complex tasks |
+|------|------------|
+| `researcher` | Web search, summarize, gather info |
+| `coder` | Write code, implement features |
+| `reviewer` | Code review, quality check |
+| `writer` | Documentation, reports |
+| `council` | AI deliberation, adversarial decision making |
+| `meta` | Meta-agent for complex orchestration |
 
-## Meta-Agent Orchestration
+```bash
+# Add tasks to team queue
+./team-task.sh add "Research weather APIs" researcher
+./team-task.sh add "Build wrapper" coder
+./team-task.sh add "Review code" reviewer
 
-The meta-agent follows a **Plan → Execute → Critic → Heal → Learn** cycle:
+# Spawn team agents
+./spawn-agent.sh researcher "Find 3 best free weather APIs"
+./spawn-agent.sh coder "Build Python weather wrapper"
+```
+
+## 🧠 Meta-Agent
+
+Plan → Execute → Critic → Heal → Learn cycle for complex tasks.
 
 ```bash
 # Preview what meta-agent would do
-./scripts/meta-plan.sh "Build a REST API"
+./meta-plan.sh "Build a REST API"
 
-# Full execution with meta-agent
-./scripts/meta-run.sh "Build a REST API"
-
-# Show past learnings
-./scripts/meta-learnings.sh
+# Full execution with all phases
+./meta-run.sh "Build a REST API"
 ```
 
-### Meta-Agent Lifecycle
+## 🤖 AI Council
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                      META-AGENT CYCLE                         │
-├──────────────────────────────────────────────────────────────┤
-│   ┌─────────┐     ┌─────────┐     ┌─────────┐              │
-│   │ PLANNER │────▶│ EXECUTE │────▶│ CRITIC  │              │
-│   └─────────┘     └─────────┘     └─────────┘              │
-│        │                                  │                   │
-│        │              ┌─────────┐         │                   │
-│        └─────────────▶│ HEALER │◀────────┘                   │
-│                       └─────────┘                              │
-│                            │                                   │
-│                       ┌─────────┐                              │
-│                       │ LEARNER │                              │
-│                       └─────────┘                              │
-└──────────────────────────────────────────────────────────────┘
-```
-
-## AI Council Integration
-
-Adversarial deliberation with 45 councilors:
+Adversarial deliberation with 45 specialized councilors.
 
 ```bash
-# Start council deliberation
-./scripts/spawn-council.sh "REST vs GraphQL?" adversarial
+# Standard deliberation
+./spawn-council.sh "Should we use microservices?" standard
 
-# Swarm coding for complex builds
-./scripts/spawn-swarm.sh "Build a REST API for task manager"
+# Adversarial debate
+./spawn-council.sh "REST vs GraphQL?" adversarial
+
+# Consensus building
+./spawn-council.sh "Architecture decision?" consensus
 ```
 
 ### Deliberation Modes
-
 | Mode | Use Case |
 |------|----------|
 | `standard` | General discussion |
@@ -97,95 +119,142 @@ Adversarial deliberation with 45 councilors:
 | `consensus` | Agreement building |
 | `swarm_coding` | Complex builds |
 
-## Swarm Coding
+## 🐝 Swarm Coding
 
-Complex multi-agent builds with specialized roles:
+Multiple agents building together with specialized roles.
 
 ```bash
-./scripts/spawn-swarm.sh "Build a weather API wrapper"
+./spawn-swarm.sh "Build a weather API wrapper"
 ```
 
-Roles: Architect, Backend, Frontend, DevOps, Security, QA
+Swarm roles: Architect, Backend, Frontend, DevOps, Security, QA
+
+## Multi-Agent Patterns
+
+### Parallel Execution
+```
+Spawn 5 research agents simultaneously → Aggregate results
+```
+```bash
+./micro.sh researcher "topic 1" &
+./micro.sh researcher "topic 2" &
+./micro.sh researcher "topic 3" &
+./micro.sh researcher "topic 4" &
+./micro.sh researcher "topic 5" &
+wait
+```
+
+### Pipeline
+```
+Researcher → Coder → Reviewer → Tester → Security → Deploy
+```
+```bash
+./spawn-agent.sh researcher "Research API options"
+# Results → Coder
+./spawn-agent.sh coder "Build API from research"
+# Results → Reviewer  
+./spawn-agent.sh reviewer "Review the API"
+# ... and so on
+```
+
+### Council + Team
+```
+Council decides → Team implements → Council reviews
+```
+```bash
+./spawn-council.sh "Architecture decision?" adversarial
+# Council verdict → Team
+./spawn-agent.sh coder "Build based on council decision"
+```
 
 ## Architecture
 
 ```
-Team Lead
-    │
-    ├──→ Researcher ─→ Web search, summarize
-    ├──→ Coder ─→ Write code, implement
-    ├──→ Reviewer ─→ Code review, quality
-    ├──→ Writer ─→ Documentation
-    ├──→ Council ─→ Adversarial deliberation
-    │           ├──→ 45 Councilors
-    │           ├──→ 11 Deliberation Modes
-    │           └──→ Swarm Coding
-    │
-    └──→ Meta-Agent ─→ Plan → Execute → Critic → Heal → Learn
+                    ┌─────────────────────────────────┐
+                    │         TEAM LEAD                │
+                    │   (Orchestrates everything)      │
+                    └───────────────┬─────────────────┘
+                                    │
+        ┌───────────────────────────┼───────────────────────────┐
+        │                           │                           │
+        ▼                           ▼                           ▼
+┌───────────────┐          ┌───────────────┐          ┌───────────────┐
+│  MICRO-AGENTS │          │  TEAM AGENTS  │          │   AI COUNCIL  │
+│  (25+ tiny)   │          │ (4 full roles)│          │ (45 councilors)│
+├───────────────┤          ├───────────────┤          ├───────────────┤
+│ researcher     │          │ researcher    │          │ Speaker      │
+│ coder        │          │ coder        │          │ Technocrat   │
+│ debugger     │          │ reviewer     │          │ Ethicist     │
+│ test-writer  │          │ writer       │          │ Skeptic      │
+│ ...          │          │              │          │ ...          │
+└───────────────┘          └───────────────┘          └───────────────┘
+        │                           │                           │
+        └───────────────────────────┼───────────────────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    │      SHARED CONTEXT          │
+                    │  • Task Queue              │
+                    │  • Memory                  │
+                    │  • Artifacts               │
+                    └─────────────────────────────┘
 ```
 
 ## Scripts Reference
 
 | Script | Purpose |
 |--------|---------|
+| `micro.sh` | Spawn 25+ micro-agents |
 | `team-session.sh` | Start/end team sessions |
 | `team-task.sh` | Task queue management |
-| `team-status.sh` | View full team status |
-| `spawn-agent.sh` | Spawn team member agents |
-| `spawn-council.sh` | Spawn AI Council deliberation |
-| `spawn-swarm.sh` | Spawn Swarm Coding session |
+| `team-status.sh` | Full team dashboard |
+| `spawn-agent.sh` | Spawn team agents |
+| `spawn-council.sh` | Spawn AI Council |
+| `spawn-swarm.sh` | Spawn swarm coding |
 | `meta-plan.sh` | Preview meta-agent plan |
-| `meta-run.sh` | Execute with meta-agent cycle |
-| `meta-learnings.sh` | Show past learnings |
-| `share-team.sh` | Package for sharing |
+| `meta-run.sh` | Full meta-agent execution |
+| `meta-learnings.sh` | View past learnings |
 
-## Integration with Duck CLI
+## Duck CLI Integration
 
 ```javascript
-// Spawn a researcher agent
+// Spawn micro-agents in parallel
 sessions_spawn({
-  task: "Research best weather APIs",
+  task: "Research best weather API",
   model: "minimax/MiniMax-M2.7",
-  label: "researcher-agent"
+  label: "micro-researcher"
 })
 
-// Or spawn via CLI
-./scripts/spawn-agent.sh researcher "Find best APIs"
-./scripts/meta-run.sh "Build API wrapper"
-```
+sessions_spawn({
+  task: "Write unit tests for weather module",
+  model: "minimax/MiniMax-M2.7",
+  label: "micro-test-writer"
+})
 
-## Folder Structure
+sessions_spawn({
+  task: "Security review of weather module",
+  model: "minimax/MiniMax-M2.7",
+  label: "micro-security-scan"
+})
 
-```
-├── src/
-│   ├── TeamCLI.ts           # CLI interface
-│   └── orchestrator/        # Core team logic
-├── scripts/
-│   ├── team-*.sh           # Session/task management
-│   ├── spawn-*.sh         # Agent/council/swarm spawning
-│   └── meta-*.sh          # Meta-agent orchestration
-├── skills/                  # OpenClaw skills
-│   ├── team-orchestrator/
-│   ├── agent-researcher/
-│   ├── agent-coder/
-│   ├── agent-reviewer/
-│   ├── agent-writer/
-│   ├── agent-council/
-│   └── agent-meta/
-├── config/                 # Configuration
-└── workspace/           # Team shared state (gitignored)
+// Meta-agent for complex task
+sessions_spawn({
+  task: "Build a complete REST API",
+  runtime: "subagent",
+  model: "minimax/MiniMax-M2.7",
+  label: "meta-agent"
+})
 ```
 
 ## Requirements
 
-- Node.js 18+
-- npm
+- Bash 4+
+- Node.js 18+ (for TypeScript compilation)
 - AI Council Server (optional): `http://localhost:3003`
 
 ## Related Projects
 
+- [Duck CLI](https://github.com/Franzferdinan51/duck-cli) — Desktop AI agent with meta-agent orchestrator
 - [AI Bot Council](https://github.com/Franzferdinan51/AI-Bot-Council-Concensus) — Adversarial deliberation engine
-- [Duck CLI](https://github.com/Franzferdinan51/duck-cli) — Meta-agent orchestration
 - [OpenClaw](https://github.com/openclaw/openclaw) — Agent framework
 
 ## License
