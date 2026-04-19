@@ -61,6 +61,28 @@ MICRO_AGENTS=(
     # Planning
     ["planner"]="Break down complex tasks"
     ["architect"]="Design system architecture"
+
+    # Creative - Image
+    ["image-generator"]="Create images from text prompts"
+    ["sdxl-artist"]="SDXL image generation"
+    ["img2img-artist"]="Image-to-image transformation"
+    ["inpaint-artist"]="Inpainting and outpainting"
+
+    # Creative - Video
+    ["video-generator"]="Create videos from prompts"
+    ["animate-artist"]="Animate sequences and loops"
+    ["svd-artist"]="Stable Video Diffusion"
+
+    # Creative - 3D
+    ["3d-modeler"]="Create 3D models and meshes"
+    ["blender-artist"]="Blender workflow and scripting"
+    ["texture-artist"]="Generate textures and materials"
+    ["render-artist"]="Render 3D scenes"
+
+    # Creative - Audio
+    ["music-generator"]="Generate music and audio"
+    ["speech-agent"]="Text-to-speech and voice"
+    ["sound-designer"]="Create sound effects"
 )
 
 show_agents() {

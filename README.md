@@ -5,67 +5,71 @@
 Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https://github.com/Franzferdinan51/duck-cli).
 Inspired by [Hermes Agent](https://github.com/NousResearch/hermes-agent).
 
-## The Core Idea
+## 🧠 THE HIVE MIND
 
-> **The best AI systems use teams of specialized agents, not one big agent.**
-
-AgentTeams v1.0.0 gives you:
-- **🧠 Hive Mind** — Connect multiple systems into unified coordination
-- **Agent Mesh API** — Live real-time agent communication
-- **Dreaming Engine** — Background memory consolidation (Light → REM → Deep)
-- **5 Coordination Patterns** — Generator-Verifier, Orchestrator-Subagent, Agent Teams, Message Bus, Shared State
-- **25+ Micro-Agents** — Tiny specialists for granular tasks
-- **Meta-Agent** — Plan → Execute → Critic → Heal → Learn
-- **Hermes Integration** — Closed learning loop, FTS5 search, skill self-improvement
-- **Android Control** — Agent controls Android devices via ADB
-- **QA Verification Loops** — Multi-round verification until pass
-
-## 🧠 Hive Mind — Multi-System Coordination
-
-Connect ANY system to the hive:
-
-```bash
-# Connect Duck CLI
-./scripts/hive-connect.sh "duck-cli"
-
-# Connect Dashboard
-./scripts/hive-connect.sh "dashboard" "status,metrics"
-
-# Connect AI Council
-./scripts/hive-connect.sh "ai-council" "analysis,deliberation"
-
-# Connect CannaAI (grow app)
-./scripts/hive-connect.sh "cannaai" "vision,plant-analysis"
-```
+Every system connected to the mesh becomes part of the hive:
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                     THE HIVE MIND                                 │
 │                                                                  │
-│   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
-│   │  Duck CLI   │  │  Dashboard  │  │  AI Council  │            │
-│   └──────┬──────┘  └──────┬──────┘  └──────┬──────┘            │
-│          └────────────────┼────────────────┘                     │
-│                         ▼                                        │
+│   Every agent, system, and AI is connected                       │
+│                                                                  │
+│   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
+│   │  Duck CLI   │  │  Dashboard  │  │  AI Council  │             │
+│   │  (Coding)   │  │  (Status)   │  │(Deliberation)│             │
+│   └──────┬──────┘  └──────┬──────┘  └──────┬──────┘             │
+│          │                │                │                      │
+│   ┌──────┴──────┐  ┌──────┴──────┐  ┌──────┴──────┐            │
+│   │Creative    │  │  Android    │  │  Meta       │            │
+│   │Agents      │  │  Control    │  │  Agents     │            │
+│   │(Image/3D)  │  │  (ADB)      │  │(Plan/Exec)  │            │
+│   └────────────┘  └────────────┘  └────────────┘            │
+│                                                                  │
 │              ┌────────────────────────┐                          │
 │              │     AGENT MESH API     │                         │
-│              │   (localhost:4000)     │                         │
+│              │   (Central Nervous)    │                         │
 │              └────────────────────────┘                          │
-│                         │                                        │
-│          ┌─────────────┼─────────────┐                          │
-│          ▼             ▼             ▼                          │
-│   ┌──────────┐  ┌──────────┐  ┌──────────┐                     │
-│   │ CannaAI  │  │ Agent    │  │  Any    │                     │
-│   │ Grow App │  │ Teams    │  │ System  │                     │
-│   └──────────┘  └──────────┘  └──────────┘                     │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-Every system can:
-- ✅ Talk to each other via mesh
-- ✅ Share context and memory
-- ✅ Coordinate complex multi-system tasks
-- ✅ Broadcast to all systems at once
+**Connect ANY system:** `./scripts/hive-connect.sh <name> [capabilities]`
+
+## Core Features
+
+- **🧠 Hive Mind** — All agents/systems connected and coordinating
+- **🎨 Creative Agents** — Image, Video, 3D, Music generation
+- **🌐 Live Communication** — Real-time WebSocket messaging
+- **🌙 Dreaming Engine** — Light→REM→Deep memory consolidation
+- **🤖 30+ Micro-Agents** — Single-purpose specialists
+- **🧠 Meta-Agent** — Plan→Execute→Critic→Heal→Learn
+- **📱 Android Control** — ADB + reflection loop
+- **✅ QA Verification** — Multi-round verification
+
+## 🎨 Creative Agents
+
+| Agent | Purpose | Tools |
+|-------|---------|-------|
+| `image-generator` | Text-to-image | ComfyUI, MiniMax, SDXL |
+| `video-generator` | Video creation | MiniMax, AnimateDiff, SVD |
+| `3d-modeler` | 3D mesh creation | Blender, GLTF export |
+| `blender-artist` | Blender scripting | Python API, Cycles |
+| `texture-artist` | Procedural textures | Stable Diffusion |
+| `music-generator` | Music creation | MiniMax |
+| `speech-agent` | TTS + voice | MiniMax |
+| `animate-artist` | Animation sequences | ComfyUI |
+
+### Connect Creative Tools
+
+```bash
+# Connect all creative agents
+./scripts/creative-hive.sh
+
+# Or individual
+./scripts/hive-connect.sh "comfyui" "image,workflows"
+./scripts/hive-connect.sh "minimax-creative" "speech,music,video"
+./scripts/hive-connect.sh "blender" "3d,rendering"
+```
 
 ## Quick Start
 
@@ -74,109 +78,62 @@ git clone https://github.com/Franzferdinan51/Agent-Teams.git
 cd Agent-Teams
 chmod +x *.sh scripts/*.sh
 
-# Start Agent Mesh API
+# Start mesh (hive nervous system)
 cd /tmp/agent-mesh-api && npm start &
 
 # Connect to hive
 ./scripts/hive-connect.sh my-system
 
-# Run dreaming (memory consolidation)
-node scripts/dreaming-engine.js dream
+# List agents
+./scripts/micro.sh list
 
-# Run live coordination
-node scripts/live-messenger.js --demo
+# Spawn creative agent
+./scripts/micro.sh image-generator "futuristic city at sunset"
 ```
 
-## 🌐 Live Agent Communication
+## Hive Mind Scripts
 
-```javascript
-const { LiveMessenger } = require('./scripts/live-messenger');
-
-const messenger = new LiveMessenger('researcher-1');
-await messenger.connect();
-messenger.broadcast('hive', 'Starting research...');
-```
-
-## 🌙 Dreaming Engine (Background Memory)
-
-```bash
-node scripts/dreaming-engine.js dream
-# Phase order: Light → REM → Deep
-# Scoring: 6 weighted signals, thresholds: score≥0.8, recalls≥3, queries≥3
-```
-
-## 🏗️ Architecture
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                    AGENTTEAMS v1.0.0                            │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   Micro-Agents ──┐                                              │
-│   (25+ tiny)     │                                              │
-│                   │    ┌──────────────────────────────────────┐ │
-│   Meta-Agent ────┼───→│        AGENT MESH API                │ │
-│   (Plan→Exec→    │    │   http://localhost:4000              │ │
-│    Critic→       │    │   Live real-time communication     │ │
-│    Heal→Learn)   │    └──────────────────────────────────────┘ │
-│                   │                                              │
-│   Dreaming ──────┼───→│                                       │
-│   (Light→REM→    │    │   HIVE MIND                          │
-│    Deep)         │    │   Every system connected              │
-│                   │    │                                       │
-│   Hermes ────────┼───→│                                       │
-│   (Learning loop)│    │                                       │
-│                   │    │                                       │
-│   Android ──────┼───→│                                       │
-│   (ADB control)  │    │                                       │
-│                   │    │                                       │
-└───────────────────┴────┴───────────────────────────────────────┘
-```
-
-## Scripts Reference
-
-### Hive Mind
 | Script | Purpose |
 |--------|---------|
 | `hive-connect.sh` | Connect any system to hive |
 | `hive-mind.js` | Orchestrate multi-system tasks |
+| `creative-hive.sh` | Connect all creative agents |
+| `live-messenger.js` | Real-time messaging |
 
-### Live Communication
-| Script | Purpose |
-|--------|---------|
-| `live-messenger.js` | WebSocket real-time chat |
-| `live-coord.sh` | Live coordination commands |
-| `mesh-register.js` | Auto-register with mesh |
+## Micro-Agents (30+)
 
-### Memory & Dreaming
-| Script | Purpose |
-|--------|---------|
-| `dreaming-engine.js` | Light→REM→Deep cycles |
-| `subconscious.js` | 30-min cron consolidation |
-| `session-manager.js` | Session + context loading |
+**Research:** researcher, researcher-deep, comparer, summarizer
+
+**Coding:** coder, debugger, bug-hunt, optimizer, security-scan, refactor
+
+**Creative:** image-generator, video-generator, 3d-modeler, music-generator, speech-agent
+
+**QA:** test-writer, code-review, qa-test-writer, qa-security-scan
+
+**Planning:** planner, architect
+
+**All can spawn sub-agents as needed**
 
 ## Related Projects
 
 | Project | Purpose |
 |---------|---------|
 | [Duck CLI](https://github.com/Franzferdinan51/duck-cli) | Desktop AI agent |
-| [Agent Mesh API](https://github.com/Franzferdinan51/agent-mesh-api) | Agent communication |
-| [Hermes Agent](https://github.com/NousResearch/hermes-agent) | Closed learning loop |
-| [OpenClaw](https://github.com/openclaw/openclaw) | Agent framework |
+| [Agent Mesh API](https://github.com/Franzferdinan51/agent-mesh-api) | Hive communication |
+| [MiniMax CLI](https://github.com/MiniMax-AI/cli) | Speech, video, music |
+| [ComfyUI](https://github.com/comfyanonymous/ComfyUI) | Image workflows |
 
 ## Changelog
 
 ### v1.0.0 (2026-04-19)
-- Hive Mind — multi-system coordination
-- Agent Mesh API (live WebSocket messaging)
-- Dreaming Engine (Light → REM → Deep)
-- Hermes Agent patterns
-- Android agent control (ADB + reflection)
-- 5 coordination patterns
-- 25+ micro-agents
-- Meta-Agent (Plan→Execute→Critic→Heal→Learn)
-- QA verification loops
-- Active memory (MEMORY.md + daily notes)
+- **Hive Mind** — unified multi-system coordination
+- **Creative Agents** — image, video, 3D, music, speech
+- Agent Mesh API live WebSocket
+- Dreaming Engine (Light→REM→Deep)
+- 30+ Micro-Agents (all can spawn sub-agents)
+- Meta-Agent with sub-agent support
+- Android control (ADB + reflection)
+- Hermes patterns, Active memory
 
 ## License
 
