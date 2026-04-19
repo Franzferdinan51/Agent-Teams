@@ -178,6 +178,35 @@ function main() {
         return;
     }
 
+    // Model preferences
+    if (cmd === 'models' || (cmd === 'model' && args[0] === 'prefs')) {
+        printBanner();
+        console.log(`
+📊 HIVE NATION MODEL PREFERENCES
+
+`);
+        console.log(`LOCAL MODELS (Free, uses local GPU/RAM):
+`);
+        console.log(`  Qwen 3.6 35B A3B (Windows PC)`);
+        console.log(`    • Terminal/CLI tasks (Terminal-Bench leader: 61.6%)`);
+        console.log(`    • Graduate reasoning (GPQA Diamond: 90.4%)`);
+        console.log(`    • Fastest local (~158 tok/s)
+`);
+        console.log(`  Google Gemma 4 26B A4B (Mac)`);
+        console.log(`    • Vision tasks (native multimodal)`);
+        console.log(`    • Android development (tool-calling trained)`);
+        console.log(`    • Privacy-sensitive tasks
+`);
+        console.log(`CLOUD MODELS (API):
+`);
+        console.log(`  MiniMax M2.7 — General agents, research`);
+        console.log(`  Kimi K2.5 — Vision + coding`);
+        console.log(`  gpt-5.4 — Premium reasoning
+`);
+        console.log(`See MODEL-PREFERENCES.md for full routing rules.`);
+        return;
+    }
+
     // Default help
     printHelp();
 }
