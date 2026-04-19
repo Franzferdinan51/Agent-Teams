@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /**
- * Hive CLI - Unified Command Line Interface
- * Works on Mac, Linux, Termux (Android)
+ * Hive CLI - Complete Command Line Interface
  * 
- * Usage:
- *   hive <command> [args]
- *   node cli/index.js <command> [args]
+ * All Hive modules unified under Senate control:
+ * - Senate Decrees (THE LAW)
+ * - Agent Orchestrator (Senate-controlled)
+ * - Memory & Decisions
+ * - Skills, Plugins, Automation
+ * - Monitoring, Security, Multi-Instance
  */
 
 const fs = require('fs');
@@ -19,7 +21,7 @@ const baseDir = path.dirname(__dirname);
 const scriptsDir = path.join(baseDir, 'scripts');
 
 // ═══════════════════════════════════════════════════════════
-// PLATFORM HELPERS
+// RUN SCRIPT
 // ═══════════════════════════════════════════════════════════
 
 function runScript(scriptName, args = []) {
@@ -29,48 +31,45 @@ function runScript(scriptName, args = []) {
             console.log(`Script not found: ${scriptName}`);
             return;
         }
-        
         const child = require(scriptPath);
         if (typeof child.run === 'function') {
             child.run(args);
         }
     } catch (e) {
-        console.error(`Error running ${scriptName}: ${e.message}`);
+        console.error(`Error: ${e.message}`);
     }
 }
 
-function runCommand(cmd, args = []) {
-    const { execSync } = require('child_process');
+function runModule(modulePath, args = []) {
     try {
-        const result = execSync(cmd, { 
-            encoding: 'utf-8',
-            stdio: 'pipe'
-        });
-        return result;
+        const mod = require(modulePath);
+        const cmd = args[0];
+        const modArgs = args.slice(1);
+        
+        // Try CLI-style command
+        if (mod.commands && mod.commands[cmd]) {
+            mod.commands[cmd](modArgs);
+        }
+        // Try direct function
+        else if (typeof mod === 'function') {
+            const instance = new mod();
+            if (instance[cmd]) {
+                instance[cmd](...modArgs);
+            }
+        }
     } catch (e) {
-        return e.message;
+        console.error(`Error: ${e.message}`);
     }
 }
 
 // ═══════════════════════════════════════════════════════════
-// TERMUX API WRAPPERS
-// ═══════════════════════════════════════════════════════════
-
-function termuxCommand(cmd, args = []) {
-    if (!platform.canUseTermuxAPI()) {
-        return { error: 'Termux:API not available' };
-    }
-    return runCommand(cmd, args);
-}
-
-// ═══════════════════════════════════════════════════════════
-// HELP TEXT
+// HELP
 // ═══════════════════════════════════════════════════════════
 
 const helpText = `
 ╔══════════════════════════════════════════════════════════════════╗
-║           🏛️ HIVE NATION CLI 🏛️                                  ║
-║           Multi-Agent Government Framework                       ║
+║               🏛️ HIVE NATION CLI 🏛️                            ║
+║           Complete Multi-Agent Government Framework             ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║  Platform: ${(platform.platform + ' ').padEnd(50)}║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -78,52 +77,100 @@ const helpText = `
 USAGE:
   hive <command> [args]
 
-COMMANDS:
+═══════════════════════════════════════════════════════════════════
+🏛️  SENATE — THE LAW OF THE HIVE
+═══════════════════════════════════════════════════════════════════
 
-  🏛️ GOVERNMENT
-    gov          Government hub
-    senate       Senate operations
-    congress     Congress operations
-    constitution View constitution
-    law          Legal code
-    orders       Executive orders
-    official     Government officials
+  senate issue <title> <content>     Issue binding decree
+  senate list [status]                 List decrees
+  senate check <action>                Check decree compliance
+  senate vote <#> <senator> <vote>    Vote on decree
+  senate revoke <#>                    Revoke decree
+  senate dashboard                     Show Senate command center
 
-  🧠 PRODUCTION
-    scoring <cmd>    Agent evaluation
-    memory <cmd>     Memory persistence
-    trace <cmd>      Execution tracing
-    budget <cmd>     Resource management
+═══════════════════════════════════════════════════════════════════
+🤖 AGENTS — SENATE-CONTROLLED
+═══════════════════════════════════════════════════════════════════
 
-  📱 TERMUX (Android)
-    camera [n]       Take photo
-    location         Get GPS
-    clipboard [text] Get/set clipboard
-    notify <title> <msg>  Show notification
-    speak <text>     Text-to-speech
-    sms <num> <msg>  Send SMS
+  agent execute <task>                 Execute task (Senate-approved)
+  agent decompose <task>               Show task breakdown
+  agent select <task>                  Show agent selection
+  agent parallel <task1|task2|...>     Parallel execution
+  agent failover <agent> <task>        Show failover chain
+  agent perf [agent]                   View performance
 
-  💻 SYSTEM
-    platform        Show platform info
-    status          System status
-    mcp             Start MCP server
-    install         Install Hive CLI
+═══════════════════════════════════════════════════════════════════
+🧠 MEMORY & DECISIONS
+═══════════════════════════════════════════════════════════════════
 
-  📖 HELP
-    help            Show this help
-    docs            Open documentation
+  remember <cat> <content>            Save memory
+  recall <query>                      Search memories
+  decision <ctx> <decision> [reason]  Log decision
+  pastDecisions <query>               Search past decisions
+  learn <topic> <content>             Store learning
+  quick <type> <content>              Quick save (todo|learn|note)
+
+═══════════════════════════════════════════════════════════════════
+📊 PRODUCTION TOOLS
+═══════════════════════════════════════════════════════════════════
+
+  scoring <cmd>     Agent evaluation & rankings
+  memory <cmd>      Memory & decision logs
+  trace <cmd>       Execution visualization
+  budget <cmd>      Resource management
+  skills <cmd>      Web search, cron, code review, etc
+  plugins <cmd>     Notion, GitHub, Claude, Ollama
+  automation <cmd>  Schedules, webhooks, workflows
+  monitoring <cmd>  System metrics & alerts
+  security <cmd>    API keys, secrets, audit
+  multi <cmd>       Distributed setup
+
+═══════════════════════════════════════════════════════════════════
+🏛️ GOVERNMENT
+═══════════════════════════════════════════════════════════════════
+
+  gov              Government hub
+  senate           Senate operations
+  congress         Congress operations
+  constitution     View constitution
+  law              Legal code
+  orders           Executive orders
+  official         Government officials
+
+═══════════════════════════════════════════════════════════════════
+📱 TERMUX (Android)
+═══════════════════════════════════════════════════════════════════
+
+  camera [n]       Take photo
+  location          Get GPS
+  clipboard [text]  Get/set clipboard
+  notify <title> <msg>  Show notification
+  speak <text>      Text-to-speech
+  sms <num> <msg>  Send SMS
+
+═══════════════════════════════════════════════════════════════════
+💻 SYSTEM
+═══════════════════════════════════════════════════════════════════
+
+  platform         Show platform info
+  status           System status
+  mcp              Start MCP server
+  dashboard        Full dashboard
+  install          Install Hive CLI
+
+═══════════════════════════════════════════════════════════════════
 
 EXAMPLES:
 
-  hive gov
-  hive scoring score researcher "code" 8 9 8 9
-  hive memory remember general "Remember this"
-  hive platform
-
-  # Termux-specific
-  hive camera 0
-  hive notify "Alert" "Something happened"
-  hive speak "Hello from Termux"
+  hive senate issue "Model Priority" "All agents MUST use MiniMax M2.7"
+  hive senate check "use gpt-4 for everything"
+  
+  hive agent execute "build a REST API"
+  hive agent parallel "research X|research Y|research Z"
+  
+  hive remember work "Use MiniMax for all agents"
+  hive recall "model preferences"
+  hive decision "Use MiniMax" "Best performance" "Benchmarks show"
 
 `;
 
@@ -144,110 +191,82 @@ const termuxHelp = platform.canUseTermuxAPI() ? `
 // ═══════════════════════════════════════════════════════════
 
 const commands = {
+    // SENATE
+    senate: (args) => {
+        runModule('../scripts/hive-senate-decrees.js', args);
+    },
+
+    // AGENTS
+    agent: (args) => {
+        runModule('../agents/hive-agent-orchestrator.js', args);
+    },
+
     // Government
     gov: () => runScript('hive-gov.js'),
-    senate: () => runScript('hive-senate.js'),
     congress: () => runScript('hive-congress.js'),
     constitution: () => runScript('hive-constitution.js'),
     law: () => runScript('hive-law.js'),
     orders: () => runScript('hive-orders.js'),
     official: () => runScript('hive-official.js'),
-    news: () => runScript('hive-news.js'),
 
-    // Production
+    // Memory
+    remember: (args) => runModule('../scripts/hive-memory.js', ['remember', ...args]),
+    recall: (args) => runModule('../scripts/hive-memory.js', ['recall', ...args]),
+    decision: (args) => runModule('../scripts/hive-memory.js', ['decision', ...args]),
+    pastDecisions: (args) => runModule('../scripts/hive-memory.js', ['pastDecisions', ...args]),
+    learn: (args) => runModule('../scripts/hive-memory.js', ['learn', ...args]),
+    quick: (args) => runModule('../scripts/hive-memory.js', ['quick', ...args]),
+
+    // Production Tools
     scoring: (args) => runScript('hive-scoring.js', args),
     memory: (args) => runScript('hive-memory.js', args),
     trace: (args) => runScript('hive-trace.js', args),
     budget: (args) => runScript('hive-budget.js', args),
-    'model-config': () => runScript('hive-model-config.js'),
+
+    // Extended Modules
+    skills: (args) => runModule('../skills/hive-skills.js', args),
+    plugins: (args) => runModule('../plugins/hive-plugins.js', args),
+    automation: (args) => runModule('../automation/hive-automation.js', args),
+    monitoring: (args) => runModule('../monitoring/hive-monitoring.js', args),
+    security: (args) => runModule('../security/hive-security.js', args),
+    multi: (args) => runModule('../multi-instance/hive-multi.js', args),
 
     // Termux commands
     camera: (args) => {
-        if (!platform.canUseTermuxAPI()) {
-            console.log('Termux:API not available');
-            return;
-        }
-        const cameraId = args[0] || '0';
-        const outputPath = args[1] || '/sdcard/hive-photo.jpg';
-        runCommand(`termux-camera-photo -c ${cameraId} ${outputPath}`);
-        console.log(`Photo saved: ${outputPath}`);
+        if (!platform.canUseTermuxAPI()) { console.log('Termux:API not available'); return; }
+        const { execSync } = require('child_process');
+        execSync(`termux-camera-photo -c ${args[0] || 0} /sdcard/hive-photo.jpg`);
+        console.log('Photo saved: /sdcard/hive-photo.jpg');
     },
     location: () => {
-        if (!platform.canUseTermuxAPI()) {
-            console.log('Termux:API not available');
-            return;
-        }
-        const result = runCommand('termux-location');
-        console.log(result);
+        if (!platform.canUseTermuxAPI()) { console.log('Termux:API not available'); return; }
+        const { execSync } = require('child_process');
+        console.log(execSync('termux-location', { encoding: 'utf-8' }));
     },
     clipboard: (args) => {
-        if (!platform.canUseTermuxAPI()) {
-            console.log('Termux:API not available');
-            return;
-        }
+        if (!platform.canUseTermuxAPI()) { console.log('Termux:API not available'); return; }
+        const { execSync } = require('child_process');
         if (args.length > 0) {
-            runCommand(`termux-clipboard-set "${args.join(' ')}"`);
+            execSync(`termux-clipboard-set "${args.join(' ')}"`);
             console.log('Clipboard set');
         } else {
-            const result = runCommand('termux-clipboard-get');
-            console.log(result);
+            console.log(execSync('termux-clipboard-get', { encoding: 'utf-8' }));
         }
     },
     notify: (args) => {
-        if (!platform.canUseTermuxAPI()) {
-            console.log('Termux:API not available');
-            return;
-        }
-        if (args.length < 1) {
-            console.log('Usage: hive notify <title> [message]');
-            return;
-        }
-        const title = args[0];
-        const message = args.slice(1).join(' ') || '';
-        runCommand(`termux-notification --title "${title}" --content "${message}"`);
-        console.log('Notification sent');
+        if (!platform.canUseTermuxAPI()) { console.log('Termux:API not available'); return; }
+        const { execSync } = require('child_process');
+        execSync(`termux-notification --title "${args[0]}" --content "${args.slice(1).join(' ')}"`);
     },
     speak: (args) => {
-        if (!platform.canUseTermuxAPI()) {
-            console.log('Termux:API not available');
-            return;
-        }
-        if (args.length < 1) {
-            console.log('Usage: hive speak <text>');
-            return;
-        }
-        runCommand(`termux-tts-speak "${args.join(' ')}"`);
-        console.log('Speaking...');
+        if (!platform.canUseTermuxAPI()) { console.log('Termux:API not available'); return; }
+        const { execSync } = require('child_process');
+        execSync(`termux-tts-speak "${args.join(' ')}"`);
     },
     sms: (args) => {
-        if (!platform.canUseTermuxAPI()) {
-            console.log('Termux:API not available');
-            return;
-        }
-        if (args.length < 2) {
-            console.log('Usage: hive sms <number> <message>');
-            return;
-        }
-        const number = args[0];
-        const message = args.slice(1).join(' ');
-        runCommand(`termux-sms-send -n "${number}" "${message}"`);
-        console.log('SMS sent');
-    },
-    vibrate: (args) => {
-        if (!platform.canUseTermuxAPI()) {
-            console.log('Termux:API not available');
-            return;
-        }
-        const duration = args[0] || '500';
-        runCommand(`termux-vibrate -d ${duration}`);
-    },
-    flashlight: (args) => {
-        if (!platform.canUseTermuxAPI()) {
-            console.log('Termux:API not available');
-            return;
-        }
-        const action = args[0] || 'on';
-        runCommand(`termux-torch ${action}`);
+        if (!platform.canUseTermuxAPI()) { console.log('Termux:API not available'); return; }
+        const { execSync } = require('child_process');
+        execSync(`termux-sms-send -n "${args[0]}" "${args.slice(1).join(' ')}"`);
     },
 
     // System
@@ -255,33 +274,27 @@ const commands = {
     status: () => {
         console.log('\n📊 Hive Status');
         platform.print();
-        console.log('\n💾 Storage: /tmp/hive-*');
     },
-    mcp: () => {
-        console.log('Starting Hive MCP Server...');
-        console.log('Use with Claude CLI: claude --mcp /path/to/hive mcp');
+    mcp: () => console.log('Start MCP: node cli/mcp/server.js'),
+    dashboard: () => {
+        console.log('\n🎛️ FULL DASHBOARD');
+        // Import and run all dashboards
+        try {
+            const SenateRegistry = require('../scripts/hive-senate-decrees.js');
+            const senate = new SenateRegistry();
+            senate.dashboard();
+        } catch (e) { console.log('Senate not loaded'); }
+        try {
+            const AgentOrchestrator = require('../agents/hive-agent-orchestrator.js');
+            const orchestrator = new AgentOrchestrator();
+            orchestrator.dashboard();
+        } catch (e) { console.log('Orchestrator not loaded'); }
     },
-    install: () => {
-        console.log('\n📦 Hive Installation');
-        if (platform.isTermux) {
-            console.log('Termux detected - use: npm install -g hive-nation');
-        } else {
-            console.log('Run: npm install -g hive-nation');
-        }
-    },
-    docs: () => {
-        console.log('\n📖 Documentation at: docs/');
-        console.log('  - START-HERE.md');
-        console.log('  - SETUP-YOUR-MODELS.md');
-        console.log('  - CROSS-PLATFORM-PLAN.md');
-    },
+    install: () => console.log('Run: bash install.sh'),
+    version: () => console.log('Hive Nation v1.8.0'),
     help: () => console.log(helpText + termuxHelp),
     '--help': () => console.log(helpText + termuxHelp),
-    '-h': () => console.log(helpText + termuxHelp),
-
-    // Version
-    version: () => console.log('Hive Nation v1.6.1'),
-    '--version': () => console.log('Hive Nation v1.6.1')
+    '-h': () => console.log(helpText + termuxHelp)
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -300,4 +313,4 @@ if (!cmd) {
     console.log('Run "hive help" for available commands');
 }
 
-module.exports = { commands, platform };
+module.exports = { commands, platform }; 
