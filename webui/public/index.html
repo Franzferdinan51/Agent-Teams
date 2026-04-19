@@ -217,6 +217,7 @@
         <div class="nav-tab" data-tab="teams"><span class="emoji">👥</span> Teams</div>
         <div class="nav-tab" data-tab="memory"><span class="emoji">🧠</span> Memory</div>
         <div class="nav-tab" data-tab="council"><span class="emoji">🧠</span> Council</div>
+        <div class="nav-tab" data-tab="live"><span class="emoji">📡</span> Live</div>
         <div class="nav-tab" data-tab="automation"><span class="emoji">⚡</span> Automation</div>
         <div class="nav-tab" data-tab="system"><span class="emoji">📈</span> System</div>
     </div>
@@ -461,6 +462,57 @@
             </div>
         </div>
         
+        <!-- LIVE VIEW -->
+        <div id="tab-live" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><span class="icon">📡</span> Live Deliberation Center</div>
+                    <div style="display:flex;gap:8px">
+                        <button class="btn btn-secondary" onclick="loadLiveView()">🔄 Refresh</button>
+                        <button class="btn btn-hive" onclick="startLiveDeliberation()">⚖️ New</button>
+                    </div>
+                </div>
+                <div id="live-current"></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📊 Live Stats</div>
+                </div>
+                <div class="grid-4" id="live-stats"></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">💬 Live Messages</div>
+                    <span class="badge badge-green" id="live-message-count">0 messages</span>
+                </div>
+                <div id="live-message-feed" style="max-height:500px;overflow-y:auto"></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🗳️ Live Voting</div>
+                </div>
+                <div id="live-voting"></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🤖 Active Agents</div>
+                </div>
+                <div id="live-agents"></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📈 Activity Feed</div>
+                    <span class="badge badge-blue" id="live-activity-count">0 events</span>
+                </div>
+                <div id="live-activity-feed" style="max-height:400px;overflow-y:auto"></div>
+            </div>
+        </div>
+        
         <!-- Automation -->
         <div id="tab-automation" class="section">
             <div class="card">
@@ -689,6 +741,7 @@
         // Load tabs
         function loadTab(tab) {
             if (tab === 'council') loadCouncil();
+            else if (tab === 'live') loadLiveView();
             else if (tab === 'senate') { loadDecrees(); loadSenators(); }
             else if (tab === 'voting') loadVotes();
             else if (tab === 'agents') loadAgents();
@@ -970,6 +1023,160 @@
                 loadCouncilMessages();
             } else {
                 showToast('Failed to start agent deliberation', 'error');
+            }
+        }
+        
+        // ═══════════════════════════════════════════
+        // LIVE VIEW TAB - Full real-time deliberation view
+        // ═══════════════════════════════════════════
+        
+        let livePollInterval = null;
+        
+        async function loadLiveView() {
+            const session = await apiGet('/council/all');
+            const council = await apiGet('/council');
+            const messages = await apiGet('/council/messages');
+            
+            // Current deliberation
+            const curr = session?.current;
+            if (curr && curr.phase !== 'idle') {
+                const stats = curr.stats || {};
+                const elapsed = Math.floor((curr.elapsed || 0) / 1000);
+                const mins = Math.floor(elapsed / 60);
+                const secs = elapsed % 60;
+                
+                document.getElementById('live-current').innerHTML = `
+                    <div style="background:linear-gradient(135deg,var(--bg3),var(--bg4));border-radius:16px;padding:24px;border:2px solid var(--hive)">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                            <div>
+                                <div style="font-size:24px;font-weight:800;color:var(--hive)">${curr.topic || 'Active Deliberation'}</div>
+                                <div style="font-size:13px;color:var(--text2);margin-top:4px">
+                                    Mode: ${curr.mode || 'balanced'} | Started: ${mins}m ${secs}s ago
+                                </div>
+                            </div>
+                            <div style="text-align:center">
+                                <div style="font-size:48px;font-weight:800;color:var(--success)">${stats.yeas || 0}</div>
+                                <div style="font-size:12px;color:var(--text3)">YEAS</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <span class="badge badge-${curr.phase === 'voting' ? 'green' : curr.phase === 'ended' ? 'red' : 'amber'}" style="font-size:14px;padding:8px 16px">${curr.phase?.toUpperCase() || 'OPENING'}</span>
+                            <span class="badge badge-purple" style="font-size:12px">${council?.councilors || 46} Councilors</span>
+                            <span class="badge badge-blue">${session?.viewerCount || 0} watching</span>
+                        </div>
+                        ${curr.phase === 'idle' ? '<button class="btn btn-hive" onclick="startLiveDeliberation()" style="margin-top:16px">⚖️ Start Deliberation</button>' : ''}
+                    </div>
+                `;
+                
+                // Start polling for live updates
+                if (!livePollInterval) {
+                    startLivePolling();
+                }
+            } else {
+                document.getElementById('live-current').innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon" style="font-size:64px">⚖️</div>
+                        <p style="font-size:16px;margin-top:12px">No Active Deliberation</p>
+                        <p style="color:var(--text3);margin-top:8px">Start one to see live updates here</p>
+                        <button class="btn btn-hive" onclick="startLiveDeliberation()" style="margin-top:16px">⚖️ Start Deliberation</button>
+                    </div>
+                `;
+                stopLivePolling();
+            }
+            
+            // Live stats
+            const msgCount = messages?.messages?.length || 0;
+            document.getElementById('live-stats').innerHTML = `
+                <div class="stat"><div class="stat-value" style="font-size:28px">${msgCount}</div><div class="stat-label">Messages</div></div>
+                <div class="stat"><div class="stat-value" style="font-size:28px;color:var(--success)">${stats?.yeas || 0}</div><div class="stat-label">Yeas</div></div>
+                <div class="stat"><div class="stat-value" style="font-size:28px;color:var(--danger)">${stats?.nays || 0}</div><div class="stat-label">Nays</div></div>
+                <div class="stat"><div class="stat-value" style="font-size:28px">${mins || 0}m</div><div class="stat-label">Elapsed</div></div>
+            `;
+            
+            // Message feed
+            const msgs = messages?.messages || [];
+            document.getElementById('live-message-count').textContent = msgs.length + ' messages';
+            document.getElementById('live-message-feed').innerHTML = msgs.length > 0 
+                ? msgs.slice(-20).reverse().map(m => `
+                    <div style="padding:12px;background:var(--bg3);border-radius:8px;margin-bottom:8px;border-left:3px solid var(--accent3)">
+                        <div style="font-weight:600;color:var(--accent3);margin-bottom:4px">${m.councilor || 'Council'}</div>
+                        <div style="font-size:13px;line-height:1.5">${m.content || m.text || ''}</div>
+                        ${m.vote ? `<div style="margin-top:6px;font-size:12px;color:${m.vote === 'yea' ? 'var(--success)' : 'var(--danger)'}">${m.vote === 'yea' ? '✅ VOTED YES' : '❌ VOTED NO'}</div>` : ''}
+                    </div>
+                `).join('')
+                : '<div class="empty-state"><p>No messages yet</p></div>';
+            
+            // Voting display
+            if (curr?.voteData) {
+                const vd = curr.voteData;
+                const total = (vd.yeas || 0) + (vd.nays || 0);
+                const pct = total > 0 ? Math.round((vd.yeas / total) * 100) : 50;
+                document.getElementById('live-voting').innerHTML = `
+                    <div style="background:var(--bg3);border-radius:12px;padding:16px">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+                            <span style="color:var(--success);font-weight:700">${vd.yeas || 0} Yeas (${pct}%)</span>
+                            <span style="color:var(--danger);font-weight:700">${vd.nays || 0} Nays (${100-pct}%)</span>
+                        </div>
+                        <div style="height:12px;background:var(--bg4);border-radius:6px;overflow:hidden">
+                            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--success),var(--accent));transition:width 0.5s"></div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                document.getElementById('live-voting').innerHTML = '<div class="empty-state"><p>Voting has not started</p></div>';
+            }
+            
+            // Active agents
+            const agents = curr?.councilors || [];
+            document.getElementById('live-agents').innerHTML = agents.length > 0 
+                ? agents.slice(0, 10).map(a => `
+                    <div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--bg3);border-radius:8px;margin-bottom:6px">
+                        <div style="width:32px;height:32px;background:var(--accent2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">${a.name?.charAt(0) || '?'}</div>
+                        <div style="flex:1"><div style="font-weight:600">${a.name || 'Unknown'}</div><div style="font-size:11px;color:var(--text3)">${a.role || 'Councilor'}</div></div>
+                        <span class="badge badge-green" style="font-size:10px">ACTIVE</span>
+                    </div>
+                `).join('')
+                : '<div class="empty-state"><p>No active councilors</p></div>';
+            
+            // Activity feed
+            document.getElementById('live-activity-count').textContent = msgs.length + ' events';
+            document.getElementById('live-activity-feed').innerHTML = msgs.slice(-15).reverse().map((m, i) => `
+                <div style="display:flex;gap:12px;padding:8px;border-bottom:1px solid var(--border)">
+                    <div style="width:24px;text-align:center;color:var(--text3)">${msgs.length - i}</div>
+                    <div style="flex:1">
+                        <div style="font-weight:600;font-size:12px">${m.councilor || 'System'}</div>
+                        <div style="font-size:12px;color:var(--text2);margin-top:2px">${(m.content || m.text || '').substring(0, 80)}...</div>
+                    </div>
+                    <div style="font-size:11px;color:var(--text3)">${new Date(m.timestamp || Date.now()).toLocaleTimeString()}</div>
+                </div>
+            `).join('') || '<div class="empty-state"><p>No activity yet</p></div>';
+        }
+        
+        function startLivePolling() {
+            if (livePollInterval) clearInterval(livePollInterval);
+            livePollInterval = setInterval(loadLiveView, 2000); // Poll every 2 seconds
+        }
+        
+        function stopLivePolling() {
+            if (livePollInterval) {
+                clearInterval(livePollInterval);
+                livePollInterval = null;
+            }
+        }
+        
+        async function startLiveDeliberation() {
+            const topic = prompt('Enter deliberation topic:');
+            if (!topic) return;
+            
+            showToast('Starting live deliberation...', 'info');
+            const r = await apiPost('/council/deliberate', { topic, mode: 'balanced' });
+            
+            if (r.success) {
+                showToast('Live deliberation started!', 'success');
+                startLivePolling();
+                loadLiveView();
+            } else {
+                showToast('Failed to start deliberation', 'error');
             }
         }
         
