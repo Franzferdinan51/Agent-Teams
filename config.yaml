@@ -1,0 +1,51 @@
+# Hive Nation / Agent Teams Configuration
+# v2.0.2
+
+server:
+  port: 3131
+  host: "0.0.0.0"
+  cors_origins: ["*"]
+  rate_limit:
+    requests: 100
+    window_ms: 60000
+
+# AI Providers
+providers:
+  minimax:
+    api_key: "${MINIMAX_API_KEY}"
+    endpoint: "https://api.minimax.chat/v1/text/chatcompletion_v2"
+    model: "MiniMax-M2.7"
+    timeout_ms: 30000
+  
+  openrouter:
+    api_key: "${OPENROUTER_API_KEY}"
+    endpoint: "https://openrouter.ai/api/v1/chat/completions"
+    timeout_ms: 30000
+  
+  lmstudio:
+    api_key: "sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf"
+    endpoint: "http://192.168.1.81:1234/v1"
+    timeout_ms: 60000
+    default_model: "qwen3.5-9b"
+
+# Council Server
+council:
+  host: "localhost"
+  port: 3006
+  poll_interval_ms: 3000
+
+# Data persistence
+persistence:
+  data_dir: "./data"
+  state_file: "core/state.json"
+  auto_save: true
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARN, ERROR
+  timestamps: true
+
+# SSE Streaming
+sse:
+  heartbeat_interval_ms: 30000
+  max_clients: 100

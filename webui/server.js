@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 /**
- * Hive Nation WebUI Server - Production Backend v2.0.1
+ * Hive Nation WebUI Server - Production Backend v2.0.2
  * Integrates with ACTUAL Hive core for live LLM calls + persistence
+ * 
+ * Environment variables:
+ *   PORT, COUNCIL_HOST, COUNCIL_PORT, LMSTUDIO_URL
+ *   RATE_LIMIT, RATE_WINDOW, LOG_LEVEL
  */
 
 const http = require('http');
@@ -9,11 +13,20 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 
-const PORT = 3131;
+// Config from environment with defaults
+const PORT = parseInt(process.env.PORT || '3131');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const SCRIPTS_DIR = path.join(__dirname, '..', 'scripts');
-const COUNCIL_HOST = 'localhost';
-const COUNCIL_PORT = 3006;
+const COUNCIL_HOST = process.env.COUNCIL_HOST || 'localhost';
+const COUNCIL_PORT = parseInt(process.env.COUNCIL_PORT || '3006');
+const LM_STUDIO_URL = process.env.LMSTUDIO_URL || 'http://192.168.1.81:1234/v1';
+
+// Rate limiting config (from env)
+const RATE_LIMIT = parseInt(process.env.RATE_LIMIT || '100');
+const RATE_WINDOW = parseInt(process.env.RATE_WINDOW || '60000');
+
+// Log level (from env)
+const LOG_LEVEL = process.env.LOG_LEVEL || 'INFO';
 
 // SSE clients for live updates
 const sseClients = new Set();
@@ -583,14 +596,12 @@ process.on('uncaughtException', (error) => {
     gracefulShutdown('uncaughtException');
 });
 
-// Rate limiting (simple in-memory implementation)
+// Rate limiting (uses env vars RATE_LIMIT, RATE_WINDOW)
 const rateLimitMap = new Map();
-const RATE_LIMIT = 100; // requests per minute
-const RATE_WINDOW = 60000; // 1 minute
 
-// Logger with timestamps and levels
+// Logger with timestamps and levels (uses env var LOG_LEVEL)
 const LOG_LEVELS = { DEBUG: 0, INFO: 1, WARN: 2, ERROR: 3 };
-const currentLevel = LOG_LEVELS.INFO;
+const currentLevel = LOG_LEVELS[LOG_LEVEL] || LOG_LEVELS.INFO;
 
 function log(level, ...args) {
     if (level >= currentLevel) {
