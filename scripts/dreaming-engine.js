@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
  * agent-teams v1.0.0 - Dreaming Engine
- * Background memory consolidation with Light → Deep → REM phases
+ * Background memory consolidation with Light → REM → Deep phases
  * Based on OpenClaw's memory-core dreaming system
  */
 
 const fs = require('fs').promises;
 const path = require('path');
 
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 const DREAMS_DIR = 'memory/.dreams';
 const MEMORY_DIR = 'memory';
 
@@ -18,6 +18,14 @@ class DreamingEngine {
         this.memoryDir = path.join(process.cwd(), MEMORY_DIR);
         this.dreamsFile = path.join(process.cwd(), 'DREAMS.md');
         this.memoryFile = path.join(process.cwd(), 'MEMORY.md');
+        this.config = {
+            minScore: 0.8,           // Default: 0.8 (not 0.7)
+            minRecallCount: 3,
+            minUniqueQueries: 3,
+            maxPromotionsPerSweep: 10,
+            maxAgeDays: 30,
+            recencyHalfLifeDays: 14
+        };
     }
 
     async init() {
@@ -25,8 +33,6 @@ class DreamingEngine {
         await fs.mkdir(this.memoryDir, { recursive: true });
         
         console.log(`[DreamingEngine v${VERSION}] Initialized`);
-        console.log(`   Dreams dir: ${this.dreamsDir}`);
-        console.log(`   Memory dir: ${this.memoryDir}`);
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -36,10 +42,7 @@ class DreamingEngine {
     async lightPhase() {
         console.log(`\n[Light Phase] 😴 Processing...`);
         
-        // Read recent daily notes
-        const today = new Date().toISOString().split('T')[0];
         const recentFiles = await this.getRecentDailyFiles(7);
-        
         const candidates = [];
         
         for (const file of recentFiles) {
@@ -47,23 +50,23 @@ class DreamingEngine {
             const lines = content.split('\n').filter(l => l.trim() && !l.startsWith('#'));
             
             for (const line of lines) {
-                // Score for novelty
                 if (!this.isDuplicate(line, candidates)) {
                     candidates.push({
                         text: line,
                         source: path.basename(file),
                         signals: 1,
-                        lastSeen: today
+                        lastSeen: new Date().toISOString().split('T')[0],
+                        recallCount: 0,
+                        uniqueQueries: 1
                     });
                 } else {
-                    // Increment signal
                     const existing = candidates.find(c => c.text === line);
                     if (existing) existing.signals++;
                 }
             }
         }
 
-        // Write light phase output
+        // Write phase output
         const lightOutput = {
             phase: 'light',
             timestamp: new Date().toISOString(),
@@ -78,18 +81,52 @@ class DreamingEngine {
     }
 
     // ═══════════════════════════════════════════════════════════
-    // PHASE 2: DEEP SLEEP
+    // PHASE 2: REM SLEEP (after Light, before Deep)
+    // Extract themes and record reinforcement signals
+    // ═══════════════════════════════════════════════════════════
+    async remPhase(candidates = []) {
+        console.log(`\n[REM Phase] 🌌 Processing...`);
+        
+        // Extract themes from candidates
+        const themes = this.extractThemes(candidates);
+        
+        // Build recall patterns
+        const patterns = this.buildRecallPatterns(candidates);
+        
+        // Write REM output
+        const remOutput = {
+            phase: 'rem',
+            timestamp: new Date().toISOString(),
+            themes: themes,
+            recallPatterns: patterns.length,
+            reinforcementBoost: 0.08 // max boost from REM
+        };
+
+        await this.writePhaseOutput('rem', remOutput);
+
+        console.log(`[REM Phase] ✅ Themes: ${themes.join(', ') || 'none'}`);
+        
+        // Apply REM boost to candidates
+        for (const c of candidates) {
+            c.remBoost = Math.min(0.08, c.signals * 0.01);
+        }
+        
+        return candidates;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // PHASE 3: DEEP SLEEP
     // Score and promote to MEMORY.md
     // ═══════════════════════════════════════════════════════════
     async deepPhase(candidates = []) {
         console.log(`\n[Deep Phase] 🌙 Processing...`);
         
         if (candidates.length === 0) {
-            console.log(`[Deep Phase] ⏭️  No candidates from light phase`);
+            console.log(`[Deep Phase] ⏭️  No candidates`);
             return [];
         }
 
-        // Score candidates using weighted signals
+        // Score candidates using 6 weighted signals
         const scored = candidates.map(c => ({
             ...c,
             score: this.calculateScore(c),
@@ -105,15 +142,19 @@ class DreamingEngine {
             existingMemory = await fs.readFile(this.memoryFile, 'utf8');
         } catch { /* ignore */ }
 
-        // Promote qualified entries
+        // Promote qualified entries (up to limit)
         const promoted = [];
+        let promotedCount = 0;
         
         for (const entry of scored.filter(e => e.promote)) {
-            // Skip duplicates
-            if (existingMemory.includes(entry.text)) {
-                console.log(`[Deep Phase] ⏭️  Duplicate: ${entry.text.substring(0, 50)}...`);
-                continue;
+            // Skip if at promotion limit
+            if (promotedCount >= this.config.maxPromotionsPerSweep) {
+                console.log(`[Deep Phase] ⏭️  Limit reached (${this.config.maxPromotionsPerSweep})`);
+                break;
             }
+            
+            // Skip duplicates
+            if (existingMemory.includes(entry.text)) continue;
 
             // Write to MEMORY.md
             const date = new Date().toISOString().split('T')[0];
@@ -121,11 +162,11 @@ class DreamingEngine {
             
             existingMemory += entryLine;
             promoted.push(entry);
+            promotedCount++;
             
-            console.log(`[Deep Phase] ⬆️  Promoted: ${entry.text.substring(0, 50)}... (score: ${entry.score.toFixed(2)})`);
+            console.log(`[Deep Phase] ⬆️  "${entry.text.substring(0, 40)}..." (score: ${entry.score.toFixed(2)})`);
         }
 
-        // Save MEMORY.md
         await fs.writeFile(this.memoryFile, existingMemory);
 
         // Write deep phase summary
@@ -134,56 +175,56 @@ class DreamingEngine {
             timestamp: new Date().toISOString(),
             scored: scored.length,
             promoted: promoted.length,
-            topScore: scored[0]?.score || 0
+            topScore: scored[0]?.score.toFixed(2) || 0,
+            thresholds: this.config
         };
 
         await this.writePhaseOutput('deep', deepOutput);
 
-        console.log(`[Deep Phase] ✅ ${promoted.length}/${scored.length} promoted`);
+        console.log(`[Deep Phase] ✅ ${promoted.length}/${scored.length} promoted (max: ${this.config.maxPromotionsPerSweep})`);
         return promoted;
     }
 
     calculateScore(candidate) {
-        // Weighted scoring from OpenClaw:
-        // Frequency: 0.24, Relevance: 0.30, Query diversity: 0.15
+        // Six weighted signals (from OpenClaw)
+        // Relevance: 0.30, Frequency: 0.24, Query diversity: 0.15
         // Recency: 0.15, Consolidation: 0.10, Conceptual richness: 0.06
 
-        const signals = candidate.signals || 1;
-        const recencyDays = this.daysSince(candidate.lastSeen);
-        
-        // Normalize to 0-1
         let score = 0;
         
-        // Frequency (0.24 weight) — how many signals
-        score += 0.24 * Math.min(1, signals / 5);
+        // Frequency (0.24 weight)
+        score += 0.24 * Math.min(1, candidate.signals / 5);
         
-        // Relevance (0.30 weight) — conceptual density
-        score += 0.30 * Math.min(1, candidate.text.length / 100);
+        // Relevance (0.30 weight)
+        score += 0.30 * Math.min(1, (candidate.recallCount || 0) / 5);
         
-        // Recency (0.15 weight) — time decay
-        score += 0.15 * Math.max(0, 1 - (recencyDays / 30));
+        // Query diversity (0.15 weight)
+        score += 0.15 * Math.min(1, (candidate.uniqueQueries || 1) / 3);
         
-        // Consolidation (0.10 weight) — multi-day persistence
-        score += 0.10 * (candidate.lastSeen ? 0.5 : 0);
+        // Recency (0.15 weight) — 14-day half-life
+        const recencyDays = this.daysSince(candidate.lastSeen);
+        const recencyScore = Math.pow(0.5, recencyDays / this.config.recencyHalfLifeDays);
+        score += 0.15 * recencyScore;
         
-        // Conceptual richness (0.06 weight) — concept density
+        // Consolidation (0.10 weight)
+        const consolidationScore = candidate.signals > 1 ? 0.5 : 0;
+        score += 0.10 * consolidationScore;
+        
+        // Conceptual richness (0.06 weight)
         const concepts = (candidate.text.match(/\b\w+\b/g) || []).length;
         score += 0.06 * Math.min(1, concepts / 20);
         
-        // Query diversity bonus
-        score += 0.00; // Placeholder for query diversity
+        // REM boost (max +0.08)
+        score += candidate.remBoost || 0;
 
         return Math.min(1, Math.max(0, score));
     }
 
     shouldPromote(candidate) {
-        // Thresholds from OpenClaw:
-        const minScore = 0.7;
-        const minSignals = 2;
-        const minRecallDiversity = 1;
-
-        return candidate.score >= minScore &&
-               candidate.signals >= minSignals;
+        // Three gates must ALL pass
+        return candidate.score >= this.config.minScore &&
+               (candidate.signals || 0) >= this.config.minRecallCount &&
+               (candidate.uniqueQueries || 0) >= this.config.minUniqueQueries;
     }
 
     daysSince(dateStr) {
@@ -192,81 +233,36 @@ class DreamingEngine {
         return Math.floor((Date.now() - date.getTime()) / 86400000);
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // PHASE 3: REM SLEEP
-    // Theme extraction and reflection
-    // ═══════════════════════════════════════════════════════════
-    async remPhase() {
-        console.log(`\n[REM Phase] 🌌 Processing...`);
-        
-        // Read recent dreams and memories
-        const recentMemories = await this.getRecentPromotions(14);
-        const existingDreams = await this.getExistingDreams();
-        
-        // Extract themes
-        const themes = this.extractThemes(recentMemories);
-        
-        // Write REM summary
-        const remOutput = {
-            phase: 'rem',
-            timestamp: new Date().toISOString(),
-            themes: themes.length,
-            reflection: `Recent themes: ${themes.join(', ')}`
-        };
-
-        await this.writePhaseOutput('rem', remOutput);
-
-        console.log(`[REM Phase] ✅ Themes: ${themes.join(', ')}`);
-        return themes;
-    }
-
-    extractThemes(memories) {
-        // Simple theme extraction
+    extractThemes(candidates) {
         const themes = [];
         const patterns = [
-            /api|rest|endpoint|graphql/i,
-            /memory|dream|remember|forget/i,
-            /agent|multi|coordination|team/i,
-            /security|vulnerability|scan/i,
-            /test|qa|review|approve/i
+            [/api|rest|endpoint|graphql/i, 'API Design'],
+            [/memory|dream|remember|forget/i, 'Memory'],
+            [/agent|multi|coordination|team/i, 'Agents'],
+            [/security|vulnerability|scan/i, 'Security'],
+            [/test|qa|review|approve/i, 'Testing'],
+            [/android|mobile|phone/i, 'Android']
         ];
 
-        const patternNames = ['API Design', 'Memory', 'Agents', 'Security', 'Testing'];
-
-        for (let i = 0; i < patterns.length; i++) {
-            const matches = memories.filter(m => patterns[i].test(m.text));
-            if (matches.length >= 2) {
-                themes.push(patternNames[i]);
-            }
+        for (const [regex, name] of patterns) {
+            const matches = candidates.filter(c => regex.test(c.text));
+            if (matches.length >= 2) themes.push(name);
         }
 
         return themes;
     }
 
-    async getRecentPromotions(days) {
-        try {
-            const memory = await fs.readFile(this.memoryFile, 'utf8');
-            return memory.split('\n').filter(l => l.trim() && !l.startsWith('#'));
-        } catch {
-            return [];
-        }
-    }
-
-    async getExistingDreams() {
-        try {
-            return await fs.readFile(this.dreamsFile, 'utf8');
-        } catch {
-            return '';
-        }
+    buildRecallPatterns(candidates) {
+        return candidates
+            .filter(c => c.signals > 1)
+            .map(c => ({ text: c.text.substring(0, 50), signals: c.signals }));
     }
 
     async getRecentDailyFiles(days) {
         const files = [];
         for (let i = 0; i < days; i++) {
             const date = new Date(Date.now() - i * 86400000);
-            const dateStr = date.toISOString().split('T')[0];
-            const filePath = path.join(this.memoryDir, `${dateStr}.md`);
-            
+            const filePath = path.join(this.memoryDir, `${date.toISOString().split('T')[0]}.md`);
             try {
                 await fs.access(filePath);
                 files.push(filePath);
@@ -284,8 +280,8 @@ class DreamingEngine {
         
         await fs.writeFile(filePath, JSON.stringify(data, null, 2));
         
-        // Also append to DREAMS.md
-        const dreamEntry = `\n## ${phase} ${new Date().toISOString()}\n${JSON.stringify(data, null, 2)}\n`;
+        // Append to DREAMS.md
+        const dreamEntry = `\n## ${phase} ${new Date().toISOString()}\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\`\n`;
         
         try {
             const existing = await fs.readFile(this.dreamsFile, 'utf8');
@@ -296,7 +292,7 @@ class DreamingEngine {
     }
 
     // ═══════════════════════════════════════════════════════════
-    // FULL DREAM CYCLE
+    // FULL DREAM CYCLE (Light → REM → Deep)
     // ═══════════════════════════════════════════════════════════
     async dream() {
         console.log(`\n${'═'.repeat(60)}`);
@@ -308,102 +304,60 @@ class DreamingEngine {
         // Phase 1: Light
         const candidates = await this.lightPhase();
 
-        // Phase 2: Deep
-        const promoted = await this.deepPhase(candidates);
+        // Phase 2: REM (before Deep!)
+        await this.remPhase(candidates);
 
-        // Phase 3: REM
-        const themes = await this.remPhase();
+        // Phase 3: Deep
+        const promoted = await this.deepPhase(candidates);
 
         console.log(`\n${'═'.repeat(60)}`);
         console.log(`   🌅 DREAMING COMPLETE`);
         console.log(`   Candidates: ${candidates.length}`);
         console.log(`   Promoted: ${promoted.length}`);
-        console.log(`   Themes: ${themes.join(', ') || 'none'}`);
+        console.log(`   Thresholds: score≥${this.config.minScore}, recalls≥${this.config.minRecallCount}, queries≥${this.config.minUniqueQueries}`);
         console.log(`${'═'.repeat(60)}\n`);
 
-        return { candidates, promoted, themes };
+        return { candidates, promoted };
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // SCHEDULE (cron-style)
-    // ═══════════════════════════════════════════════════════════
-    schedule(frequencyCron = '0 3 * * *') {
-        // Default: 3 AM daily
-        console.log(`[DreamingEngine] 📅 Scheduled: ${frequencyCron}`);
-        
-        // Parse cron (simplified)
-        const [minute, hour] = frequencyCron.split(' ');
-        
-        const runAt = () => {
-            const now = new Date();
-            if (now.getMinutes() === parseInt(minute) && now.getHours() === parseInt(hour)) {
-                console.log(`[DreamingEngine] ⏰ Triggering scheduled dream...`);
-                this.dream().catch(console.error);
-            }
-        };
-
-        // Check every minute
-        setInterval(runAt, 60000);
-        
-        console.log(`[DreamingEngine] 🕐 Running at ${hour}:${minute.padStart(2, '0')} daily`);
-    }
-
-    // Check dreaming status
     async status() {
-        const stats = {
-            version: VERSION,
-            dreamsDir: this.dreamsDir,
-            phaseOutputs: {}
-        };
-
-        for (const phase of ['light', 'deep', 'rem']) {
+        const stats = { version: VERSION, phaseOutputs: {} };
+        for (const phase of ['light', 'rem', 'deep']) {
             const phaseDir = path.join(this.dreamsDir, phase);
             try {
-                const files = await fs.readdir(phaseDir);
-                stats.phaseOutputs[phase] = files.length;
+                stats.phaseOutputs[phase] = (await fs.readdir(phaseDir)).length;
             } catch {
                 stats.phaseOutputs[phase] = 0;
             }
         }
-
         return stats;
     }
 }
 
-// CLI
 if (require.main === module) {
     const engine = new DreamingEngine();
     const command = process.argv[2];
 
-    (async () => {
-        switch (command) {
-            case 'dream':
-                await engine.dream();
-                break;
-            case 'status':
-                console.log(await engine.status());
-                break;
-            case 'schedule':
-                engine.schedule(process.argv[3] || '0 3 * * *');
-                console.log('Dreaming scheduled. Press Ctrl+C to stop.');
-                break;
-            default:
-                console.log(`
+    if (command === 'dream') {
+        engine.dream().catch(console.error);
+    } else if (command === 'status') {
+        engine.status().then(s => console.log(JSON.stringify(s, null, 2)));
+    } else {
+        console.log(`
 DreamingEngine v${VERSION}
 
 Usage:
-  node dreaming-engine.js dream      # Run full cycle
-  node dreaming-engine.js status    # Show status
-  node dreaming-engine.js schedule  # Run daily at 3 AM
+  node dreaming-engine.js dream    # Full cycle (Light → REM → Deep)
+  node dreaming-engine.js status  # Show phase counts
 
-Phases:
-  Light → Deep → REM
-  - Light: Stage candidates from daily notes
-  - Deep: Score & promote to MEMORY.md
-  - REM: Extract themes & reflections
-                `);
-        }
-    })();
+Phase order: Light → REM → Deep
+
+Thresholds:
+  minScore: ${engine.config.minScore}
+  minRecallCount: ${engine.config.minRecallCount}
+  minUniqueQueries: ${engine.config.minUniqueQueries}
+        `);
+    }
 }
 
 module.exports = { DreamingEngine };
