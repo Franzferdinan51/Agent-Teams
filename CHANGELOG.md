@@ -4,6 +4,26 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.2] - 2026-04-19 - ComfyUI Integration + Creative Suite
+
+### Added
+
+#### 🎨 Hive ComfyUI — Full Diffusion Control (30KB)
+- **Image Generation**: Flux (schnell/dev), SDXL, SD3, PixArt, HunyuanDiT, HiDream, Qwen Image
+- **Video Generation**: Stable Video Diffusion, Mochi, LTX-Video, Hunyuan Video, Wan 2.1
+- **Audio Generation**: Stable Audio, ACE Step
+- **3D Generation**: Hunyuan3D 2.0
+- **Advanced**: ControlNet, LoRA, Inpainting, Upscaling, Custom workflows
+- **CLI**: Full shell interface + JavaScript API
+- **Auto-poll**: Waits for completion, returns image URLs
+
+#### Updated
+- `skills/creative-agents/SKILL.md` — Complete ComfyUI documentation
+- `START-HERE.md` — Added ComfyUI section
+- `QUICKREF.md` — Added ComfyUI commands
+
+---
+
 ## [1.0.1] - 2026-04-19 - Local Stack + Vision Enhancements
 
 ### Added

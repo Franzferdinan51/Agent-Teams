@@ -150,6 +150,17 @@ node scripts/hive-discovery.js find <capability>     # Find who has it
 ./scripts/hive-vision.sh models                     # List vision models
 ```
 
+### 🎨 COMFYUI (Full Diffusion)
+```bash
+./scripts/hive-comfyui.sh flux <prompt>           # Flux generation
+./scripts/hive-comfyui.sh sdxl <prompt>          # SDXL generation
+./scripts/hive-comfyui.sh img2img <img> <prompt># Image to image
+./scripts/hive-comfyui.sh video <image>           # Video from image
+./scripts/hive-comfyui.sh 3d <image>             # 3D generation
+./scripts/hive-comfyui.sh audio <prompt>          # Audio/sound
+./scripts/hive-comfyui.sh status                 # System status
+```
+
 ---
 
 ## 🧠 META-AGENT

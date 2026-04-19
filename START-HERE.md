@@ -147,6 +147,31 @@ node scripts/dreaming-engine.js dream
 
 **100% local — no API keys needed for most tasks!**
 
+### 🎨 I want to... generate images, video, audio, 3D
+
+```bash
+# ComfyUI (FULL diffusion suite — run locally!)
+./scripts/hive-comfyui.sh flux "cyberpunk city at night"
+./scripts/hive-comfyui.sh sdxl "majestic dragon"
+./scripts/hive-comfyui.sh img2img photo.jpg "make it snowy"
+
+# Video generation
+./scripts/hive-comfyui.sh video portrait.jpg
+./scripts/hive-comfyui.sh wan "robot dancing"
+
+# 3D generation
+./scripts/hive-comfyui.sh 3d object.jpg
+
+# Audio generation
+./scripts/hive-comfyui.sh audio "thunderstorm"
+./scripts/hive-comfyui.sh music "epic orchestra"
+
+# MiniMax (via API)
+~/.npm-global/bin/mmx video generate --prompt "sunset" --duration 6
+```
+
+**ComfyUI supports: Flux, SDXL, SD3, SVD, Hunyuan3D, Stable Audio + 100s of models**
+
 ### 🕸️ I want to... go decentralized (P2P)
 
 ```bash
