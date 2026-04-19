@@ -4,6 +4,40 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.0] - 2026-04-19 - CLI + MCP + Cross-Platform
+
+### NEW: Full CLI System
+- `cli/index.js` - Unified command line interface
+- `cli/platform-detect.js` - Platform detection (Mac/Linux/Termux/Android)
+- `cli/hive` - Shell entry point
+- `install.sh` - Cross-platform installer
+
+### NEW: MCP Server
+- `cli/mcp/server.js` - Model Context Protocol server
+- Works with Claude CLI: `claude --mcp /path/to/cli/mcp/server.js`
+- Exposes all Hive tools as MCP tools
+
+### NEW: Termux:API Support (Android)
+With `pkg install termux-api`:
+- `hive camera 0` - Take photo
+- `hive location` - Get GPS coordinates
+- `hive clipboard [text]` - Get/set clipboard
+- `hive notify "Title" "Message"` - Show notification
+- `hive speak "Hello"` - Text-to-speech
+- `hive sms 5551234 "Hi"` - Send SMS
+- `hive vibrate 500` - Vibrate
+- `hive flashlight on` - Toggle flashlight
+
+### Platforms Supported
+| Platform | CLI | MCP | Termux API |
+|----------|-----|-----|------------|
+| Mac | ✅ | ✅ | N/A |
+| Linux | ✅ | ✅ | N/A |
+| Termux | ✅ | ✅ | ✅ |
+| Termux:API | ✅ | ✅ | ✅ |
+
+---
+
 ## [1.2.0] - 2026-04-19 - Constitution SOUL + Government Operations
 
 ### Added

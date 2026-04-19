@@ -41,6 +41,43 @@ Inspired by [Hermes Agent](https://github.com/NousResearch/hermes-agent).
 
 ---
 
+## 🖥️ CLI + MCP (Cross-Platform)
+
+**Full command line interface + Model Context Protocol**
+
+```bash
+# Install
+bash install.sh
+
+# Use CLI
+hive gov                        # Government hub
+hive scoring score agent "task" 8 9 8 9  # Score an agent
+hive memory remember general "Remember this"
+hive platform                   # Show platform info
+
+# MCP Server (for Claude integration)
+node cli/mcp/server.js
+```
+
+**Supported:** Mac ✅ | Linux ✅ | Termux (Android) ✅ | Termux:API ✅
+
+## 📱 Termux (Android) Extra Features
+
+With Termux:API installed (`pkg install termux-api`):
+
+```bash
+hive camera 0         # Take photo (0=back, 1=front)
+hive location         # Get GPS coordinates
+hive clipboard [text]  # Get or set clipboard
+hive notify "Title" "Message"  # Show notification
+hive speak "Hello"    # Text-to-speech
+hive sms 5551234 "Hi" # Send SMS
+hive vibrate 500      # Vibrate
+hive flashlight on    # Toggle flashlight
+```
+
+---
+
 ## 🚀 GET STARTED (5 Minutes)
 
 ```bash
