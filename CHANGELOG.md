@@ -4,6 +4,91 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.0] - 2026-04-19 - Hive Congress — Full Government Simulation
+
+### Added
+
+#### 🏛️ HIVE CONGRESS — Three Branches of Government
+- **hive-congress.js** (30KB) — Complete government simulation
+
+##### THREE BRANCHES:
+
+**📜 LEGISLATIVE BRANCH**
+- **Senate (Upper House)** — 100 seats (2 per state)
+  - Speaker, Majority/Minority Leaders
+  - Majority/Minority Whips
+  - Leadership + all 100 state seats
+- **House of Representatives (Lower House)** — 435 seats
+  - Speaker, Majority/Minority Leaders
+  - Seats by delegation
+  - Committee assignments
+
+**⚡ EXECUTIVE BRANCH**
+- President + Vice President
+- 15 Cabinet Secretaries:
+  - State (Foreign Policy)
+  - Treasury (Economics)
+  - Defense (Military)
+  - Justice (Law Enforcement)
+  - Energy, Agriculture, Commerce, Labor
+  - HHS, HUD, Transportation, Education
+  - Veterans Affairs, Homeland Security
+- White House Staff:
+  - Chief of Staff, Press Secretary
+  - National Security Advisor
+  - Council of Economic Advisers
+
+**⚖️ JUDICIAL BRANCH**
+- Supreme Court — 9 Justices
+  - Chief Justice John Roberts III
+  - 6 Conservative, 3 Liberal justices
+  - Ideology tracking, voting records
+
+##### INTER-BRANCH INTERACTIONS:
+- Bill must pass BOTH Senate AND House
+- President can veto bills
+- Congress can override veto (2/3 both chambers)
+- Courts can strike down laws/executive orders
+- Treaties require Senate confirmation (2/3)
+- Appointments require Senate confirmation (51)
+- Impeachment process (House charges, Senate trials)
+
+##### LEGISLATION LIFECYCLE:
+```
+Bill Introduced → Senate Vote → House Vote → President → Law
+                    ↓            ↓           ↓
+                  Veto ← Override  Veto  → Court Review
+```
+
+### Commands
+```bash
+# Government Structure
+./scripts/hive-congress.sh structure
+
+# Legislation
+./scripts/hive-congress.sh bill "Privacy Act"
+./scripts/hive-congress.sh vote S.123 senate 60 40 51
+./scripts/hive-congress.sh present S.123
+./scripts/hive-congress.sh sign S.123
+./scripts/hive-congress.sh veto S.123 "Constitutional concerns"
+./scripts/hive-congress.sh override S.123 70 300
+
+# Executive
+./scripts/hive-congress.sh eo "Immigration Policy"
+./scripts/hive-congress.sh cabinet "Climate Change"
+
+# Judicial
+./scripts/hive-congress.sh case "Tech v. Government"
+./scripts/hive-congress.sh decision SCOTUS-123 "Struck Down" 6 3
+
+# Other
+./scripts/hive-congress.sh treaty "Trade Agreement" 60
+./scripts/hive-congress.sh appointment "Nominee" "Secretary" 55
+./scripts/hive-congress.sh impeachment "Official" "Charges"
+```
+
+---
+
 ## [1.0.5] - 2026-04-19 - Hive Senate Pro Enhancements
 
 ### Added
