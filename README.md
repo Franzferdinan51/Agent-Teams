@@ -4,7 +4,8 @@ A portable, self-contained multi-agent team coordination system for [OpenClaw](h
 
 ## Features
 
-- **Team Orchestration** — Coordinate specialized agents (researcher, coder, reviewer, writer)
+- **Team Orchestration** — Coordinate specialized agents (researcher, coder, reviewer, writer, council)
+- **AI Council Integration** — Adversarial deliberation with 45 councilors
 - **Shared Context** — Tasks, memory, and artifacts shared across team members
 - **Portable** — Copy to any machine, self-contained, no external dependencies
 - **Duck CLI Integration** — Works with sessions_spawn for parallel agent execution
@@ -45,6 +46,38 @@ node dist/TeamCLI.js status
 | **coder** | Write code, implement features |
 | **reviewer** | Code review, quality check |
 | **writer** | Documentation, reports |
+| **council** | AI deliberation, adversarial decision making |
+
+## AI Council Integration
+
+The council provides adversarial deliberation for complex decisions:
+
+```bash
+# Start council deliberation
+./scripts/spawn-council.sh "Should we use microservices?" adversarial
+
+# Swarm coding for complex builds
+./scripts/spawn-swarm.sh "Build a REST API for task manager"
+```
+
+### Deliberation Modes
+
+| Mode | Use Case |
+|------|----------|
+| `standard` | General discussion |
+| `socratic` | Deep questioning |
+| `adversarial` | Conflict resolution |
+| `consensus` | Agreement building |
+| `creative` | Brainstorming |
+| `swarm_coding` | Complex builds |
+
+### Councilor Categories
+
+- **councilor** — Speaker, Technocrat, Ethicist, Pragmatist, Skeptic
+- **vision** — Visual Analyst, Pattern Recognizer, Color Specialist
+- **coding** — Architect, Backend, Frontend, DevOps, Security, QA
+- **specialist** — Risk Analyst, Legal Expert, Finance Expert
+- **emergency** — Meteorologist, Emergency Manager
 
 ## Architecture
 
@@ -54,7 +87,12 @@ Team Lead
     ├──→ Researcher ─→ Web search, summarize
     ├──→ Coder ─→ Write code, implement
     ├──→ Reviewer ─→ Code review, quality
-    └──→ Writer ─→ Documentation
+    ├──→ Writer ─→ Documentation
+    └──→ Council ─→ Adversarial deliberation
+              │
+              ├──→ 45 Councilors
+              ├──→ 11 Modes
+              └──→ Swarm Coding
 ```
 
 ## Integration with Duck CLI
@@ -66,6 +104,10 @@ sessions_spawn({
   model: "minimax/MiniMax-M2.7",
   label: "researcher-agent"
 })
+
+// Or spawn via CLI
+./scripts/spawn-agent.sh researcher "Find best APIs"
+./scripts/spawn-council.sh "Complex decision?" adversarial
 ```
 
 ## Folder Structure
@@ -74,8 +116,20 @@ sessions_spawn({
 ├── src/
 │   ├── TeamCLI.ts           # CLI interface
 │   └── orchestrator/        # Core team logic
-├── scripts/                 # Bash scripts
-├── skills/                 # OpenClaw skills
+├── scripts/
+│   ├── team-session.sh      # Session management
+│   ├── team-task.sh         # Task queue
+│   ├── team-status.sh       # Status dashboard
+│   ├── spawn-agent.sh       # Spawn agents
+│   ├── spawn-council.sh     # Spawn council deliberation
+│   └── spawn-swarm.sh       # Swarm coding
+├── skills/                  # OpenClaw skills
+│   ├── team-orchestrator/  # Main coordination
+│   ├── agent-researcher/   # Researcher role
+│   ├── agent-coder/        # Coder role
+│   ├── agent-reviewer/     # Reviewer role
+│   ├── agent-writer/       # Writer role
+│   └── agent-council/     # Council integration
 ├── config/                 # Configuration
 └── workspace/             # Team shared state (gitignored)
 ```
@@ -84,6 +138,12 @@ sessions_spawn({
 
 - Node.js 18+
 - npm
+- AI Council Server (optional): `http://localhost:3003`
+
+## Related Projects
+
+- [AI Bot Council](https://github.com/Franzferdinan51/AI-Bot-Council-Concensus) — Adversarial deliberation engine
+- [OpenClaw](https://github.com/openclaw/openclaw) — Agent framework
 
 ## License
 
