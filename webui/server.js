@@ -502,3 +502,74 @@ process.on('SIGINT', () => {
     server.close();
     process.exit(0);
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// Council Integration
+// ═══════════════════════════════════════════════════════════════════
+
+const councilHost = 'localhost';
+const councilPort = 3006;
+
+function councilGet(path) {
+    return new Promise((resolve) => {
+        const req = http.get({ hostname: councilHost, port: councilPort, path: `/api${path}` }, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve(null); } });
+        });
+        req.on('error', () => resolve(null));
+        req.setTimeout(3000, () => { req.destroy(); resolve(null); });
+    });
+}
+
+// Council status
+if (pathname === '/api/council') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    councilGet('/status').then(data => {
+        res.end(JSON.stringify({
+            connected: !!data,
+            version: data?.version || 'unknown',
+            modes: data?.modes || [],
+            councilors: data?.councilors?.length || 0
+        }));
+    }).catch(() => res.end(JSON.stringify({ connected: false })));
+    return;
+}
+
+// Get councilors
+if (pathname === '/api/councilors') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    councilGet('/councilors').then(data => {
+        res.end(JSON.stringify(data || { councilors: [] }));
+    }).catch(() => res.end(JSON.stringify({ councilors: [] })));
+    return;
+}
+
+// Get session
+if (pathname === '/api/council/session') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    councilGet('/session').then(data => {
+        res.end(JSON.stringify(data || { session: null }));
+    }).catch(() => res.end(JSON.stringify({ session: null })));
+    return;
+}
+
+// Get messages
+if (pathname === '/api/council/messages') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    councilGet('/session/messages').then(data => {
+        res.end(JSON.stringify(data || { messages: [] }));
+    }).catch(() => res.end(JSON.stringify({ messages: [] })));
+    return;
+}
+
+// Get modes
+if (pathname === '/api/council/modes') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    councilGet('/modes').then(data => {
+        res.end(JSON.stringify(data || { modes: [] }));
+    }).catch(() => res.end(JSON.stringify({ 
+        modes: ['balanced', 'adversarial', 'consensus', 'devil-advocate', 'brainstorm', 'legislature', 'prediction', 'swarm', 'inspector']
+    })));
+    return;
+}

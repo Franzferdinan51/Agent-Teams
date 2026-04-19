@@ -118,6 +118,7 @@
         <div class="nav-tab" data-tab="memory">🧠 Memory</div>
         <div class="nav-tab" data-tab="workflows">⚙️ Workflows</div>
         <div class="nav-tab" data-tab="monitoring">📈 System</div>
+        <div class="nav-tab" data-tab="council">🧠 Council</div>
     </div>
     
     <div class="main">
@@ -301,6 +302,39 @@
         
         <!-- Monitoring -->
         <div id="tab-monitoring" class="section">
+            <div id="tab-council" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🧠 AI Council Integration</div>
+                        <span class="badge badge-purple" id="council-status">Checking...</span>
+                    </div>
+                    <div class="grid-4">
+                        <div class="stat"><div class="stat-value" id="councilors-count">-</div><div class="stat-label">Councilors</div></div>
+                        <div class="stat"><div class="stat-value" id="council-modes">-</div><div class="stat-label">Modes</div></div>
+                        <div class="stat"><div class="stat-value" id="council-version">-</div><div class="stat-label">Version</div></div>
+                        <div class="stat"><div class="stat-value" style="color:var(--success)">✓</div><div class="stat-label">SSE Live</div></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">📊 Available Modes</div>
+                    <div id="council-modes-list" style="margin-top:12px"></div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🗣️ Recent Deliberations</div>
+                        <button class="btn btn-primary" onclick="requestDeliberation()">⚖️ New Deliberation</button>
+                    </div>
+                    <div id="council-messages"><div class="loading">Loading...</div></div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">🎭 Featured Councilors</div>
+                    <div id="councilors-list"><div class="loading">Loading...</div></div>
+                </div>
+            </div>
+        
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">📈 System Health</div>
@@ -390,7 +424,7 @@
         
         // Load tabs
         async function loadTab(tab) {
-            if (tab === 'overview') loadDashboard();
+            if (tab === 'council') loadCouncil();
             else if (tab === 'senate') { loadDecrees(); loadSenators(); }
             else if (tab === 'voting') loadVotes();
             else if (tab === 'agents') loadAgents();
@@ -662,10 +696,58 @@
         
         // Auto-refresh
         setInterval(() => {
+        
+        // Auto-refresh
+        setInterval(() => {
             if (document.getElementById('tab-overview').classList.contains('active')) {
                 loadDashboard();
             }
         }, 30000);
+        
+        // Council Functions
+        async function loadCouncil() {
+            const data = await apiGet("/council");
+            if (data) {
+                document.getElementById("council-status").textContent = data.connected ? "Connected" : "Offline";
+                document.getElementById("council-status").className = data.connected ? "badge badge-green" : "badge badge-red";
+                document.getElementById("councilors-count").textContent = data.councilors || 0;
+                document.getElementById("council-modes").textContent = data.modes?.length || 13;
+                document.getElementById("council-version").textContent = data.version || "3.x";
+            }
+            loadCouncilors();
+            loadCouncilModes();
+            loadCouncilMessages();
+        }
+        
+        async function loadCouncilors() {
+            const data = await apiGet("/councilors");
+            if (data && data.councilors) {
+                const featured = data.councilors.slice(0, 8);
+                document.getElementById("councilors-list").innerHTML = featured.map(function(c) {
+                    return '<div class="agent-card"><div class="agent-avatar" style="background:var(--accent2)">' + c.name.charAt(0) + '</div><div class="agent-info"><div class="agent-name">' + c.name + '</div><div class="agent-role">' + c.role + '</div></div></div>';
+                }).join("");
+            } else {
+                document.getElementById("councilors-list").innerHTML = '<div class="empty-state"><div class="icon">🧠</div><p>Start Council server to see councilors</p></div>';
+            }
+        }
+        
+        async function loadCouncilModes() {
+            const modes = ["balanced", "adversarial", "consensus", "devil-advocate", "brainstorm", "legislature", "prediction", "swarm", "inspector"];
+            document.getElementById("council-modes-list").innerHTML = modes.map(function(m) {
+                return '<span class="badge badge-purple" style="margin:4px;padding:6px 12px">' + m + '</span>';
+            }).join("");
+        }
+        
+        async function loadCouncilMessages() {
+            const data = await apiGet("/council/messages");
+            if (data && data.messages && data.messages.length > 0) {
+                document.getElementById("council-messages").innerHTML = data.messages.slice(0, 10).map(function(m) {
+                    return '<div class="memory-item"><div class="memory-cat">' + (m.type || "message") + '</div><div class="memory-content">' + (m.content || "").substring(0, 200) + '</div></div>';
+                }).join("");
+            } else {
+                document.getElementById("council-messages").innerHTML = '<div class="empty-state"><div class="icon">🧠</div><p>No deliberations yet - start Council server</p></div>';
+            }
+        }
         
         // Initial load
         loadDashboard();
