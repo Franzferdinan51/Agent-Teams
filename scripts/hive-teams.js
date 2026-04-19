@@ -419,7 +419,7 @@ function displayTeamStatus(team) {
     if (team.results.length > 0) {
         console.log('\n   📊 RESULTS:');
         team.results.slice(-3).forEach((r, idx) => {
-            console.log(`      ${idx + 1}. ${r.summary.substring(0, 60)}...`);
+            console.log(`      ${idx + 1}. ${(r.result || r.summary || 'No result').substring(0, 60)}...`);
         });
     }
     
