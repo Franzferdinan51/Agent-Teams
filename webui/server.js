@@ -97,6 +97,34 @@ function httpPost(host, port, p, data) {
     });
 }
 
+// Generic HTTP proxy for Council API
+async function httpProxy(host, port, p, method = 'GET', body = '') {
+    return new Promise((resolve) => {
+        const options = {
+            hostname: host,
+            port,
+            path: p,
+            method: method,
+            headers: { 'Content-Type': 'application/json' }
+        };
+        if (body && method !== 'GET') {
+            options.headers['Content-Length'] = Buffer.byteLength(body);
+        }
+        const req = http.request(options, (res) => {
+            let d = '';
+            res.on('data', c => d += c);
+            res.on('end', () => { 
+                try { resolve(JSON.parse(d)); } 
+                catch { resolve(d || null); } 
+            });
+        });
+        req.on('error', () => resolve(null));
+        req.setTimeout(10000, () => { req.destroy(); resolve(null); });
+        if (body && method !== 'GET') req.write(body);
+        req.end();
+    });
+}
+
 // Get persistent state (cold-start safe)
 function getState() {
     if (HiveCore && HiveCore.hiveState) {
@@ -414,10 +442,71 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/councilors') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         const data = await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/councilors');
-        res.end(JSON.stringify(data || { councilors: [] }));
+        res.end(JSON.stringify({ councilors: data || [] }));
         return;
     }
-
+    
+    // ── LLM Provider Endpoints ────────────────────────────
+    
+    if (pathname === '/api/llm/status') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+            current: 'minimax',
+            providers: [
+                { id: 'minimax', name: 'MiniMax', active: true, hasKey: true },
+                { id: 'lmstudio', name: 'LM Studio (Local)', active: false, hasKey: true },
+                { id: 'openrouter', name: 'OpenRouter', active: false, hasKey: true }
+            ]
+        }));
+        return;
+    }
+    
+    if (pathname === '/api/llm/providers') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+            current: 'minimax',
+            providers: [
+                { id: 'minimax', name: 'MiniMax', active: true, hasKey: true },
+                { id: 'lmstudio', name: 'LM Studio (Local)', active: false, hasKey: true },
+                { id: 'openrouter', name: 'OpenRouter', active: false, hasKey: true }
+            ]
+        }));
+        return;
+    }
+    
+    if (pathname === '/api/llm/provider' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const { provider } = JSON.parse(body);
+                const result = await httpPost(COUNCIL_HOST, COUNCIL_PORT, '/api/llm/provider', { provider });
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, provider }));
+            } catch (e) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: e.message }));
+            }
+        });
+        return;
+    }
+    
+    if (pathname === '/api/llm/test' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const result = await httpPost(COUNCIL_HOST, COUNCIL_PORT, '/api/llm/test', {});
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(result || { error: 'LLM test failed' }));
+            } catch (e) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: e.message }));
+            }
+        });
+        return;
+    }
+    
     if (pathname === '/api/council/session') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         const data = await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/session');
@@ -531,6 +620,33 @@ const server = http.createServer(async (req, res) => {
         }
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(status));
+        return;
+    }
+    
+    // ═══════════════════════════════════════════
+    // COUNCIL API PROXY (for unified WebUI)
+    // ═══════════════════════════════════════════
+    
+    // Proxy all /council/* requests to Council server (3007)
+    if (pathname.startsWith('/council') || pathname.startsWith('/llm') || pathname.startsWith('/session')) {
+        const councilPath = '/api' + pathname;
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const result = await httpProxy(COUNCIL_HOST, COUNCIL_PORT, councilPath, req.method, body);
+                if (result) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(result));
+                } else {
+                    res.writeHead(502, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Council server unavailable' }));
+                }
+            } catch (e) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: e.message }));
+            }
+        });
         return;
     }
     
