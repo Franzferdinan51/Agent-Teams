@@ -4,12 +4,12 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.2.0] - 2026-04-19 - Constitution & Full Government
+## [1.2.0] - 2026-04-19 - Constitution & Full Government OPERATIONS
 
 ### Added
 
 #### 📜 HIVE CONSTITUTION — The Founding Document
-- **hive-constitution.js** (23KB) — Complete constitution
+- **hive-constitution.js** (23KB) — Complete US-style constitution
 
 ##### Articles 1-7:
 - **Article I**: Legislative Powers (Congress, House, Senate)
@@ -74,7 +74,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.1.0] - 2026-04-19 - Hive Congress — Full Government Simulation
+## [1.1.1] - 2026-04-19 - Hive Congress GOVERNMENT OPERATIONS
+
+### Changed
+
+- **"Simulation" → "Operations"** — No fake connotation, actual operations
+- **Funny Hive-themed names** — No real political names:
+  - President Commander Quackford (was James Biden)
+  - Senator Honks McQuackface (Speaker)
+  - Senator Buzz Thornhill (Majority Leader)
+  - Senator Wingnut R. Badwing (Minority Leader)
+  - Chief Justice Hexagon Roberts III
+  - Justice Blossom Sotomayor, Petalmaster Kagan, Dandelion Jackson
+  - Secretary of State Fluttershy Blinken
+  - And many more bee/hive-themed funny names!
+
+---
+
+## [1.1.0] - 2026-04-19 - Hive Congress — Full Government Operations
 
 ### Added
 

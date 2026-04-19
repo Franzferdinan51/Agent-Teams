@@ -1,220 +1,214 @@
-# 🕸️ HiveMesh P2P — Decentralized Agent Mesh
+# 🕸️ HiveMesh — Agent Mesh Integration
 
-## Overview
+## v3.0.0 Integration Guide
 
-**Decentralized peer-to-peer communication** for the Hive Mind — no central server, no blockchain, just pure agent-to-agent networking.
+**Agent Mesh API** is the central nervous system for the Hive Mind. 
 
-Inspired by [BitChat](https://github.com/permissionlesstech/bitchat) — the decentralized Bluetooth + Nostr mesh chat.
-
-## Architecture
+GitHub: https://github.com/Franzferdinan51/agent-mesh-api/tree/dev
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     DECENTRALIZED MESH                              │
+│                     AGENT MESH API v3.0.0                           │
+├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│   Each node is equal — no central server                           │
+│   🕸️ CENTRALIZED MESH (Primary)                                   │
+│   ├── Agent Registration + Discovery                              │
+│   ├── Direct Messaging                                             │
+│   ├── Heartbeat & Health Monitoring                                │
+│   ├── WebSocket Real-Time Events                                   │
+│   ├── Agent Groups & Broadcasts                                     │
+│   ├── Collective Memory (shared KV store)                          │
+│   ├── File Transfer (Base64)                                       │
+│   ├── System Updates (auto-notify agents)                         │
+│   ├── Catastrophe Protocols (recovery)                              │
+│   └── Auto-Update System (identity preserved!)                     │
 │                                                                     │
-│      🕸️ Node A ◄──────► 🕸️ Node B                              │
-│         │    \            /    │                                   │
-│         │     \          /     │                                   │
-│         │      \        /      │                                   │
-│         │       \      /       │                                   │
-│         │        \    /        │                                   │
-│         │    ┌──────┴──────┐   │                                   │
-│         │    │  🛰️ Relay   │   │                                   │
-│         │    │ (optional)   │   │                                   │
-│         │    └──────┬──────┘   │                                   │
-│         │           │          │                                   │
-│         ▼           ▼          ▼                                   │
-│      🕸️ Node C ◄──────► 🕸️ Node D                              │
-│                                                                     │
-│   Messages propagate via GOSSIP protocol                           │
-│   Relays help nodes behind NAT find each other                     │
+│   🕸️ DECENTRALIZED P2P (Experimental)                            │
+│   ├── Direct peer-to-peer connections                              │
+│   ├── Gossip protocol for message propagation                      │
+│   └── Relay servers for NAT traversal                              │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## Key Concepts
+## Quick Start
 
-### Peer-to-Peer
-- Every node is equal
-- Direct communication between agents
-- No single point of failure
-- Network continues if any node fails
-
-### Gossip Protocol
-- Messages spread like gossip through the network
-- Each node forwards to its peers
-- TTL (time-to-live) limits propagation
-- Eventually reaches all nodes
-
-### Relay Servers (Optional)
-- Help nodes behind NAT/firewall
-- Not required for operation
-- Multiple relays for redundancy
-- Nodes can be both peer AND relay
-
-## How It Works
-
-```
-1. NODE STARTS
-   └─> Announces itself to known relays
-   
-2. PEER DISCOVERY
-   └─> Query relays for known peers
-   └─> Connect directly to discovered peers
-   
-3. MESSAGE SENT
-   └─> Stored locally
-   └─> Forwarded to connected peers (gossip)
-   └─> Each peer forwards to their peers (up to TTL hops)
-   
-4. MESSAGE RECEIVED
-   └─> Emit event to local agents
-   └─> Forward to other peers (if TTL > 0)
-   └─> Deduplicate by message ID
-```
-
-## Usage
-
-### Start a Relay (Optional)
 ```bash
-# First node - acts as relay
-./scripts/hive-p2p.sh 4100 relay
+# 1. Install dependencies
+cd /tmp/agent-mesh-api && npm install
+
+# 2. Start the mesh server
+cd /tmp/agent-mesh-api && npm start
+# Server: http://localhost:4000
+# WebSocket: ws://localhost:4000/ws
+# API Key: openclaw-mesh-default-key
 ```
 
-### Start a Peer
+## Core Features (v3.0.0)
+
+### Agent Registration
 ```bash
-# Connect to existing mesh
-./scripts/hive-p2p.sh 4101 peer
+# Register agent
+curl -X POST http://localhost:4000/api/agents/register \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: openclaw-mesh-default-key" \
+  -d '{"name": "DuckBot", "endpoint": "http://localhost:3000", "capabilities": ["messaging", "task_execution"]}'
 
-# Or specify port
-./scripts/hive-p2p.sh 4200 peer
+# Register with ID (identity preserved on update!)
+# Response: {"success": true, "agentId": "cc5afd10-ca32-4514-85f9-2558c70f2164"}
 ```
 
-### CLI Commands
+### Messaging
 ```bash
-# Check status
-./scripts/hive-p2p.sh 4100 status
+# Send message (ID or name)
+curl -X POST http://localhost:4000/api/messages \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: openclaw-mesh-default-key" \
+  -d '{"from": "DuckBot", "to": "Dashboard", "content": "Hello!", "messageType": "direct"}'
 
-# List peers
-./scripts/hive-p2p.sh 4100 peers
-
-# Broadcast message
-./scripts/hive-p2p.sh 4100 broadcast "Hello mesh!"
-
-# View history
-./scripts/hive-p2p.sh 4100 history
+# Batch send (up to 100!)
+curl -X POST http://localhost:4000/api/messages/batch \
+  -H "X-API-Key: openclaw-mesh-default-key" \
+  -d '{"messages": [{"to": "Agent1", "content": "Task 1"}, {"to": "Agent2", "content": "Task 2"}]}'
 ```
 
-### Programmatic Usage
+### Health & Heartbeat
+```bash
+# Send heartbeat
+curl -X POST http://localhost:4000/api/agents/DuckBot/heartbeat \
+  -H "X-API-Key: openclaw-mesh-default-key"
+
+# Health dashboard
+curl http://localhost:4000/api/health/dashboard \
+  -H "X-API-Key: openclaw-mesh-default-key"
+```
+
+### File Transfer
+```bash
+# Upload file
+FILE_DATA=$(base64 -w 0 myfile.txt)
+curl -X POST http://localhost:4000/api/files/upload \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: openclaw-mesh-default-key" \
+  -d "{\"filename\": \"myfile.txt\", \"fileData\": \"$FILE_DATA\", \"description\": \"Important doc\"}"
+```
+
+### System Updates (Auto-Update!)
+```bash
+# Create update
+curl -X POST http://localhost:4000/api/updates \
+  -H "X-API-Key: openclaw-mesh-default-key" \
+  -d '{"version": "2.0.0", "title": "New Features", "breakingChange": false}'
+
+# Auto-update client preserves identity!
+node auto-update-client.js --agent-name "DuckBot" --endpoint "http://localhost:3001" --version "2.0.0"
+```
+
+### Catastrophe Protocols
+```bash
+# Report catastrophe
+curl -X POST http://localhost:4000/api/catastrophe \
+  -H "X-API-Key: openclaw-mesh-default-key" \
+  -d '{"eventType": "server_crash", "severity": "critical", "title": "Server down"}'
+
+# Get recovery protocols
+curl http://localhost:4000/api/catastrophe/protocols
+```
+
+### Bulk Operations (NEW!)
+```bash
+# Bulk register (up to 50 agents)
+curl -X POST http://localhost:4000/api/agents/bulk-register \
+  -H "X-API-Key: openclaw-mesh-default-key" \
+  -d '{"agents": [{"name": "Agent1", "endpoint": "http://..."}, {"name": "Agent2", ...}]}'
+
+# Lightweight ping
+curl -X POST http://localhost:4000/api/agents/ping/DuckBot \
+  -H "X-API-Key: openclaw-mesh-default-key"
+```
+
+## Integration with AgentTeams
+
+### Connect Hive to Mesh
+```bash
+# Start mesh server
+cd /tmp/agent-mesh-api && npm start &
+
+# Register all hive agents
+./scripts/hive-connect.sh mesh
+```
+
+### Mesh-Enabled Scripts
+```bash
+# All scripts auto-connect to mesh when MESH_URL is set
+export MESH_URL="http://localhost:4000"
+export MESH_API_KEY="openclaw-mesh-default-key"
+
+# Now agents can communicate across the mesh
+./scripts/agent-coordinator.sh spawn research "AI news"
+```
+
+## WebSocket Events
+
 ```javascript
-const { HiveMeshNode } = require('./scripts/hive-mesh-p2p');
+const ws = new WebSocket('ws://localhost:4000/ws');
 
-const node = new HiveMeshNode({ port: 4100 });
-await node.start();
-
-// Listen for messages
-node.on('message', (msg) => {
-    console.log(`${msg.from}: ${msg.content}`);
+ws.on('message', (data) => {
+    const event = JSON.parse(data);
+    console.log('Event:', event.type, event);
 });
 
-// Broadcast
-await node.broadcast('hello', 'Hello from peer!');
-
-// Send direct
-await node.sendTo('node-abc123', 'Private message');
-
-// Stop
-await node.stop();
+// Events:
+// - agent_joined, agent_left, agent_updated
+// - message_received, heartbeat
+// - system_update, catastrophe_alert
+// - agent_health_change, file_available
 ```
 
-## Multi-Machine Setup
+## P2P Mesh (Decentralized)
 
-### Local Network (Same WiFi)
-Nodes auto-discover each other via mDNS/Bonjour (future).
+### When to Use P2P vs Centralized
 
-### Remote Machines (Tailscale VPN)
-```
-1. Install Tailscale on all machines
-2. Connect to same tailnet
-3. Nodes use Tailscale IPs to connect
-4. Mesh works across the internet!
-```
+| Scenario | Use |
+|----------|-----|
+| Local network agents | P2P (faster, no server) |
+| Remote agents | Centralized Mesh |
+| Critical messages | Both (P2P + centralized backup) |
+| Fire-and-forget tasks | P2P gossip |
+| Guaranteed delivery | Centralized mesh |
 
-### Setup
+### Start P2P Node
 ```bash
-# On each machine
-brew install tailscale
-tailscale up
-
-# Then start HiveMesh with Tailscale IP
+# Node acts as peer + relay
 ./scripts/hive-p2p.sh 4100 peer
+
+# CLI
+./scripts/hive-p2p.sh 4100 status
+./scripts/hive-p2p.sh 4100 peers
+./scripts/hive-p2p.sh 4100 broadcast "Hello mesh!"
 ```
 
-## Comparison
+## OpenClaw Compatibility (v3.0.0)
 
-| Feature | Centralized (Mesh API) | Decentralized (P2P) |
-|---------|------------------------|---------------------|
-| **Server** | Required | Optional |
-| **Single Point of Failure** | Yes | No |
-| **Works Offline** | No | Yes (local mesh) |
-| **Setup Complexity** | Low | Medium |
-| **Message Delivery** | Guaranteed | Best-effort |
-| **Scalability** | Limited | High |
-| **Privacy** | Server sees all | End-to-end possible |
+```bash
+# Get OpenClaw compatibility info
+curl http://localhost:4000/api/openclaw/compat
 
-## For the Hive Mind
+# Health check
+curl http://localhost:4000/health
 
-### Current (Centralized)
+# Structured health
+curl http://localhost:4000/api/health \
+  -H "X-API-Key: openclaw-mesh-default-key"
 ```
-Agent → Mesh API Server (port 4000) → Other Agents
-```
-
-### With P2P Mesh (Decentralized)
-```
-Agent A ↔ Agent B ↔ Agent C ↔ Agent D
-         ↕
-     (optional relay)
-```
-
-### Hybrid Approach
-```
-- Local network: Direct P2P (fastest)
-- Remote: Via relay or Tailscale VPN
-- Critical messages: Both P2P + centralized backup
-```
-
-## Future Enhancements
-
-| Feature | Status |
-|---------|--------|
-| mDNS/Bonjour discovery | Planned |
-| WebRTC for NAT traversal | Planned |
-| End-to-end encryption | Planned |
-| DHT for peer discovery | Planned |
-| Tor integration | Planned |
-| Signal protocol | Planned |
-
-## Comparison to BitChat
-
-| Feature | BitChat | HiveMesh P2P |
-|---------|---------|--------------|
-| Transport | Bluetooth + Nostr | WebSocket + HTTP |
-| Purpose | Human chat | Agent communication |
-| Discovery | Bluetooth LE + relays | mDNS + DHT (future) |
-| Encryption | Noise protocol | Simple (upgradeable) |
-| Blockchain | No | No |
-| Decentralization | Full | Full |
 
 ## Resources
 
-- [BitChat](https://github.com/permissionlesstech/bitchat) — Inspiration
-- [libp2p](https://libp2p.io/) — Production P2P library
-- [YJS](https://docs.yjs.dev/) — CRDT for collaboration
-- [Gun.js](https://gun.eco/) — Decentralized graph DB
+- GitHub: https://github.com/Franzferdinan51/agent-mesh-api/tree/dev
+- API Docs: https://github.com/Franzferdinan51/agent-mesh-api/blob/dev/API_DOCUMENTATION.md
+- Auto-Update: https://github.com/Franzferdinan51/agent-mesh-api/blob/dev/AUTO-UPDATE-README.md
 
 ## Status
 
-Added: 2026-04-19
-Purpose: Decentralized P2P communication for Hive Mind
+✅ Production Ready (v3.0.0)
+Updated: 2026-04-19
