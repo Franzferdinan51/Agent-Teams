@@ -1,19 +1,24 @@
 #!/usr/bin/env node
 /**
- * Hive Memory — Production-Ready Persistence System
+ * Hive Memory - Production Memory System
  * 
- * Features:
- * - SQLite-backed storage
- * - Cross-session recall
- * - Structured logs
- * - Semantic search (simple vector similarity)
- * - Memory categories
+ * Integrated with:
+ * - Scoring (track decision outcomes)
+ * - Trace (store task learnings)
+ * - Budget (log resource decisions)
+ * - Government (track legislation outcomes)
+ * 
+ * Usage:
+ *   node scripts/hive-memory.js <command>
  */
 
 const fs = require('fs');
 const path = require('path');
 
-// Simple embedded SQLite (no external deps)
+// ═══════════════════════════════════════════════════════════════════
+// SIMPLE EMBEDDED DATABASE
+// ═══════════════════════════════════════════════════════════════════
+
 class SimpleDB {
     constructor(filepath) {
         this.filepath = filepath;
@@ -37,7 +42,6 @@ class SimpleDB {
         memory.timestamp = Date.now();
         this.data.memories.push(memory);
         
-        // Update simple index
         if (!this.data.index[memory.category]) {
             this.data.index[memory.category] = [];
         }
@@ -55,7 +59,6 @@ class SimpleDB {
             results = results.filter(m => m.category === category);
         }
 
-        // Simple keyword matching + ranking
         results = results
             .map(m => {
                 const content = (m.content + ' ' + (m.tags || [])).toLowerCase();
@@ -106,28 +109,33 @@ class SimpleDB {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// HIVE MEMORY CLASS
+// ═══════════════════════════════════════════════════════════════════
+
 class HiveMemory {
     constructor() {
         this.memoryDir = '/tmp/hive-memory';
         if (!fs.existsSync(this.memoryDir)) fs.mkdirSync(this.memoryDir, { recursive: true });
         
         this.db = new SimpleDB(path.join(this.memoryDir, 'hive-memory.json'));
-        this.sessions = new SimpleDB(path.join(this.memoryDir, 'sessions.json'));
         this.decisions = new SimpleDB(path.join(this.memoryDir, 'decisions.json'));
         this.learnings = new SimpleDB(path.join(this.memoryDir, 'learnings.json'));
+        this.workflows = new SimpleDB(path.join(this.memoryDir, 'workflows.json'));
+        this.projects = new SimpleDB(path.join(this.memoryDir, 'projects.json'));
     }
 
     // ═══════════════════════════════════════════════════════════
-    // REMEMBER
+    // QUICK REMEMBER (Most Used)
     // ═══════════════════════════════════════════════════════════
 
     remember(args) {
-        const { category, content, tags, importance = 5 } = args;
+        const { category = 'general', content, tags = [], importance = 5 } = args;
         
         const memory = {
-            category: category || 'general',
+            category,
             content,
-            tags: tags || [],
+            tags,
             importance,
             accessCount: 0,
             lastAccessed: null
@@ -135,24 +143,19 @@ class HiveMemory {
 
         const saved = this.db.insert(memory);
         
-        console.log('\n✓ Memory saved:');
-        console.log(`  ID: ${saved.id}`);
-        console.log(`  Category: ${category}`);
-        console.log(`  Content: ${content.substring(0, 80)}...`);
-        
+        console.log(`\n✓ Memory saved [${category}]: ${content.substring(0, 60)}...`);
         return saved;
     }
 
     // ═══════════════════════════════════════════════════════════
-    // RECALL
+    // QUICK RECALL (Most Used)
     // ═══════════════════════════════════════════════════════════
 
     recall(query, category = null) {
         const results = this.db.search(query, category);
         
-        console.log('\n' + '='.repeat(60));
-        console.log(`MEMORY RECALL: "${query}"`);
-        console.log('='.repeat(60));
+        console.log(`\n📚 RECALL: "${query}"`);
+        console.log('═'.repeat(50));
         
         if (results.length === 0) {
             console.log('\nNo memories found.');
@@ -160,133 +163,105 @@ class HiveMemory {
         }
 
         for (const r of results) {
-            // Update access count
             r.accessCount++;
             r.lastAccessed = Date.now();
             this.db.save();
 
             const age = this.ageString(r.timestamp);
-            console.log(`\n[${r.category}] ${age}`);
-            console.log(`  ${r.content.substring(0, 150)}...`);
+            console.log(`\n[${age}] [${r.category}]`);
+            console.log(`  ${r.content.substring(0, 150)}`);
             if (r.tags.length) console.log(`  Tags: ${r.tags.join(', ')}`);
-            console.log(`  Relevance: ${r.relevance} | Accessed: ${r.accessCount}x`);
         }
 
         return results;
     }
 
     // ═══════════════════════════════════════════════════════════
-    // SESSION MEMORY
-    // ═══════════════════════════════════════════════════════════
-
-    saveSession(sessionId, data) {
-        const session = {
-            sessionId,
-            data,
-            timestamp: Date.now()
-        };
-        
-        this.sessions.insert(session);
-        console.log(`\n✓ Session ${sessionId} saved`);
-    }
-
-    loadSession(sessionId) {
-        const sessions = this.sessions.search(sessionId);
-        return sessions[0]?.data;
-    }
-
-    sessionHistory(limit = 20) {
-        const recent = this.sessions.recent(limit);
-        
-        console.log('\n' + '='.repeat(60));
-        console.log('SESSION HISTORY');
-        console.log('='.repeat(60));
-
-        for (const s of recent) {
-            const age = this.ageString(s.timestamp);
-            console.log(`\n[${age}] Session: ${s.sessionId}`);
-            console.log(`  ${JSON.stringify(s.data).substring(0, 100)}...`);
-        }
-
-        return recent;
-    }
-
-    // ═══════════════════════════════════════════════════════════
-    // DECISIONS LOG
+    // DECISION LOG (Critical for Decision Making)
     // ═══════════════════════════════════════════════════════════
 
     logDecision(args) {
-        const { context, decision, rationale, outcome, agent } = args;
+        const { context, decision, rationale, outcome = null, agent = 'system', score = null } = args;
         
-        const decisionEntry = {
+        const entry = {
             context,
             decision,
             rationale,
             outcome,
             agent,
+            score,
             timestamp: Date.now()
         };
 
-        this.decisions.insert(decisionEntry);
+        this.decisions.insert(entry);
         
-        console.log('\n✓ Decision logged:');
-        console.log(`  Context: ${context.substring(0, 60)}...`);
+        console.log(`\n✓ Decision logged:`);
+        console.log(`  Context: ${context.substring(0, 50)}...`);
         console.log(`  Decision: ${decision}`);
-        if (agent) console.log(`  Agent: ${agent}`);
+        console.log(`  Agent: ${agent}`);
+        if (score) console.log(`  Score: ${score}/100`);
+        
+        return entry;
     }
 
-    pastDecisions(query, limit = 10) {
+    // ═══════════════════════════════════════════════════════════
+    // PAST DECISIONS (For Reference)
+    // ═══════════════════════════════════════════════════════════
+
+    pastDecisions(query = 'test', limit = 10) {
         const results = this.decisions.search(query, null, limit);
         
-        console.log('\n' + '='.repeat(60));
-        console.log(`PAST DECISIONS: "${query}"`);
-        console.log('='.repeat(60));
+        console.log(`\n⚖️ PAST DECISIONS: "${query}"`);
+        console.log('═'.repeat(50));
 
         for (const d of results) {
             const age = this.ageString(d.timestamp);
             console.log(`\n[${age}] ${d.decision}`);
-            console.log(`  Context: ${d.context.substring(0, 100)}...`);
-            console.log(`  Rationale: ${d.rationale.substring(0, 100)}...`);
+            console.log(`  Context: ${d.context.substring(0, 80)}...`);
+            console.log(`  Rationale: ${d.rationale.substring(0, 80)}...`);
             if (d.outcome) console.log(`  Outcome: ${d.outcome}`);
+            if (d.score) console.log(`  Score: ${d.score}/100`);
         }
 
         return results;
     }
 
     // ═══════════════════════════════════════════════════════════
-    // LEARNINGS
+    // LEARNINGS (From Experience)
     // ═══════════════════════════════════════════════════════════
 
     learn(args) {
-        const { topic, learning, source, confidence = 7 } = args;
+        const { topic, learning, source, confidence = 7, type = 'general' } = args;
         
-        const learningEntry = {
+        const entry = {
             topic,
             learning,
             source,
             confidence,
+            type, // 'technical', 'process', 'decision', 'pattern'
             timestamp: Date.now()
         };
 
-        this.learnings.insert(learningEntry);
+        this.learnings.insert(entry);
         
-        console.log('\n✓ Learning stored:');
+        console.log(`\n✓ Learning stored [${type}]:`);
         console.log(`  Topic: ${topic}`);
-        console.log(`  Learning: ${learning.substring(0, 100)}...`);
+        console.log(`  ${learning.substring(0, 100)}...`);
         console.log(`  Confidence: ${confidence}/10`);
+        
+        return entry;
     }
 
-    recallLearnings(topic, limit = 10) {
+    recallLearnings(topic = 'test', limit = 10) {
         const results = this.learnings.search(topic, null, limit);
         
-        console.log('\n' + '='.repeat(60));
-        console.log(`LEARNINGS ABOUT: "${topic}"`);
-        console.log('='.repeat(60));
+        console.log(`\n🧠 LEARNINGS: "${topic}"`);
+        console.log('═'.repeat(50));
 
         for (const l of results) {
             const age = this.ageString(l.timestamp);
-            console.log(`\n[${age}] ${l.confidence}/10 confidence`);
-            console.log(`  ${l.learning.substring(0, 150)}...`);
+            console.log(`\n[${age}] [${l.type}] ${l.confidence}/10 confidence`);
+            console.log(`  ${l.learning.substring(0, 150)}`);
             if (l.source) console.log(`  Source: ${l.source}`);
         }
 
@@ -294,54 +269,198 @@ class HiveMemory {
     }
 
     // ═══════════════════════════════════════════════════════════
-    // CATEGORIES
+    // WORKFLOWS (Reusable Templates)
     // ═══════════════════════════════════════════════════════════
 
-    categories() {
-        const stats = this.db.stats();
+    createWorkflow(args) {
+        const { name, steps, description, category = 'general' } = args;
         
-        console.log('\n' + '='.repeat(60));
-        console.log('MEMORY CATEGORIES');
-        console.log('='.repeat(60));
-        console.log(`\nTotal memories: ${stats.total}`);
-        console.log('\nBy category:');
-        
-        for (const [cat, count] of Object.entries(stats.categories)) {
-            console.log(`  ${cat}: ${count}`);
+        const workflow = {
+            name,
+            description,
+            category,
+            steps,
+            createdAt: Date.now(),
+            usageCount: 0
+        };
+
+        const saved = this.workflows.insert(workflow);
+        console.log(`\n✓ Workflow created: ${name}`);
+        console.log(`  Steps: ${steps.length}`);
+        return saved;
+    }
+
+    runWorkflow(name) {
+        const workflows = this.workflows.search(name);
+        if (workflows.length === 0) {
+            console.log(`Workflow not found: ${name}`);
+            return null;
         }
 
-        return stats.categories;
+        const workflow = workflows[0];
+        workflow.usageCount++;
+        this.workflows.save();
+
+        console.log(`\n▶ Running workflow: ${workflow.name}`);
+        console.log(`  ${workflow.description}`);
+        console.log('\nSteps:');
+        
+        workflow.steps.forEach((step, i) => {
+            console.log(`  ${i + 1}. ${step}`);
+        });
+
+        return workflow;
+    }
+
+    listWorkflows() {
+        const workflows = this.workflows.recent(20);
+        
+        console.log('\n📋 WORKFLOWS');
+        console.log('═'.repeat(50));
+
+        for (const w of workflows) {
+            console.log(`\n  ${w.name} [${w.category}]`);
+            console.log(`    ${w.description}`);
+            console.log(`    Steps: ${w.steps.length} | Used: ${w.usageCount}x`);
+        }
+
+        return workflows;
     }
 
     // ═══════════════════════════════════════════════════════════
-    // RECENT
+    // PROJECTS (Track Work)
     // ═══════════════════════════════════════════════════════════
 
-    recent(limit = 20) {
-        const memories = this.db.recent(limit);
+    trackProject(args) {
+        const { name, status = 'active', description, milestones = [] } = args;
         
-        console.log('\n' + '='.repeat(60));
-        console.log('RECENT MEMORIES');
-        console.log('='.repeat(60));
+        const project = {
+            name,
+            description,
+            status,
+            milestones,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            notes: []
+        };
 
-        for (const m of memories) {
-            const age = this.ageString(m.timestamp);
-            console.log(`\n[${age}] [${m.category}]`);
-            console.log(`  ${m.content.substring(0, 120)}...`);
+        const saved = this.projects.insert(project);
+        console.log(`\n✓ Project tracked: ${name} [${status}]`);
+        return saved;
+    }
+
+    updateProject(name, updates) {
+        const projects = this.projects.search(name);
+        if (projects.length === 0) {
+            console.log(`Project not found: ${name}`);
+            return null;
         }
 
-        return memories;
+        Object.assign(projects[0], updates, { updatedAt: Date.now() });
+        this.projects.save();
+        
+        console.log(`\n✓ Project updated: ${name}`);
+        return projects[0];
+    }
+
+    projectStatus() {
+        const all = this.projects.recent(50);
+        
+        const active = all.filter(p => p.status === 'active').length;
+        const completed = all.filter(p => p.status === 'completed').length;
+        const paused = all.filter(p => p.status === 'paused').length;
+
+        console.log('\n📊 PROJECT STATUS');
+        console.log('═'.repeat(50));
+        console.log(`  Active: ${active}`);
+        console.log(`  Completed: ${completed}`);
+        console.log(`  Paused: ${paused}`);
+        console.log(`  Total: ${all.length}`);
+
+        if (active > 0) {
+            console.log('\n  Active Projects:');
+            for (const p of all.filter(p => p.status === 'active').slice(0, 5)) {
+                console.log(`    • ${p.name}`);
+            }
+        }
+
+        return { active, completed, paused, total: all.length };
     }
 
     // ═══════════════════════════════════════════════════════════
-    // DELETE
+    // INTEGRATION: SCORING DECISIONS
     // ═══════════════════════════════════════════════════════════
 
-    forget(memoryId) {
-        if (this.db.delete(memoryId)) {
-            console.log(`\n✓ Memory ${memoryId} deleted`);
-        } else {
-            console.log(`\n✗ Memory ${memoryId} not found`);
+    scoreDecision(decisionId, outcome, score) {
+        const decisions = this.decisions.db.data.memories;
+        const decision = decisions.find(d => d.id === decisionId);
+        
+        if (decision) {
+            decision.outcome = outcome;
+            decision.score = score;
+            decision.scoredAt = Date.now();
+            this.decisions.save();
+            
+            console.log(`\n✓ Decision scored: ${score}/100`);
+            console.log(`  Outcome: ${outcome}`);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // INTEGRATION: TRACE LEARNINGS
+    // ═══════════════════════════════════════════════════════════
+
+    learnFromTask(taskId, agent, result, success) {
+        this.learn({
+            topic: 'task-execution',
+            learning: `Task ${taskId} by ${agent}: ${result.substring(0, 100)}...`,
+            source: 'trace',
+            confidence: success ? 9 : 5,
+            type: success ? 'pattern' : 'error'
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // QUICK TEMPLATES
+    // ═══════════════════════════════════════════════════════════
+
+    quick(args) {
+        const { type, content } = args;
+        
+        switch (type) {
+            case 'todo':
+                return this.remember({
+                    category: 'todo',
+                    content,
+                    tags: ['action', 'pending']
+                });
+            
+            case 'learn':
+                return this.learn({
+                    topic: 'quick-learn',
+                    learning: content,
+                    source: 'quick-note'
+                });
+            
+            case 'decision':
+                return this.logDecision({
+                    context: 'quick',
+                    decision: content,
+                    rationale: 'Quick logged'
+                });
+            
+            case 'note':
+                return this.remember({
+                    category: 'notes',
+                    content,
+                    tags: ['note']
+                });
+            
+            default:
+                return this.remember({
+                    category: 'quick',
+                    content
+                });
         }
     }
 
@@ -368,19 +487,21 @@ class HiveMemory {
 
     dashboard() {
         const memStats = this.db.stats();
-        const sessionCount = this.sessions.db.data.memories.length;
         const decisionCount = this.decisions.db.data.memories.length;
         const learningCount = this.learnings.db.data.memories.length;
+        const workflowCount = this.workflows.db.data.memories.length;
+        const projectStats = this.projects.db.data.memories.length;
 
-        console.log('\n' + '='.repeat(60));
+        console.log('\n' + '═'.repeat(50));
         console.log('🐝 HIVE MEMORY DASHBOARD');
-        console.log('='.repeat(60));
+        console.log('═'.repeat(50));
         
         console.log('\n📊 STORAGE:');
         console.log(`   Memories: ${memStats.total}`);
-        console.log(`   Sessions: ${sessionCount}`);
         console.log(`   Decisions: ${decisionCount}`);
         console.log(`   Learnings: ${learningCount}`);
+        console.log(`   Workflows: ${workflowCount}`);
+        console.log(`   Projects: ${projectStats}`);
         
         console.log('\n📁 CATEGORIES:');
         for (const [cat, count] of Object.entries(memStats.categories)) {
@@ -392,69 +513,130 @@ class HiveMemory {
         for (const m of recent) {
             console.log(`   ${this.ageString(m.timestamp)}: ${m.content.substring(0, 50)}...`);
         }
+
+        console.log('\n⚖️ RECENT DECISIONS (3):');
+        const recentDecisions = this.decisions.recent(3);
+        for (const d of recentDecisions) {
+            console.log(`   ${this.ageString(d.timestamp)}: ${d.decision.substring(0, 40)}...`);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // API EXPORT (For WebUI/Integration)
+    // ═══════════════════════════════════════════════════════════
+
+    api() {
+        return {
+            stats: this.db.stats(),
+            recent: this.db.recent(20),
+            decisions: this.decisions.recent(20),
+            learnings: this.learnings.recent(20),
+            workflows: this.workflows.recent(20),
+            projects: this.projects.recent(20)
+        };
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════
 // CLI
+// ═══════════════════════════════════════════════════════════════════
+
 const memory = new HiveMemory();
 const cmd = process.argv[2];
 const args = process.argv.slice(3);
 
 const commands = {
+    // Quick actions
     remember: () => memory.remember({
         category: args[0] || 'general',
         content: args.slice(1).join(' ') || 'Remember this'
     }),
     recall: () => memory.recall(args.join(' ') || 'test'),
-    categories: () => memory.categories(),
-    recent: () => memory.recent(parseInt(args[0]) || 20),
-    forget: () => memory.forget(args[0]),
+    quick: () => memory.quick({ type: args[0], content: args.slice(1).join(' ') }),
     
-    session: () => memory.saveSession(args[0], args.slice(1).join(' ')),
-    loadSession: () => {
-        const data = memory.loadSession(args[0]);
-        console.log(data);
-    },
-    sessionHistory: () => memory.sessionHistory(parseInt(args[0]) || 20),
-    
+    // Decisions
     decision: () => memory.logDecision({
-        context: args[0] || '',
-        decision: args[1] || '',
-        rationale: args[2] || '',
+        context: args[0] || 'general',
+        decision: args[1] || 'decision made',
+        rationale: args[2] || 'reasoning',
         agent: args[3]
     }),
     pastDecisions: () => memory.pastDecisions(args.join(' ') || 'test'),
     
+    // Learnings
     learn: () => memory.learn({
         topic: args[0] || 'general',
-        learning: args.slice(1).join(' ') || 'Learned something'
+        learning: args.slice(1).join(' ') || 'learned something',
+        source: args[3]
     }),
     recallLearnings: () => memory.recallLearnings(args.join(' ') || 'test'),
     
+    // Workflows
+    createWorkflow: () => memory.createWorkflow({
+        name: args[0],
+        description: args[1],
+        steps: args.slice(2)
+    }),
+    runWorkflow: () => memory.runWorkflow(args[0]),
+    workflows: () => memory.listWorkflows(),
+    
+    // Projects
+    project: () => memory.trackProject({ name: args[0], description: args.slice(1).join(' ') }),
+    projectStatus: () => memory.projectStatus(),
+    
+    // Categories & Stats
+    categories: () => memory.db.stats(),
+    recent: () => memory.db.recent(parseInt(args[0]) || 20),
+    
+    // Dashboard
     dashboard: () => memory.dashboard(),
+    
+    // API
+    api: () => console.log(JSON.stringify(memory.api(), null, 2)),
+    
+    // Help
     help: () => console.log(`
-Hive Memory Commands
+HIVE MEMORY - Production Memory System
+═══════════════════════════════════════════════════════════════
 
-  remember <category> <content>       Save a memory
-  recall <query>                      Search memories
-  categories                          List categories
-  recent [n]                         Recent memories
-  forget <id>                        Delete memory
+QUICK ACTIONS:
+  remember <category> <content>   Save a memory
+  recall <query>                 Search memories
+  quick <type> <content>          Quick save (todo|learn|decision|note)
 
-  session <id> <data>               Save session
-  loadSession <id>                   Load session
-  sessionHistory [n]                 Session history
+DECISIONS:
+  decision <context> <decision> [rationale] [agent]
+  pastDecisions <query>          Search past decisions
 
-  decision <context> <decision> [rationale] [agent]  Log decision
-  pastDecisions <query>              Search past decisions
+LEARNINGS:
+  learn <topic> <learning> [source]
+  recallLearnings <topic>         Search learnings
 
-  learn <topic> <learning> [source]  Store learning
-  recallLearnings <topic>            Recall learnings
+WORKFLOWS:
+  createWorkflow <name> <desc> <step1> <step2> ...
+  runWorkflow <name>             Run a workflow
+  workflows                      List workflows
 
-  dashboard                          Full dashboard
+PROJECTS:
+  project <name> [description]   Track new project
+  projectStatus                  Show all projects
+
+INFO:
+  categories                     Memory categories
+  recent [n]                     Recent memories
+  dashboard                      Full dashboard
+  api                            JSON export for integrations
+
+EXAMPLES:
+  hive-memory remember work "Use MiniMax M2.7 for agents"
+  hive-memory recall "model preferences"
+  hive-memory decision "Use MiniMax" "Best for agents" "Fast + accurate"
+  hive-memory learn model-choice "MiniMax M2.7 is best for agents" "benchmark"
+  hive-memory quick todo "Review PRs on Friday"
+  hive-memory createWorkflow deploy "Deploy to production" "build" "test" "push"
 `)
 };
 
 commands[cmd]?.() || commands.help();
 
-module.exports = { HiveMemory, SimpleDB };
+module.exports = { HiveMemory };
