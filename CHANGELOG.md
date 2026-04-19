@@ -4,6 +4,38 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.1] - 2026-04-19 - Local Stack + Vision Enhancements
+
+### Added
+
+#### 🏠 Hive Local — Unified Local AI Stack
+- `hive-local.js` (27KB) — Complete offline AI
+  - **LM Studio integration** — Local model inference (Qwen, Llama, Mistral, Gemma)
+  - **Vision** — Local image analysis with Qwen VL/LLaVA
+  - **Voice STT** — Whisper transcription (base, small, medium, large)
+  - **Voice TTS** — macOS say for instant offline TTS
+  - **Web Search** — DuckDuckGo scraping, Brave API fallback
+  - **GitHub** — gh CLI integration (search repos, code, issues)
+  - **File Search** — find/grep for local files
+  - **Cloud Fallbacks** — Seamless switch to cloud when local unavailable
+
+- `hive-local.sh` — CLI wrapper
+
+- `skills/local/SKILL.md` — Local stack documentation
+
+#### 👁️ Vision Enhancements
+- 5 vision models: Kimi K2.5, GPT-5.4, MiniMax VL, Qwen VL, Gemini 2.0
+- Screen capture + analysis
+- Batch processing
+- Image comparison
+- Preset analyses (growth, chart, document, receipt, code, room)
+
+### Updated
+- `START-HERE.md` — Added local stack section
+- `QUICKREF.md` — Added local commands reference
+
+---
+
 ## [1.0.0] - 2026-04-19 - The Complete Hive Senate
 
 ### Added

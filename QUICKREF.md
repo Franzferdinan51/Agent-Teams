@@ -291,4 +291,27 @@ node scripts/live-messenger.js --demo               # Demo mode
 
 ---
 
+## 🏠 LOCAL MODELS (100% Offline)
+
+```bash
+# LM Studio (local models)
+./scripts/hive-local.sh lm-status                   # Check status
+./scripts/hive-local.sh chat <prompt>              # Chat locally
+
+# Voice (Whisper + macOS TTS)
+./scripts/hive-local.sh transcribe <audio>         # STT (Whisper)
+./scripts/hive-local.sh tts <text>                 # TTS (macOS say)
+
+# Search (no API needed)
+./scripts/hive-local.sh search <query>             # DuckDuckGo
+./scripts/hive-local.sh gh-search <query>         # GitHub
+./scripts/hive-local.sh find <dir> <pattern>      # File find
+./scripts/hive-local.sh grep <dir> <pattern>      # Grep
+
+# Vision (local + cloud fallback)
+./scripts/hive-local.sh analyze <image> [prompt]   # Local VL
+```
+
+---
+
 **See `START-HERE.md` for full guide or `README.md` for architecture.**

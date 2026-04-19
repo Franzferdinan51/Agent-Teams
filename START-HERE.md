@@ -122,6 +122,31 @@ node scripts/dreaming-engine.js dream
 
 **Vision Models:** Kimi K2.5 (screenshots), GPT-5.4 (complex), Qwen VL (local), Gemini 2.0 (fast)
 
+### 🏠 I want to... run everything LOCAL (no cloud)
+
+```bash
+# Local model chat (LM Studio)
+./scripts/hive-local.sh chat "Hello, explain this code"
+
+# Local speech recognition (Whisper)
+./scripts/hive-local.sh transcribe audio.mp3
+
+# Local text-to-speech (macOS)
+./scripts/hive-local.sh tts "Hello from Hive Local"
+
+# Local web search (DuckDuckGo)
+./scripts/hive-local.sh search "AI news"
+
+# Local GitHub search (gh CLI)
+./scripts/hive-local.sh gh-search "rust web framework"
+
+# Local file search
+./scripts/hive-local.sh find ~/projects "*.js"
+./scripts/hive-local.sh grep ~/projects "function"
+```
+
+**100% local — no API keys needed for most tasks!**
+
 ### 🕸️ I want to... go decentralized (P2P)
 
 ```bash
