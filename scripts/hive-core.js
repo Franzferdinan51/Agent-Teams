@@ -604,3 +604,94 @@ module.exports = {
     Councilor,
     COUNCILOR_PERSONAS
 };
+
+// ═══════════════════════════════════════════════════════════════════
+// COUNCIL ENACTMENT LAYER
+// Converts Council decisions into actionable decrees
+// ═══════════════════════════════════════════════════════════════════
+
+EnactmentLayer = {
+    // Track Council recommendations and Senate decrees
+    enactedDecrees: [],
+    pendingActions: [],
+    
+    // When Council reaches consensus, create actionable decree
+    async createDecreeFromCouncil(recommendation) {
+        const decree = {
+            id: 'decree-' + Date.now(),
+            title: recommendation.topic || 'Council Recommendation',
+            content: recommendation.consensus || recommendation.summary,
+            authority: 'council',
+            scope: recommendation.scope || 'universal',
+            priority: recommendation.urgency === 'high' ? 'high' : 'medium',
+            status: 'active',
+            source: 'council',
+            timestamp: new Date().toISOString(),
+            actionRequired: this.extractAction(recommendation.consensus),
+            agents: [] // Which agents should enact this
+        };
+        
+        this.enactedDecrees.push(decree);
+        this.save();
+        
+        // Broadcast to SSE clients
+        broadcastSSE({ type: 'decree-enacted', decree });
+        
+        return decree;
+    },
+    
+    // Extract actionable task from consensus text
+    extractAction(consensus) {
+        if (!consensus) return null;
+        
+        const actions = [];
+        if (consensus.includes('SHOULD') || consensus.includes('MUST')) {
+            const matches = consensus.match(/[A-Z\s]+:\s*[^.]+/g);
+            if (matches) actions.push(...matches);
+        }
+        return actions.length ? actions : null;
+    },
+    
+    // Get pending actions for an agent
+    getActionsForAgent(agentId) {
+        return this.pendingActions.filter(a => 
+            !a.completed && 
+            (!a.assignedTo || a.assignedTo === agentId)
+        );
+    },
+    
+    // Mark action as completed
+    completeAction(actionId, agentId, result) {
+        const action = this.pendingActions.find(a => a.id === actionId);
+        if (action) {
+            action.completed = true;
+            action.completedBy = agentId;
+            action.result = result;
+            action.completedAt = new Date().toISOString();
+        }
+    },
+    
+    // OpenClaw agent hook - called when Council decides something
+    async notifyOpenClaw(decree) {
+        // Send to OpenClaw gateway if available
+        const OPENCLAW_URL = process.env.OPENCLAW_GATEWAY_URL || 'http://localhost:18789';
+        
+        try {
+            const response = await fetch(`${OPENCLAW_URL}/api/enact`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'council-decree',
+                    decree: decree,
+                    source: 'hive-nation'
+                }),
+                signal: AbortSignal.timeout(5000)
+            });
+            
+            return response.ok;
+        } catch (e) {
+            console.log('⚠️ OpenClaw notification failed:', e.message);
+            return false;
+        }
+    }
+};

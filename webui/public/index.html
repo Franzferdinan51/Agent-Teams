@@ -636,16 +636,40 @@
             }
         }
         
-        function updateCouncilMessages(messages) {
+        function updateCouncilMessages(session) {
             const container = document.getElementById('council-messages');
-            if (!messages || messages.length === 0) return;
+            if (!session) return;
             
-            container.innerHTML = messages.slice(0, 10).map(m => 
-                `<div class="memory-item" style="border-left: 3px solid var(--accent3)">
-                    <div class="memory-cat">${m.councilor || 'Council'} — ${m.timestamp || ''}</div>
-                    <div class="memory-content">${m.content || ''}</div>
-                </div>`
-            ).join('');
+            // Show live deliberation progress
+            const messages = session.messages || [];
+            const stats = session.stats || {};
+            
+            let html = `<div style="background:var(--bg4);padding:16px;border-radius:12px;margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <strong style="color:var(--hive)">${session.topic || 'Deliberation'}</strong>
+                        <div style="font-size:12px;color:var(--text3);margin-top:4px">Phase: ${session.phase || 'idle'}</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="font-size:24px;font-weight:800;color:var(--success)">${stats.yeas || 0}</div>
+                        <div style="font-size:11px;color:var(--text3)">YEAS</div>
+                    </div>
+                </div>
+            </div>`;
+            
+            if (messages.length === 0) {
+                html += '<div class="empty-state"><div class="icon">⚖️</div><p>Deliberation in progress... Messages will appear here.</p></div>';
+            } else {
+                html += messages.slice(-10).reverse().map(m => 
+                    `<div class="memory-item" style="border-left: 3px solid var(--accent3)">
+                        <div class="memory-cat">${m.councilor || 'Council'}</div>
+                        <div class="memory-content">${m.content || m.text || ''}</div>
+                        ${m.vote ? `<div style="margin-top:6px;font-size:11px;color:${m.vote === 'yea' ? 'var(--success)' : 'var(--danger)'}">${m.vote === 'yea' ? '✅ VOTE YES' : '❌ VOTE NO'}</div>` : ''}
+                    </div>`
+                ).join('');
+            }
+            
+            container.innerHTML = html;
         }
         
         // Start live stream on page load
@@ -924,16 +948,35 @@
         }
         
         async function startDeliberation() {
-            const topic = prompt('Enter deliberation topic:');
+            // Create a nice modal for deliberation setup
+            const topic = prompt('Enter deliberation topic (e.g., "Should AI have memory?"):');
             if (!topic) return;
             
-            const mode = prompt('Select mode (balanced/adversarial/consensus):') || 'balanced';
+            const modes = ['balanced', 'adversarial', 'consensus', 'brainstorm', 'swarm'];
+            const mode = prompt('Select mode:\n' + modes.map((m, i) => `${i+1}. ${m}`).join('\n') + '\n(default: balanced)') || 'balanced';
             
-            showToast('Starting deliberation...', 'info');
+            showToast('Starting deliberation: "' + topic + '"', 'info');
+            
             const r = await apiPost('/council/deliberate', { topic, mode });
             
             if (r.success) {
                 showToast('Deliberation started!', 'success');
+                
+                // Poll for live results every 2 seconds
+                const pollInterval = setInterval(async () => {
+                    const session = await apiGet('/council/session');
+                    if (session && session.messages && session.messages.length > 0) {
+                        updateCouncilMessages(session);
+                        
+                        // Stop polling if deliberation ended
+                        if (session.phase === 'ended' || session.phase === 'idle') {
+                            clearInterval(pollInterval);
+                            showToast('Deliberation complete!', 'success');
+                        }
+                    }
+                }, 2000);
+                
+                // Initial load
                 loadCouncil();
             } else {
                 showToast('Failed to start deliberation', 'error');
@@ -942,14 +985,39 @@
         
         // Automation
         async function loadAutomation() {
+            // Get automation status from API
+            const autoStatus = await apiGet('/automation/status');
+            const isRunning = autoStatus && autoStatus.running;
+            const jobCount = autoStatus?.jobs || 0;
+            
             const status = '<div class="grid-4">' +
-                '<div class="stat"><div class="stat-value">0</div><div class="stat-label">Pending</div></div>' +
-                '<div class="stat"><div class="stat-value">0</div><div class="stat-label">Running</div></div>' +
-                '<div class="stat"><div class="stat-value">0</div><div class="stat-label">Completed</div></div>' +
-                '<div class="stat"><div class="stat-value">0</div><div class="stat-label">Failed</div></div>' +
+                '<div class="stat"><div class="stat-value">' + (isRunning ? '✅' : '❌') + '</div><div class="stat-label">Engine</div></div>' +
+                '<div class="stat"><div class="stat-value">' + jobCount + '</div><div class="stat-label">Jobs</div></div>' +
+                '<div class="stat"><div class="stat-value">' + (isRunning ? 'Active' : 'Stopped') + '</div><div class="stat-label">Status</div></div>' +
+                '<div class="stat"><div class="stat-value">-</div><div class="stat-label">Triggered</div></div>' +
                 '</div>';
             document.getElementById('automation-status').innerHTML = status;
-            document.getElementById('automation-jobs').innerHTML = '<div class="empty-state"><div class="icon">⚡</div><p>Start automation: node scripts/hive-automation-v2.js start</p></div>';
+            
+            const actionBtn = isRunning 
+                ? '<button class="btn btn-secondary" disabled>⚡ Running</button>'
+                : '<button class="btn btn-hive" onclick="startAutomation()">⚡ Start Engine</button>';
+            
+            document.getElementById('automation-jobs').innerHTML = 
+                '<div class="empty-state">' +
+                actionBtn +
+                '<p style="margin-top:12px;font-size:12px;color:var(--text3)">Or run: <code>node scripts/hive-automation-v2.js start</code></p>' +
+                '</div>';
+        }
+        
+        async function startAutomation() {
+            showToast('Starting automation engine...', 'info');
+            const r = await apiPost('/automation/start', {});
+            if (r.success) {
+                showToast('Automation engine started!', 'success');
+                loadAutomation();
+            } else {
+                showToast('Failed to start automation', 'error');
+            }
         }
         
         function showAutomationForm() { document.getElementById('automation-form-section').style.display = 'block'; }

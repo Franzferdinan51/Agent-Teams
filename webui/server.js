@@ -465,6 +465,104 @@ const server = http.createServer(async (req, res) => {
     }
     
     // ═══════════════════════════════════════════
+    // AUTOMATION CONTROL
+    // ═══════════════════════════════════════════
+    
+    // Start automation engine
+    if (pathname === '/api/automation/start' && req.method === 'POST') {
+        const autoFile = path.join(SCRIPTS_DIR, 'hive-automation-v2.js');
+        if (fs.existsSync(autoFile)) {
+            const { spawn } = require('child_process');
+            const auto = spawn('node', [autoFile, 'start'], { detached: true, stdio: 'ignore' });
+            auto.unref();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, message: 'Automation engine started' }));
+        } else {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: 'Automation script not found' }));
+        }
+        return;
+    }
+    
+    // Get automation status
+    if (pathname === '/api/automation/status') {
+        const autoState = path.join(__dirname, '..', 'data', 'automation', 'jobs.json');
+        let status = { running: false, jobs: 0 };
+        if (fs.existsSync(autoState)) {
+            try {
+                const data = JSON.parse(fs.readFileSync(autoState, 'utf8'));
+                status = { running: true, jobs: data.length || 0 };
+            } catch (e) {}
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(status));
+        return;
+    }
+    
+    // ═══════════════════════════════════════════
+    // OPENCLAW AGENT INTEGRATION
+    // ═══════════════════════════════════════════
+    
+    // Get pending actions for OpenClaw agents
+    if (pathname === '/api/openclaw/actions') {
+        const coreState = path.join(__dirname, '..', 'data', 'core', 'state.json');
+        let actions = [];
+        if (fs.existsSync(coreState)) {
+            try {
+                const data = JSON.parse(fs.readFileSync(coreState, 'utf8'));
+                actions = data.pendingActions || [];
+            } catch (e) {}
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ actions, count: actions.length }));
+        return;
+    }
+    
+    // Notify OpenClaw of Council decree
+    if (pathname === '/api/openclaw/enact' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const { decree, action } = JSON.parse(body);
+                
+                // Save to state for OpenClaw to pick up
+                const coreState = path.join(__dirname, '..', 'data', 'core', 'state.json');
+                let state = { pendingActions: [], decrees: [] };
+                if (fs.existsSync(coreState)) {
+                    try { state = JSON.parse(fs.readFileSync(coreState, 'utf8')); } catch (e) {}
+                }
+                
+                if (decree) {
+                    state.decrees = state.decrees || [];
+                    state.decrees.push(decree);
+                }
+                
+                if (action) {
+                    state.pendingActions = state.pendingActions || [];
+                    state.pendingActions.push({
+                        id: 'action-' + Date.now(),
+                        ...action,
+                        created: new Date().toISOString(),
+                        completed: false
+                    });
+                }
+                
+                fs.writeFileSync(coreState, JSON.stringify(state, null, 2));
+                
+                // Broadcast to all clients
+                broadcastSSE({ type: 'action-enacted', decree, action });
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, message: 'Action queued for OpenClaw agents' }));
+            } catch (e) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: e.message }));
+            }
+        });
+        return;
+    }
+    
     // SSE STREAMING (Real-time updates)
     // ═══════════════════════════════════════════
     
@@ -550,6 +648,17 @@ server.listen(PORT, () => {
 ╚══════════════════════════════════════════════════════════════════╝
 `);
     log(LOG_LEVELS.INFO, 'Server started on port', PORT);
+    
+    // Auto-start automation if enabled
+    if (process.env.AUTO_START_AUTOMATION === 'true') {
+        const autoFile = path.join(SCRIPTS_DIR, 'hive-automation-v2.js');
+        if (fs.existsSync(autoFile)) {
+            const { spawn } = require('child_process');
+            const auto = spawn('node', [autoFile, 'start'], { detached: true, stdio: 'ignore' });
+            auto.unref();
+            log(LOG_LEVELS.INFO, 'Automation engine auto-started');
+        }
+    }
 });
 
 // Graceful shutdown
