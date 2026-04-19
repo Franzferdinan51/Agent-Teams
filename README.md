@@ -8,23 +8,26 @@ Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        THE HIVE MIND                                │
+│                        THE HIVE MIND                              │
 │                                                                     │
 │   EVERYTHING CONNECTED:                                            │
 │                                                                     │
-│   ┌─────────────────────────────────────────────────────────────┐   │
-│   │                      OPENCLAW 🦞                           │   │
-│   │  Gateway · Memory · Skills · Channels · MCP · ACP           │   │
-│   └─────────────────────────────────────────────────────────────┘   │
+│   ┌───────────────────────────────────────────────────────────┐   │
+│   │  🦞 OpenClaw │ 🦆 Duck CLI │ 🏛️ AI Council │ 📊 Dashboard│   │
+│   │  Gateway     │  Coding     │  45 Councilors │ Status     │   │
+│   │  Memory      │  Research   │  11 Modes      │ Metrics    │   │
+│   │  Skills      │  Meta-Agent │  Deliberate    │ Control     │   │
+│   └───────────────────────────────────────────────────────────┘   │
 │                              │                                      │
-│   ┌─────────────────────────┼─────────────────────────────────┐   │
+│   ┌─────────────────────────┼────────────────────────────────┐   │
 │   │              AGENT MESH API                               │   │
-│   │           (Central Nervous System)                        │   │
-│   └─────────────────────────┼─────────────────────────────────┘   │
-│                             │                                   │
-│   ┌─────────────────────────┼─────────────────────────────────┐   │
-│   │          Duck CLI │ AI Council │ Dashboard │ Creative       │   │
-│   │          30+ Micro │ Meta-Agent │ Android  │               │   │
+│   │           (Central Nervous System)                       │   │
+│   └─────────────────────────┼────────────────────────────────┘   │
+│                             │                                    │
+│   ┌─────────────────────────┼────────────────────────────────┐   │
+│   │    🎨 Creative │ 📱 Android │ ✅ QA │ 🔧 Task Queue       │   │
+│   │    Image/3D   │  ADB      │ Verify │ Priority Queue    │   │
+│   │    Video/Music │  Control  │ Loops  │ Emergency Broadcast│   │
 │   └─────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -41,6 +44,28 @@ Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https:
 | **Emergency Broadcast** | ✅ | `hive-emergency.sh` |
 | **Watchdog** | ✅ | `hive-watchdog.js` |
 | **Capability Discovery** | ✅ | `hive-discovery.js` |
+| **AI Council** | ✅ | `ai-council-hive.sh` |
+
+## 🏛️ AI Council — Adversarial Deliberation
+
+The AI Council Chamber adds **45 expert archetypes** and **11 deliberation modes** to the Hive Mind:
+
+### 45 Councilors
+- **Core:** Speaker, Technocrat, Ethicist, Pragmatist, Skeptic, Sentinel, Visionary...
+- **Business:** Economist, Product Manager, Marketing, Finance, Risk
+- **Technical:** DevOps, Security, Data Scientist, Performance, QA
+- **Emergency:** Meteorologist, Emergency Manager, Risk Analyst, Local Resident
+- **Vision:** Visual Analyst, Pattern Recognizer, Color Specialist, Composition Expert...
+
+### 11 Modes
+| Mode | Purpose |
+|------|---------|
+| ⚖️ Legislative | Debate + vote |
+| 🧠 Deep Research | Multi-round research |
+| 🐝 Swarm Hive | Task decomposition |
+| 💻 Swarm Coding | Software engineering |
+| 🌪️ Emergency Response | Crisis deliberation |
+| 👁️ Vision Council | Image analysis |
 
 ## 🚀 Quick Start
 
@@ -52,82 +77,27 @@ chmod +x *.sh scripts/*.sh
 # Start mesh
 cd /tmp/agent-mesh-api && npm start &
 
-# Connect systems
+# Connect all systems
 ./scripts/openclaw-hive.sh
+./scripts/ai-council-hive.sh
 ./scripts/hive-connect.sh duck-cli
 ./scripts/creative-hive.sh
-```
 
-## 🧠 Hive Mind Scripts
-
-### Task Router
-```bash
-# Routes task to best-fit agent
-node scripts/hive-router.js "generate an image of a cat"
-```
-
-### Consensus Engine
-```bash
-# Hive-wide voting
-node scripts/hive-consensus.js poll "REST or GraphQL?" "REST,GraphQL"
-node scripts/hive-consensus.js vote poll-123 REST duck-cli
-```
-
-### Shared Memory
-```bash
-# Context sharing across agents
-node scripts/hive-memory.js set current-task "Build API"
-node scripts/hive-memory.js get current-task
-node scripts/hive-memory.js search task
-```
-
-### Cross-Agent Learning
-```bash
-# Agents learn from each other
-node scripts/hive-learning.js learn duck-cli "Use shorter explanations"
-node scripts/hive-learning.js learn-from dashboard ai-council "plant analysis"
-```
-
-### Task Queue
-```bash
-# Distributed priority queue
-node scripts/hive-queue.js critical "Fix production bug"
-node scripts/hive-queue.js dequeue worker1
-node scripts/hive-queue.js complete task-123
-```
-
-### Emergency Broadcast
-```bash
-# Alert all systems instantly
-./scripts/hive-emergency.sh DEFCON1 "Production system down!"
-./scripts/hive-emergency.sh WARNING "Storm alert in 2 hours"
-```
-
-### Watchdog
-```bash
-# Monitor all systems, auto-restart failed agents
-node scripts/hive-watchdog.js
-```
-
-### Capability Discovery
-```bash
-# Find who can do what
-node scripts/hive-discovery.js discover
-node scripts/hive-discovery.js tree
-node scripts/hive-discovery.js find image-generation
+# Route task to AI Council
+./scripts/hive-router.sh "Should we use microservices?"
 ```
 
 ## All Systems
 
 | System | Type | Capabilities |
 |--------|------|-------------|
-| 🦞 **OpenClaw** | Framework | Gateway, Memory, Skills, Channels, MCP, ACP |
+| 🦞 **OpenClaw** | Framework | Gateway, Memory, Skills, MCP, ACP |
 | 🦆 **Duck CLI** | Agent | Coding, Research, Meta-agent |
-| 🏛️ **AI Council** | Council | Deliberation, Analysis, Consensus |
+| 🏛️ **AI Council** | Council | 45 Councilors, 11 Modes, Deliberation |
 | 📊 **Dashboard** | UI | Status, Metrics, Control |
 | 🎨 **Creative** | Creative | Image, Video, 3D, Music |
 | 📱 **Android** | Device | ADB, Screens, Input |
-| 🤖 **30+ Micro** | Specialists | Single-purpose agents |
+| ✅ **30+ Micro** | Specialists | Single-purpose agents |
 
 ## Related Projects
 
@@ -135,11 +105,13 @@ node scripts/hive-discovery.js find image-generation
 |---------|---------|
 | [OpenClaw](https://github.com/openclaw/openclaw) | 🦞 Agent framework |
 | [Duck CLI](https://github.com/Franzferdinan51/duck-cli) | 🦆 Desktop AI |
+| [AI Council](https://github.com/Franzferdinan51/AI-Bot-Council-Concensus) | 🏛️ Deliberation engine |
 | [Agent Mesh API](https://github.com/Franzferdinan51/agent-mesh-api) | 🔗 Hive communication |
 
 ## Changelog
 
 ### v1.0.0 (2026-04-19)
+- ✅ **AI Council** — 45 councilors + 11 deliberation modes
 - ✅ **Task Router** — Auto-route to best agent
 - ✅ **Consensus Engine** — Hive-wide voting
 - ✅ **Shared Memory** — Context sharing
@@ -148,7 +120,6 @@ node scripts/hive-discovery.js find image-generation
 - ✅ **Emergency Broadcast** — Alert all systems
 - ✅ **Watchdog** — Monitor + auto-restart
 - ✅ **Capability Discovery** — Find who can do what
-- 🦞 OpenClaw integration
 - 🎨 Creative agents (image, video, 3D, music)
 - 30+ Micro-agents
 
