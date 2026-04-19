@@ -670,3 +670,102 @@ MIT License
 ---
 
 **Version 2.0.1** — Built for production multi-agent governance 🏛️⚖️🦆
+---
+
+## 📁 Complete File Structure
+
+```
+Agent-Teams/
+├── 📦 Core Council (v2.1.0)
+│   ├── council-server.js      # LLM-powered deliberation API
+│   ├── councilors.json        # 46 councilor definitions
+│   ├── council-app.tsx        # React frontend for Council
+│   └── council-mcp-server.js  # MCP tool server
+│
+├── 📦 Agent System
+│   └── agent-api-server/      # Agent API server
+│       ├── api_server.py      # Main API
+│       └── package.json
+│
+├── 🌐 WebUI
+│   ├── webui/server.js       # Web dashboard server
+│   └── webui/public/         # Frontend files
+│
+├── 🧠 Hive Scripts (80+)
+│   ├── hive-council.js       # Council integration
+│   ├── hive-senate.js        # Senate system
+│   └── scripts/hive-*.js     # All hive scripts
+│
+└── 📚 Documentation
+    ├── docs/                 # Full documentation
+    └── README.md
+```
+
+---
+
+## 🧪 Testing the Full System
+
+### 1. Test Council API
+```bash
+npm run council:status
+npm run council:test
+npm run council:providers
+```
+
+### 2. Start Full Council App
+```bash
+npm run start:council-app
+# Opens React UI on port 3002
+```
+
+### 3. Start Agent API
+```bash
+npm run start:agent-api
+```
+
+### 4. Start MCP Server (for tools)
+```bash
+npm run start:mcp
+```
+
+### 5. Start Deliberation
+```bash
+npm run council:deliberate
+```
+
+---
+
+## 🔧 Full Setup for All Features
+
+```bash
+# 1. Clone and install
+git clone https://github.com/Franzferdinan51/Agent-Teams.git
+cd Agent-Teams
+npm install
+
+# 2. Set environment variables
+export MINIMAX_API_KEY=your_key
+export LMSTUDIO_KEY=sk-lm-any-key
+
+# 3. Start everything
+./start-all.sh
+
+# 4. Optionally start additional services
+npm run start:council-app   # React UI (port 3002)
+npm run start:agent-api      # Agent API
+npm run start:mcp            # MCP tools
+```
+
+---
+
+## 📊 All Available Ports
+
+| Service | Port | Description |
+|---------|------|-------------|
+| Council API | 3007 | LLM deliberation |
+| Council App | 3002 | React frontend |
+| WebUI | 3131 | Hive dashboard |
+| Agent API | 8080 | Agent server |
+| MCP Server | 3850 | Tool protocol |
+| Mesh API | 4000 | P2P mesh |
+

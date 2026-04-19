@@ -31,7 +31,14 @@
     "consensus:poll": "node scripts/hive-consensus.js poll",
     "consensus:vote": "node scripts/hive-consensus.js vote",
     "test": "node scripts/qa-loop.sh 'echo test'",
-    "help": "cat START-HERE.md"
+    "help": "cat START-HERE.md",
+    "start:council-app": "cd council-app && npm install && npm run dev",
+    "start:agent-api": "cd agent-api-server && python3 api_server.py",
+    "start:mcp": "node council-mcp-server.js",
+    "council:status": "curl -s http://localhost:3007/api/health | jq .",
+    "council:providers": "curl -s http://localhost:3007/api/llm/providers | jq .",
+    "council:test": "curl -s -X POST http://localhost:3007/api/llm/test | jq .",
+    "council:deliberate": "curl -s -X POST http://localhost:3007/api/session/start -H \"Content-Type: application/json\" -d \"{\\\"topic\\\":\\\"Test\\\",\\\"mode\\\":\\\"proposal\\\"}\" | jq ."
   },
   "engines": {
     "node": ">=18.0.0"
@@ -39,8 +46,7 @@
   "dependencies": {
     "ws": "^8.16.0"
   },
-  "peerDependencies": {
-  },
+  "peerDependencies": {},
   "keywords": [
     "multi-agent",
     "ai-council",
