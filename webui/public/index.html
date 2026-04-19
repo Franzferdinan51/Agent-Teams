@@ -3,37 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hive Nation - Command Center</title>
+    <title>Hive Nation - Live Command Center</title>
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
         :root{--bg:#0a0e17;--bg2:#0d1221;--bg3:#111827;--bg4:#1a2235;--border:#1e2d4a;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--accent:#6366f1;--accent2:#8b5cf6;--accent3:#a78bfa;--hive:#f59e0b;--hive2:#fbbf24;--success:#10b981;--warning:#f59e0b;--danger:#ef4444}
         body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-        .topbar{display:flex;align-items:center;justify-content:space-between;padding:15px 24px;background:rgba(10,14,23,0.95);border-bottom:2px solid var(--hive);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:10px}
+        .topbar{display:flex;align-items:center;justify-content:space-between;padding:15px 24px;background:rgba(10,14,23,0.95);border-bottom:3px solid var(--hive);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:10px}
         .brand{display:flex;align-items:center;gap:12px}
-        .brand-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--hive),var(--hive2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
+        .brand-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--hive),var(--hive2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
         .brand-text h1{font-size:18px;font-weight:800;background:linear-gradient(90deg,var(--hive2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .brand-text span{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
-        .status-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+        .status-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
         .status-item{background:var(--bg3);padding:6px 12px;border-radius:6px;font-size:12px;border:1px solid var(--border)}
-        .status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;margin-right:6px}
+        .status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;margin-right:6px;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
         .nav{display:flex;gap:4px;padding:12px 24px;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;flex-wrap:wrap}
         .nav-tab{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.2s;white-space:nowrap;border:1px solid transparent}
         .nav-tab:hover{color:var(--text);background:var(--bg3)}
         .nav-tab.active{color:var(--hive);background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3)}
         .main{flex:1;padding:24px;max-width:1400px;margin:0 auto}
         .section{display:none}
-        .section.active{display:block}
+        .section.active{display:block;animation:fadeIn 0.3s}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         .card{background:var(--bg2);border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid var(--border)}
         .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
-        .card-title{font-size:16px;font-weight:700;color:var(--hive)}
+        .card-title{font-size:16px;font-weight:700;color:var(--hive);display:flex;align-items:center;gap:8px}
         .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:16px}
-        .grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-        .stat{background:var(--bg3);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border)}
+        .grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+        .stat{background:var(--bg3);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border}}
         .stat-value{font-size:26px;font-weight:800;background:linear-gradient(135deg,var(--accent3),var(--hive2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
         .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all 0.2s}
-        .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
         .btn-hive{background:linear-gradient(135deg,var(--hive),var(--hive2));color:#0a0e17}
+        .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
         .btn-secondary{background:var(--bg3);color:var(--text2);border-color:var(--border)}
         .btn:hover{transform:translateY(-1px)}
         .input,textarea,select{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:13px;outline:none}
@@ -44,9 +46,11 @@
         table{width:100%;border-collapse:collapse;font-size:13px}
         th{text-align:left;padding:10px 12px;background:var(--bg);color:var(--hive);font-size:11px;text-transform:uppercase;border-bottom:2px solid var(--hive)}
         td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
-        tr:hover td{background:rgba(99,102,241,0.05)}
+        tr:hover td{background:rgba(99,102,241,0.05)}}
         .badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
         .badge-green{background:rgba(16,185,129,0.15);color:#10b981}
+        .badge-red{background:rgba(239,68,68,0.15);color:#ef4444}
+        .badge-amber{background:rgba(245,158,11,0.15);color:#f59e0b}
         .badge-blue{background:rgba(59,130,246,0.15);color:#3b82f6}
         .badge-purple{background:rgba(139,92,246,0.15);color:#8b5cf6}
         .empty-state{text-align:center;padding:30px;color:var(--text3)}
@@ -56,36 +60,37 @@
         @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
         .progress-bar{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;margin-top:8px}
         .progress-fill{height:100%;background:var(--success);transition:width 0.3s}
+        .decree-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid var(--accent)}
+        .decree-card.active{border-left-color:var(--success)}
+        .decree-title{font-weight:700;font-size:14px;margin-bottom:4px}
+        .decree-content{font-size:12px;color:var(--text2);margin-bottom:6px}
+        .decree-meta{font-size:10px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap}
+        .vote-row{display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg3);border-radius:8px;margin-bottom:8px;border:1px solid var(--border)}
+        .vote-info{flex:1}
+        .vote-title{font-weight:600;font-size:13px}
+        .vote-date{font-size:11px;color:var(--text3)}
+        .vote-result{font-size:12px;font-weight:600}
+        .vote-bar{height:6px;background:var(--bg4);border-radius:3px;margin-top:6px;overflow:hidden}
+        .vote-bar-fill{height:100%;background:var(--success);transition:width 0.5s}
         .agent-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
         .agent-avatar{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;flex-shrink:0}
         .agent-info{flex:1}
         .agent-name{font-weight:600;font-size:13px}
         .agent-role{font-size:11px;color:var(--text3)}
-        .agent-score{text-align:right}
-        .agent-score-value{font-size:18px;font-weight:800}
-        .agent-score-label{font-size:10px;color:var(--text3);text-transform:uppercase}
-        .decree-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;border-left:4px solid var(--accent)}
-        .decree-title{font-weight:700;font-size:14px;margin-bottom:4px}
-        .decree-content{font-size:12px;color:var(--text2)}
-        .decree-meta{font-size:10px;color:var(--text3);margin-top:6px}
+        .agent-score-value{font-size:18px;font-weight:800;color:var(--accent3)}
+        .team-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+        .team-name{font-weight:700;font-size:14px;margin-bottom:4px}
+        .team-meta{font-size:11px;color:var(--text3)}
         .memory-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px}
         .memory-cat{font-size:10px;text-transform:uppercase;color:var(--accent3);font-weight:700}
         .memory-time{font-size:10px;color:var(--text3)}
-        .memory-content{font-size:12px;color:var(--text2);margin-top:4px}
-        .memory-tags{margin-top:6px;display:flex;gap:4px;flex-wrap:wrap}
-        .memory-tag{font-size:10px;padding:2px 6px;background:rgba(99,102,241,0.1);border-radius:3px;color:var(--accent3)}
-        .workflow-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
-        .workflow-name{font-weight:600;font-size:13px}
-        .workflow-desc{font-size:11px;color:var(--text3);margin-top:2px}
-        .toggle{width:40px;height:22px;background:var(--bg4);border-radius:11px;position:relative;cursor:pointer;transition:background 0.2s}
-        .toggle.active{background:var(--success)}
-        .toggle::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:2px;left:2px;transition:transform 0.2s}
-        .toggle.active::after{transform:translateX(18px)}
+        .memory-content{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.5}
         .settings-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
         .settings-label{font-weight:600;font-size:13px}
-        .settings-desc{font-size:11px;color:var(--text3);margin-top:2px}
+        .settings-desc{font-size:11px;color:var(--text3)}
         .footer{text-align:center;padding:20px;color:var(--text3);font-size:11px;border-top:1px solid var(--border);margin-top:40px}
-        @media(max-width:768px){.grid-2{grid-template-columns:1fr}.topbar{justify-content:center}.status-bar{justify-content:center}}
+        .loading{color:var(--text3);text-align:center;padding:20px}
+        @media(max-width:768px){.grid-2{grid-template-columns:1fr}.topbar{flex-direction:column}}
     </style>
 </head>
 <body>
@@ -94,13 +99,13 @@
             <div class="brand-icon">🏛️</div>
             <div class="brand-text">
                 <h1>HIVE NATION</h1>
-                <span>Command Center</span>
+                <span>Live Command Center</span>
             </div>
         </div>
         <div class="status-bar">
             <div class="status-item">🏛️ v1.9.5</div>
             <div class="status-item" id="uptime">--:--:--</div>
-            <div class="status-item"><span class="status-dot"></span>Online</div>
+            <div class="status-item"><span class="status-dot"></span><span id="live-status">Connecting...</span></div>
         </div>
     </div>
     
@@ -112,237 +117,220 @@
         <div class="nav-tab" data-tab="teams">👥 Teams</div>
         <div class="nav-tab" data-tab="memory">🧠 Memory</div>
         <div class="nav-tab" data-tab="workflows">⚙️ Workflows</div>
-        <div class="nav-tab" data-tab="monitoring">📈 Monitoring</div>
-        <div class="nav-tab" data-tab="settings">⚙️ Settings</div>
+        <div class="nav-tab" data-tab="monitoring">📈 System</div>
     </div>
     
     <div class="main">
+        <!-- Overview -->
         <div id="tab-overview" class="section active">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">📊 System Overview</div>
-                    <button class="btn btn-secondary" onclick="refreshOverview()">🔄 Refresh</button>
+                    <div class="card-title">📊 Live System Overview</div>
+                    <button class="btn btn-secondary" onclick="loadDashboard()">🔄 Refresh</button>
                 </div>
-                <div class="grid-4">
-                    <div class="stat"><div class="stat-value">52</div><div class="stat-label">Agents</div></div>
-                    <div class="stat"><div class="stat-value" id="mem-count">0</div><div class="stat-label">Memories</div></div>
-                    <div class="stat"><div class="stat-value">1</div><div class="stat-label">Decrees</div></div>
-                    <div class="stat"><div class="stat-value">0</div><div class="stat-label">Teams</div></div>
+                <div class="grid-4" id="stats-grid">
+                    <div class="stat"><div class="stat-value" id="stat-senators">-</div><div class="stat-label">Senators</div></div>
+                    <div class="stat"><div class="stat-value" id="stat-decrees">-</div><div class="stat-label">Decrees</div></div>
+                    <div class="stat"><div class="stat-value" id="stat-votes">-</div><div class="stat-label">Votes</div></div>
+                    <div class="stat"><div class="stat-value" id="stat-teams">-</div><div class="stat-label">Teams</div></div>
                 </div>
             </div>
+            
             <div class="grid-2">
                 <div class="card">
                     <div class="card-title">🏛️ Active Decrees</div>
-                    <div class="decree-card active">
-                        <div class="decree-title">Privacy Protection</div>
-                        <div class="decree-content">All agents MUST encrypt sensitive data</div>
-                        <div class="decree-meta"><span>Status: Active</span> | <span>Enacted: Today</span></div>
-                    </div>
+                    <div id="overview-decrees"><div class="loading">Loading...</div></div>
                 </div>
                 <div class="card">
-                    <div class="card-title">🤖 Top Agents</div>
-                    <div id="top-agents"></div>
+                    <div class="card-title">🗳️ Recent Votes</div>
+                    <div id="overview-votes"><div class="loading">Loading...</div></div>
                 </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">🤖 Top Agents by Score</div>
+                <div id="overview-agents"><div class="loading">Loading...</div></div>
             </div>
         </div>
         
+        <!-- Senate -->
         <div id="tab-senate" class="section">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">🏛️ Senate Decrees</div>
-                    <button class="btn btn-hive" onclick="showToast('Decree panel opened', 'info')">📜 New Decree</button>
+                    <button class="btn btn-hive" onclick="showDecreeForm()">📜 New Decree</button>
                 </div>
-                <div class="decree-card active">
-                    <div class="decree-title">Privacy Protection</div>
-                    <div class="decree-content">All agents MUST encrypt sensitive data</div>
-                    <div class="decree-meta"><span class="badge badge-green">Active</span> | <span>Binding: Absolute</span></div>
+                <div id="senate-decrees"><div class="loading">Loading...</div></div>
+            </div>
+            
+            <div class="card" id="decree-form" style="display:none">
+                <div class="card-title">Issue New Decree</div>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input class="input" id="decree-title" placeholder="Privacy Protection">
                 </div>
-                <div class="decree-card" style="border-left-color:var(--text3)">
-                    <div class="decree-title">Model Preferences</div>
-                    <div class="decree-content">Agents PREFER local models for privacy-sensitive tasks</div>
-                    <div class="decree-meta"><span class="badge badge-blue">Advisory</span> | <span>Binding: Advisory</span></div>
+                <div class="form-group">
+                    <label>Content (MUST/SHALL/NEVER)</label>
+                    <textarea class="input" id="decree-content" placeholder="All agents MUST encrypt sensitive data"></textarea>
+                </div>
+                <div style="display:flex;gap:8px">
+                    <button class="btn btn-hive" onclick="submitDecree()">Issue Decree</button>
+                    <button class="btn btn-secondary" onclick="hideDecreeForm()">Cancel</button>
                 </div>
             </div>
+            
             <div class="card">
-                <div class="card-title">👥 Senator Roster (52 Agents)</div>
-                <div class="grid-2">
-                    <div>
-                        <strong style="color:var(--hive)">🦆 Quack Party (18)</strong>
-                        <p style="font-size:12px;color:var(--text3)">Research & Analysis</p>
-                    </div>
-                    <div>
-                        <strong style="color:var(--hive)">🐝 Honey Party (15)</strong>
-                        <p style="font-size:12px;color:var(--text3)">Development & Security</p>
-                    </div>
-                    <div>
-                        <strong style="color:var(--hive)">🦞 Claw Party (15)</strong>
-                        <p style="font-size:12px;color:var(--text3)">Planning & Communication</p>
-                    </div>
-                    <div>
-                        <strong style="color:var(--hive)">⚪ Independent (4)</strong>
-                        <p style="font-size:12px;color:var(--text3)">Non-partisan</p>
-                    </div>
+                <div class="card-header">
+                    <div class="card-title">👥 Senator Roster</div>
+                    <span class="badge badge-green" id="senator-count">Loading...</span>
                 </div>
+                <div id="senators-list"><div class="loading">Loading...</div></div>
             </div>
         </div>
         
+        <!-- Voting -->
         <div id="tab-voting" class="section">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">🗳️ Voting Chamber</div>
-                    <button class="btn btn-hive" onclick="showToast('Vote initiated', 'info')">🗳️ New Vote</button>
+                    <div class="card-title">🗳️ Historical Votes</div>
                 </div>
-                <div class="grid-4">
-                    <div class="stat"><div class="stat-value">52</div><div class="stat-label">Total</div></div>
-                    <div class="stat"><div class="stat-value" style="color:var(--success)">48</div><div class="stat-label">Present</div></div>
-                    <div class="stat"><div class="stat-value">35</div><div class="stat-label">Quorum</div></div>
-                    <div class="stat"><div class="stat-value" style="color:var(--success)">✓</div><div class="stat-label">Active</div></div>
-                </div>
+                <div id="votes-list"><div class="loading">Loading...</div></div>
             </div>
+            
             <div class="card">
-                <div class="card-title">📋 Recent Votes</div>
-                <table>
-                    <tr><th>Bill</th><th>Status</th><th>Result</th></tr>
-                    <tr><td>Privacy Protection Act</td><td><span class="badge badge-green">Passed</span></td><td>78% Yes</td></tr>
-                    <tr><td>Memory Encryption Standard</td><td><span class="badge badge-green">Passed</span></td><td>85% Yes</td></tr>
-                    <tr><td>Agent Rights Charter</td><td><span class="badge badge-purple">Pending</span></td><td>Voting Open</td></tr>
-                </table>
+                <div class="card-title">📊 Vote Statistics</div>
+                <div id="vote-stats"><div class="loading">Loading...</div></div>
             </div>
         </div>
         
+        <!-- Agents -->
         <div id="tab-agents" class="section">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">🤖 Agent Registry</div>
-                    <span class="badge badge-green">52 Active</span>
+                    <div class="card-title">🤖 Agent Rankings</div>
                 </div>
-                <div id="agent-list"></div>
+                <div id="agents-list"><div class="loading">Loading...</div></div>
             </div>
         </div>
         
+        <!-- Teams -->
         <div id="tab-teams" class="section">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">👥 Agent Teams</div>
-                    <button class="btn btn-hive" onclick="showToast('Team creator opened', 'info')">➕ Create Team</button>
+                    <div class="card-title">👥 Active Teams</div>
+                    <button class="btn btn-hive" onclick="showTeamForm()">➕ Spawn Team</button>
                 </div>
-                <div class="empty-state"><div class="icon">👥</div><p>No active teams</p></div>
+                <div id="teams-list"><div class="empty-state"><div class="icon">👥</div><p>No active teams</p></div></div>
             </div>
+            
+            <div class="card" id="team-form" style="display:none">
+                <div class="card-title">Spawn New Team</div>
+                <div class="form-group">
+                    <label>Template</label>
+                    <select class="input" id="team-template">
+                        <option value="research">Research Team</option>
+                        <option value="code">Code Team</option>
+                        <option value="security">Security Team</option>
+                        <option value="emergency">Emergency Team</option>
+                        <option value="planning">Planning Team</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Team Name</label>
+                    <input class="input" id="team-name" placeholder="My Awesome Team">
+                </div>
+                <div style="display:flex;gap:8px">
+                    <button class="btn btn-hive" onclick="spawnTeam()">Spawn Team</button>
+                    <button class="btn btn-secondary" onclick="hideTeamForm()">Cancel</button>
+                </div>
+            </div>
+            
             <div class="card">
                 <div class="card-title">📋 Team Templates</div>
                 <table>
-                    <tr><th>Template</th><th>Members</th><th>Purpose</th></tr>
-                    <tr><td>Research Team</td><td>researcher + writer + reviewer</td><td>Research workflows</td></tr>
-                    <tr><td>Code Team</td><td>coder + reviewer + security</td><td>Code development</td></tr>
-                    <tr><td>Security Team</td><td>security + reviewer + communicator</td><td>Security audits</td></tr>
-                    <tr><td>Emergency Team</td><td>security + communicator + planner</td><td>Incident response</td></tr>
-                    <tr><td>Planning Team</td><td>planner + researcher + communicator</td><td>Strategic planning</td></tr>
+                    <tr><th>Template</th><th>Roles</th><th>Purpose</th></tr>
+                    <tr><td>Research</td><td>researcher + writer + reviewer</td><td>Research workflows</td></tr>
+                    <tr><td>Code</td><td>coder + reviewer + security</td><td>Code development</td></tr>
+                    <tr><td>Security</td><td>security + reviewer + communicator</td><td>Security audits</td></tr>
+                    <tr><td>Emergency</td><td>security + communicator + planner</td><td>Incident response</td></tr>
+                    <tr><td>Planning</td><td>planner + researcher + communicator</td><td>Strategic planning</td></tr>
                 </table>
             </div>
         </div>
         
+        <!-- Memory -->
         <div id="tab-memory" class="section">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">🧠 Memory Store</div>
-                    <button class="btn btn-hive" onclick="addMemory()">➕ Add</button>
+                    <button class="btn btn-hive" onclick="showMemoryForm()">➕ Add Memory</button>
                 </div>
-                <input class="input" placeholder="Search memories..." style="margin-bottom:16px">
-                <div id="memory-list"></div>
+                <input class="input" id="memory-search" placeholder="Search memories..." oninput="searchMemories()">
+                <div id="memory-list" style="margin-top:16px"><div class="loading">Loading...</div></div>
+            </div>
+            
+            <div class="card" id="memory-form" style="display:none">
+                <div class="card-title">Store New Memory</div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select class="input" id="mem-category">
+                        <option value="general">General</option>
+                        <option value="decision">Decision</option>
+                        <option value="learning">Learning</option>
+                        <option value="todo">Todo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Content</label>
+                    <textarea class="input" id="mem-content" placeholder="Memory content..."></textarea>
+                </div>
+                <div style="display:flex;gap:8px">
+                    <button class="btn btn-hive" onclick="storeMemory()">💾 Save</button>
+                    <button class="btn btn-secondary" onclick="hideMemoryForm()">Cancel</button>
+                </div>
             </div>
         </div>
         
+        <!-- Workflows -->
         <div id="tab-workflows" class="section">
             <div class="card">
-                <div class="card-header">
-                    <div class="card-title">⚙️ Workflow Templates</div>
-                    <button class="btn btn-hive" onclick="showToast('Workflow creator opened', 'info')">➕ Create</button>
-                </div>
-            </div>
-            <div class="grid-2">
-                <div class="card">
-                    <div class="workflow-card">
-                        <div class="workflow-name">🔬 Research Workflow</div>
-                        <div class="workflow-desc">search → summarize → review → archive</div>
-                    </div>
-                    <div class="workflow-card">
-                        <div class="workflow-name">💻 Code Review Workflow</div>
-                        <div class="workflow-desc">analyze → test → suggest → implement</div>
-                    </div>
-                    <div class="workflow-card">
-                        <div class="workflow-name">⚖️ Decision Workflow</div>
-                        <div class="workflow-desc">research → debate → vote → decree → execute</div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="workflow-card">
-                        <div class="workflow-name">🚨 Emergency Workflow</div>
-                        <div class="workflow-desc">alert → assess → mobilize → resolve</div>
-                    </div>
-                    <div class="workflow-card">
-                        <div class="workflow-name">📅 Meeting Workflow</div>
-                        <div class="workflow-desc">schedule → summarize → distribute → archive</div>
-                    </div>
-                    <div class="workflow-card">
-                        <div class="workflow-name">💾 Backup Workflow</div>
-                        <div class="workflow-desc">scan → compress → encrypt → store → verify</div>
-                    </div>
-                </div>
+                <div class="card-title">⚙️ Workflow Templates</div>
+                <div id="workflows-list"><div class="loading">Loading...</div></div>
             </div>
         </div>
         
+        <!-- Monitoring -->
         <div id="tab-monitoring" class="section">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">📈 System Health</div>
-                    <button class="btn btn-secondary" onclick="refreshMonitoring()">🔄 Refresh</button>
+                    <button class="btn btn-secondary" onclick="loadMonitoring()">🔄 Refresh</button>
                 </div>
-                <div class="grid-4">
-                    <div class="stat"><div class="stat-value" style="color:var(--success)">✓</div><div class="stat-label">CPU</div></div>
-                    <div class="stat"><div class="stat-value" id="mem-used">-</div><div class="stat-label">Memory MB</div></div>
-                    <div class="stat"><div class="stat-value" id="mem-total">-</div><div class="stat-label">Limit MB</div></div>
-                    <div class="stat"><div class="stat-value" style="color:var(--success)">✓</div><div class="stat-label">Network</div></div>
+                <div class="grid-4" id="mon-stats">
+                    <div class="stat"><div class="stat-value" id="mon-cpu">-</div><div class="stat-label">CPU</div></div>
+                    <div class="stat"><div class="stat-value" id="mon-mem-used">-</div><div class="stat-label">Memory MB</div></div>
+                    <div class="stat"><div class="stat-value" id="mon-mem-total">-</div><div class="stat-label">Limit MB</div></div>
+                    <div class="stat"><div class="stat-value" id="mon-uptime">-</div><div class="stat-label">Uptime</div></div>
                 </div>
-                <div class="progress-bar"><div class="progress-fill" id="mem-bar" style="width:50%"></div></div>
+                <div class="progress-bar" style="margin-top:16px">
+                    <div class="progress-fill" id="mem-bar" style="width:50%"></div>
+                </div>
             </div>
+            
             <div class="card">
                 <div class="card-title">⚠️ System Status</div>
-                <div class="settings-row"><span>Senate API</span><span class="badge badge-green">Connected</span></div>
-                <div class="settings-row"><span>MCP Server</span><span class="badge badge-green">Active</span></div>
-                <div class="settings-row"><span>Agent Mesh</span><span class="badge badge-blue">Standby</span></div>
-            </div>
-        </div>
-        
-        <div id="tab-settings" class="section">
-            <div class="card">
-                <div class="card-title">⚙️ Preferences</div>
-                <div class="settings-row">
-                    <div><div class="settings-label">Auto-refresh</div><div class="settings-desc">Refresh every 30 seconds</div></div>
-                    <div class="toggle active" onclick="this.classList.toggle('active')"></div>
-                </div>
-                <div class="settings-row">
-                    <div><div class="settings-label">Notifications</div><div class="settings-desc">Show toast notifications</div></div>
-                    <div class="toggle active" onclick="this.classList.toggle('active')"></div>
-                </div>
-                <div class="settings-row">
-                    <div><div class="settings-label">Dark Theme</div><div class="settings-desc">Always enabled</div></div>
-                    <div class="toggle active"></div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-title">🏛️ Government Status</div>
-                <div class="settings-row"><span>Legislative Branch</span><span class="badge badge-green">Active</span></div>
-                <div class="settings-row"><span>Executive Branch</span><span class="badge badge-green">Active</span></div>
-                <div class="settings-row"><span>Judicial Branch</span><span class="badge badge-green">Active</span></div>
-                <div class="settings-row"><span>Elections</span><span class="badge badge-blue">Open</span></div>
+                <div id="sys-status"><div class="loading">Loading...</div></div>
             </div>
         </div>
     </div>
     
     <div class="toast" id="toast"></div>
-    <div class="footer">Hive Nation v1.9.5 — Multi-Agent Government Framework | 🦆 🐝 🦞</div>
+    <div class="footer">Hive Nation v1.9.5 — Live Command Center | 🦆 🐝 🦞</div>
     
     <script>
+        const API = '/api';
+        const startTime = Date.now();
+        
         // Toast
         function showToast(msg, type = 'info') {
             const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
@@ -353,7 +341,6 @@
         }
         
         // Uptime
-        const startTime = Date.now();
         function updateUptime() {
             const s = Math.floor((Date.now() - startTime) / 1000);
             const h = String(Math.floor(s / 3600)).padStart(2, '0');
@@ -371,81 +358,317 @@
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
                 tab.classList.add('active');
                 document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+                loadTab(tab.dataset.tab);
             });
         });
         
-        // Data
-        const agents = [
-            { name: 'Orchestrator', type: 'meta', score: 9.2, color: '#6366f1' },
-            { name: 'Meta-Agent', type: 'meta', score: 9.4, color: '#8b5cf6' },
-            { name: 'Quackford', type: 'researcher', score: 8.8, color: '#4a90d9' },
-            { name: 'Beeatrice', type: 'researcher', score: 8.7, color: '#f59e0b' },
-            { name: 'Code Quackston', type: 'coder', score: 8.6, color: '#10b981' },
-            { name: 'Clawrence', type: 'coder', score: 8.5, color: '#ef4444' },
-            { name: 'Quack Shield', type: 'security', score: 9.0, color: '#3b82f6' },
-            { name: 'Bee Careful', type: 'security', score: 8.9, color: '#ec4899' }
-        ];
-        
-        const memories = [];
-        
-        // Render
-        function renderAgents() {
-            document.getElementById('agent-list').innerHTML = agents.map(a => 
-                '<div class="agent-card">' +
-                '<div class="agent-avatar" style="background:' + a.color + '">' + a.name.charAt(0) + '</div>' +
-                '<div class="agent-info"><div class="agent-name">' + a.name + '</div><div class="agent-role">' + a.type + '</div></div>' +
-                '<div class="agent-score"><div class="agent-score-value" style="color:' + a.color + '">' + a.score.toFixed(1) + '</div><div class="agent-score-label">Score</div></div>' +
-                '</div>'
-            ).join('');
-            
-            document.getElementById('top-agents').innerHTML = agents.slice(0, 4).map(a => 
-                '<div class="agent-card">' +
-                '<div class="agent-avatar" style="background:' + a.color + '">' + a.name.charAt(0) + '</div>' +
-                '<div class="agent-info"><div class="agent-name">' + a.name + '</div><div class="agent-role">' + a.score.toFixed(1) + ' score</div></div>' +
-                '</div>'
-            ).join('');
+        // API helpers
+        async function apiGet(path) {
+            try {
+                const r = await fetch(API + path);
+                if (!r.ok) throw new Error('API error');
+                return await r.json();
+            } catch (e) {
+                console.error('API error:', path, e);
+                return null;
+            }
         }
         
-        function renderMemory() {
+        async function apiPost(path, data) {
+            try {
+                const r = await fetch(API + path, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                return await r.json().catch(() => ({ success: false }));
+            } catch (e) {
+                console.error('API error:', path, e);
+                return { success: false, error: e.message };
+            }
+        }
+        
+        // Load tabs
+        async function loadTab(tab) {
+            if (tab === 'overview') loadDashboard();
+            else if (tab === 'senate') { loadDecrees(); loadSenators(); }
+            else if (tab === 'voting') loadVotes();
+            else if (tab === 'agents') loadAgents();
+            else if (tab === 'teams') loadTeams();
+            else if (tab === 'memory') loadMemories();
+            else if (tab === 'workflows') loadWorkflows();
+            else if (tab === 'monitoring') loadMonitoring();
+        }
+        
+        // Dashboard
+        async function loadDashboard() {
+            document.getElementById('live-status').textContent = 'Live';
+            const data = await apiGet('/api/dashboard');
+            if (data && data.stats) {
+                document.getElementById('stat-senators').textContent = data.stats.totalSenators || '-';
+                document.getElementById('stat-decrees').textContent = data.stats.activeDecrees || '-';
+                document.getElementById('stat-votes').textContent = data.stats.totalVotes || '-';
+                document.getElementById('stat-teams').textContent = data.stats.activeTeams || '-';
+            }
+            loadDecrees();
+            loadVotes();
+            loadAgents();
+        }
+        
+        // Senate - Decrees
+        async function loadDecrees() {
+            const data = await apiGet('/api/decrees');
+            const html = data && data.decrees && data.decrees.length > 0 
+                ? data.decrees.map(d => 
+                    '<div class="decree-card active">' +
+                    '<div class="decree-title">' + (d.title || d.content || 'Decree').substring(0, 50) + '</div>' +
+                    '<div class="decree-content">' + (d.content || '') + '</div>' +
+                    '<div class="decree-meta">' +
+                    '<span class="badge badge-green">' + (d.status || 'active') + '</span>' +
+                    '<span>' + (d.priority || 'medium') + '</span>' +
+                    '</div></div>'
+                ).join('')
+                : '<div class="empty-state"><div class="icon">📜</div><p>No decrees yet</p></div>';
+            document.getElementById('overview-decrees').innerHTML = html;
+            document.getElementById('senate-decrees').innerHTML = html;
+        }
+        
+        async function loadSenators() {
+            const data = await apiGet('/api/senate');
+            if (data && data.senators) {
+                document.getElementById('senator-count').textContent = data.total + ' Senators';
+                const parties = { quack: '#4a90d9', honey: '#f59e0b', claw: '#ef4444', independent: '#64748b' };
+                const html = data.senators.slice(0, 20).map(s => 
+                    '<div class="agent-card">' +
+                    '<div class="agent-avatar" style="background:' + (parties[s.party] || '#6366f1') + '">' + s.name.charAt(0) + '</div>' +
+                    '<div class="agent-info"><div class="agent-name">' + s.name + '</div><div class="agent-role">' + s.party + ' • ' + s.type + '</div></div>' +
+                    '<span class="badge badge-blue">' + s.vote + ' vote</span>' +
+                    '</div>'
+                ).join('');
+                document.getElementById('senators-list').innerHTML = html || '<div class="empty-state"><div class="icon">👥</div><p>No senators</p></div>';
+            } else {
+                document.getElementById('senators-list').innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>No senate data</p></div>';
+            }
+        }
+        
+        function showDecreeForm() {
+            document.getElementById('decree-form').style.display = 'block';
+        }
+        function hideDecreeForm() {
+            document.getElementById('decree-form').style.display = 'none';
+        }
+        
+        async function submitDecree() {
+            const title = document.getElementById('decree-title').value;
+            const content = document.getElementById('decree-content').value;
+            if (!title && !content) {
+                showToast('Please enter decree content', 'error');
+                return;
+            }
+            const r = await apiPost('/api/decree', { title: title || content.substring(0, 30), content, authority: 'duckets', scope: 'universal', priority: 'high' });
+            if (r.success) {
+                showToast('Decree issued!', 'success');
+                hideDecreeForm();
+                loadDecrees();
+            } else {
+                showToast('Failed to issue decree', 'error');
+            }
+        }
+        
+        // Voting
+        async function loadVotes() {
+            const data = await apiGet('/api/votes');
+            if (data && data.votes) {
+                const html = data.votes.map(v => {
+                    const pct = Math.round((v.yes / (v.yes + v.no || 1)) * 100);
+                    return '<div class="vote-row">' +
+                    '<div class="vote-info">' +
+                    '<div class="vote-title">' + v.title + '</div>' +
+                    '<div class="vote-date">' + v.date + ' | ' + v.yes + ' yes / ' + v.no + ' no (' + pct + '%)</div>' +
+                    '<div class="vote-bar"><div class="vote-bar-fill" style="width:' + pct + '%;background:' + (v.status === 'passed' ? '#10b981' : v.status === 'failed' ? '#ef4444' : '#f59e0b') + '"></div></div>' +
+                    '</div>' +
+                    '<span class="badge badge-' + (v.status === 'passed' ? 'green' : v.status === 'failed' ? 'red' : 'amber') + '">' + v.status + '</span>' +
+                    '</div>';
+                }).join('');
+                document.getElementById('votes-list').innerHTML = html;
+                document.getElementById('overview-votes').innerHTML = data.votes.slice(0, 3).map(v => 
+                    '<div style="padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:8px">' +
+                    '<strong>' + v.title + '</strong> - ' + v.status +
+                    '</div>'
+                ).join('');
+            } else {
+                document.getElementById('votes-list').innerHTML = '<div class="empty-state"><div class="icon">🗳️</div><p>No votes yet</p></div>';
+            }
+        }
+        
+        // Agents
+        async function loadAgents() {
+            const data = await apiGet('/api/scoring');
+            if (data && data.length > 0) {
+                const colors = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#06b6d4'];
+                const html = data.map((a, i) => 
+                    '<div class="agent-card">' +
+                    '<div class="agent-avatar" style="background:' + colors[i % colors.length] + '">' + (a.agentId || 'A').charAt(0) + '</div>' +
+                    '<div class="agent-info"><div class="agent-name">' + (a.agentId || 'Agent') + '</div><div class="agent-role">Tasks: ' + (a.tasks || 0) + ' | Quality: ' + (a.quality || 0).toFixed(1) + '</div></div>' +
+                    '<div style="text-align:right"><div class="agent-score-value">' + (a.composite || 0).toFixed(1) + '</div><div style="font-size:10px;color:var(--text3)">Score</div></div>' +
+                    '</div>'
+                ).join('');
+                document.getElementById('agents-list').innerHTML = html;
+                document.getElementById('overview-agents').innerHTML = data.slice(0, 4).map((a, i) => 
+                    '<div style="padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:6px;display:flex;justify-content:space-between">' +
+                    '<span>' + (a.agentId || 'Agent') + '</span><span style="color:var(--accent3)">' + (a.composite || 0).toFixed(1) + '</span>' +
+                    '</div>'
+                ).join('');
+            } else {
+                document.getElementById('agents-list').innerHTML = '<div class="empty-state"><div class="icon">🤖</div><p>No agent data</p></div>';
+            }
+        }
+        
+        // Teams
+        async function loadTeams() {
+            const data = await apiGet('/api/teams');
+            if (data && data.teams && data.teams.length > 0) {
+                const html = data.teams.map(t => 
+                    '<div class="team-card">' +
+                    '<div class="team-name">' + t.name + '</div>' +
+                    '<div class="team-meta">Template: ' + t.template + ' | Members: ' + (t.members?.length || 0) + ' | Status: ' + t.status + '</div>' +
+                    '</div>'
+                ).join('');
+                document.getElementById('teams-list').innerHTML = html;
+            } else {
+                document.getElementById('teams-list').innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>No active teams — spawn one!</p></div>';
+            }
+        }
+        
+        
+        function showTeamForm() {
+            document.getElementById('team-form').style.display = 'block';
+        }
+        function hideTeamForm() {
+            document.getElementById('team-form').style.display = 'none';
+        }
+        
+        async function spawnTeam() {
+            const template = document.getElementById('team-template').value;
+            const name = document.getElementById('team-name').value;
+            const r = await apiPost('/api/team/spawn', { template, name });
+            if (r.success) {
+                showToast('Team spawned!', 'success');
+                hideTeamForm();
+                loadTeams();
+            } else {
+                showToast('Failed to spawn team', 'error');
+            }
+        }
+        
+        // Memory
+        async function loadMemories() {
+            const data = await apiGet('/api/memories');
+            if (data && data.memories) {
+                renderMemories(data.memories);
+            } else {
+                document.getElementById('memory-list').innerHTML = '<div class="empty-state"><div class="icon">🧠</div><p>No memories</p></div>';
+            }
+        }
+        
+        function renderMemories(memories) {
             if (memories.length === 0) {
                 document.getElementById('memory-list').innerHTML = '<div class="empty-state"><div class="icon">🧠</div><p>No memories stored</p></div>';
+                return;
+            }
+            document.getElementById('memory-list').innerHTML = memories.map(m => 
+                '<div class="memory-item">' +
+                '<div style="display:flex;justify-content:space-between"><span class="memory-cat">' + (m.category || 'general') + '</span><span class="memory-time">' + (m.timestamp ? new Date(m.timestamp).toLocaleDateString() : '') + '</span></div>' +
+                '<div class="memory-content">' + (m.content || '') + '</div>' +
+                '</div>'
+            ).join('');
+        }
+        
+        function showMemoryForm() {
+            document.getElementById('memory-form').style.display = 'block';
+        }
+        function hideMemoryForm() {
+            document.getElementById('memory-form').style.display = 'none';
+        }
+        
+        async function storeMemory() {
+            const content = document.getElementById('mem-content').value;
+            const category = document.getElementById('mem-category').value;
+            if (!content) {
+                showToast('Please enter content', 'error');
+                return;
+            }
+            const r = await apiPost('/api/memory', { content, category });
+            if (r.success) {
+                showToast('Memory saved!', 'success');
+                hideMemoryForm();
+                document.getElementById('mem-content').value = '';
+                loadMemories();
             } else {
-                document.getElementById('memory-list').innerHTML = memories.map(m => 
-                    '<div class="memory-item"><div class="memory-cat">' + m.cat + '</div><div class="memory-content">' + m.content + '</div></div>'
+                showToast('Failed to save memory', 'error');
+            }
+        }
+        
+        async function searchMemories() {
+            const q = document.getElementById('memory-search').value;
+            if (q.length < 2) {
+                loadMemories();
+                return;
+            }
+            const data = await apiGet('/api/memory/search?q=' + encodeURIComponent(q));
+            if (data && data.memories) {
+                renderMemories(data.memories);
+            }
+        }
+        
+        // Workflows
+        async function loadWorkflows() {
+            const data = await apiGet('/api/workflows');
+            if (data && data.workflows) {
+                const html = data.workflows.map(w => 
+                    '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px">' +
+                    '<div style="font-weight:700;margin-bottom:4px">' + w.name + '</div>' +
+                    '<div style="font-size:12px;color:var(--text3)">Steps: ' + (w.steps || []).join(' → ') + '</div>' +
+                    '</div>'
                 ).join('');
-            }
-            document.getElementById('mem-count').textContent = memories.length;
-        }
-        
-        function refreshOverview() {
-            renderAgents();
-            renderMemory();
-            showToast('Dashboard refreshed', 'success');
-        }
-        
-        function refreshMonitoring() {
-            // Simulated memory data
-            const used = Math.floor(Math.random() * 200) + 100;
-            const total = 8192;
-            document.getElementById('mem-used').textContent = used;
-            document.getElementById('mem-total').textContent = total;
-            document.getElementById('mem-bar').style.width = (used / total * 100) + '%';
-            showToast('Monitoring refreshed', 'success');
-        }
-        
-        function addMemory() {
-            const content = prompt('Enter memory content:');
-            if (content) {
-                memories.push({ cat: 'general', content: content });
-                renderMemory();
-                showToast('Memory saved', 'success');
+                document.getElementById('workflows-list').innerHTML = html;
+            } else {
+                document.getElementById('workflows-list').innerHTML = '<div class="empty-state"><div class="icon">⚙️</div><p>No workflows</p></div>';
             }
         }
         
-        // Init
-        renderAgents();
-        renderMemory();
-        refreshMonitoring();
+        // Monitoring
+        async function loadMonitoring() {
+            const data = await apiGet('/api/monitoring');
+            if (data) {
+                document.getElementById('mon-cpu').textContent = data.cpu || 'Normal';
+                document.getElementById('mon-mem-used').textContent = data.memory?.used || '-';
+                document.getElementById('mon-mem-total').textContent = data.memory?.total || '-';
+                document.getElementById('mem-bar').style.width = (data.memory?.percentage || 50) + '%';
+                document.getElementById('mem-bar').style.background = data.memory?.percentage > 80 ? '#ef4444' : data.memory?.percentage > 60 ? '#f59e0b' : '#10b981';
+                
+                const uptime = data.process?.uptime || 0;
+                const m = Math.floor(uptime / 60);
+                const s = Math.floor(uptime % 60);
+                document.getElementById('mon-uptime').textContent = m + 'm ' + s + 's';
+                
+                document.getElementById('sys-status').innerHTML = 
+                    '<div class="settings-row"><span>Senate API</span><span class="badge badge-green">Connected</span></div>' +
+                    '<div class="settings-row"><span>MCP Server</span><span class="badge badge-green">Active</span></div>' +
+                    '<div class="settings-row"><span>Agent Mesh</span><span class="badge badge-blue">Standby</span></div>' +
+                    '<div class="settings-row"><span>Memory</span><span class="badge badge-green">OK</span></div>';
+            }
+        }
+        
+        // Auto-refresh
+        setInterval(() => {
+            if (document.getElementById('tab-overview').classList.contains('active')) {
+                loadDashboard();
+            }
+        }, 30000);
+        
+        // Initial load
+        loadDashboard();
     </script>
 </body>
 </html>
