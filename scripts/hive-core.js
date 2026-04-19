@@ -218,6 +218,17 @@ class HiveLLM {
             }
         }
         
+        // Try LM Studio (local models on Windows PC)
+        if (model.startsWith('lmstudio')) {
+            try {
+                const result = await this.callLMStudio(model, prompt, system);
+                this.cache.set(cacheKey, result);
+                return result;
+            } catch (e) {
+                console.log('⚠️ LM Studio failed:', e.message);
+            }
+        }
+        
         // Fallback: simulated response
         return this.simulateResponse(prompt);
     }
@@ -263,6 +274,64 @@ class HiveLLM {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         return data.choices?.[0]?.message?.content || '';
+    }
+    
+    // ═══════════════════════════════════════════
+    // LM STUDIO (Local models on Windows PC)
+    // ═══════════════════════════════════════════
+    
+    async callLMStudio(model, prompt, system) {
+        // LM Studio on Windows PC (192.168.1.81:1234)
+        const LM_STUDIO_URL = process.env.LMSTUDIO_URL || 'http://192.168.1.81:1234/v1';
+        const LM_STUDIO_KEY = process.env.LMSTUDIO_KEY || process.env.LM_API_KEY || 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf';
+        
+        // Model mapping (LM Studio model name → actual loaded model)
+        // Use qwen3.5-9b as primary since it's actually loaded
+        const modelMap = {
+            'lmstudio/local': 'qwen3.5-9b',
+            'lmstudio/qwen3.6-35b-a3b': 'qwen3.5-9b',
+            'lmstudio/qwen3.6-35b-a3b-tq3_4s': 'qwen3.5-9b',
+            'lmstudio/qwen3.5-9b': 'qwen3.5-9b',
+            'lmstudio/qwen/qwen3.5-9b': 'qwen3.5-9b',
+            'lmstudio/qwen3.5-9b-mlx': 'qwen3.5-9b',
+            'lmstudio/gemma-4-26b-a4b-it': 'gemma-4-26b-a4b-it',
+            'lmstudio/gemma-4-e4b-it': 'gemma-4-e4b-it',
+            'lmstudio/gemma-4-e2b-it': 'gemma-4-e2b-it',
+            'lmstudio/qwen3.5-0.8b': 'qwen3.5-0.8b',
+            'lmstudio/qwen3.5-27b-claude-4.6-opus-distilled-mlx': 'qwen3.5-27b-claude-4.6-opus-distilled-mlx',
+            'lmstudio/supergemma4-26b-uncensored-mlx-v2': 'supergemma4-26b-uncensored-mlx-v2',
+            'lmstudio/foundation-sec-8b-reasoning': 'foundation-sec-8b-reasoning'
+        };
+        
+        const actualModel = modelMap[model] || model.replace('lmstudio/', '');
+        
+        try {
+            const response = await fetch(`${LM_STUDIO_URL}/chat/completions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${LM_STUDIO_KEY}`
+                },
+                body: JSON.stringify({
+                    model: actualModel,
+                    messages: [
+                        ...(system ? [{ role: 'system', content: system }] : []),
+                        { role: 'user', content: prompt }]
+                }),
+                signal: AbortSignal.timeout(60000) // 60s timeout
+            });
+            
+            if (!response.ok) {
+                const err = await response.text();
+                throw new Error(`LM Studio HTTP ${response.status}: ${err}`);
+            }
+            
+            const data = await response.json();
+            return data.choices?.[0]?.message?.content || '';
+        } catch (e) {
+            console.log(`⚠️ LM Studio error (${actualModel}):`, e.message);
+            throw e;
+        }
     }
     
     simulateResponse(prompt) {
