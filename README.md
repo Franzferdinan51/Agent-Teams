@@ -379,3 +379,39 @@ node scripts/hive-workflow.js pipeline "Topic"
 ```
 
 **Version 2.0.0** — Built for production multi-agent governance 🏛️⚖️🦆
+
+---
+
+## 🔧 v2.0.1 Fixes (2026-04-19)
+
+### Issues Fixed
+
+1. **Cold-Start Bug** - `state.teams` now always initialized (was undefined on first run)
+2. **Live LLM Integration** - Senators and councilors now call actual models (MiniMax, OpenRouter)
+3. **Persistent State** - All data survives restarts (constitution persists!)
+4. **Inter-Agent Messaging** - Real message passing with timestamps and routing
+
+### What's Actually Working
+
+| Feature | Before | After |
+|---------|--------|-------|
+| LLM Calls | ❌ Simulated only | ✅ Real API calls |
+| State Persistence | ❌ In-memory only | ✅ JSON file persists |
+| Cold Start | ❌ Could crash | ✅ Always initializes |
+| Messaging | ❌ Objects only | ✅ Real message passing |
+
+### New Files
+
+- `scripts/hive-core.js` - Core with actual LLM + persistence
+- `scripts/hive-execute.js` - Working demo of multi-agent system
+
+### Usage
+
+```bash
+# See it working
+node scripts/hive-execute.js
+
+# Test persistence (data survives restarts)
+curl http://localhost:3131/api/dashboard
+```
+

@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /**
- * Hive Nation WebUI Server - Production Backend v2.0
- * Integrates with actual Hive modules for live data
- * + Council integration
+ * Hive Nation WebUI Server - Production Backend v2.0.1
+ * Integrates with ACTUAL Hive core for live LLM calls + persistence
  */
 
 const http = require('http');
@@ -16,10 +15,20 @@ const SCRIPTS_DIR = path.join(__dirname, '..', 'scripts');
 const COUNCIL_HOST = 'localhost';
 const COUNCIL_PORT = 3006;
 
+// Load Hive Core (persistent state + LLM integration)
+let HiveCore;
+try {
+    HiveCore = require(path.join(SCRIPTS_DIR, 'hive-core.js'));
+    console.log('✅ Hive Core loaded (persistent state + LLM)');
+} catch (e) {
+    console.log('⚠️ Hive Core not available:', e.message);
+    HiveCore = null;
+}
+
 // HTTP GET helper
-function httpGet(host, port, path) {
+function httpGet(host, port, p) {
     return new Promise((resolve) => {
-        const req = http.get({ hostname: host, port, path }, (res) => {
+        const req = http.get({ hostname: host, port, path: p }, (res) => {
             let data = '';
             res.on('data', c => data += c);
             res.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve(null); } });
@@ -27,6 +36,14 @@ function httpGet(host, port, path) {
         req.on('error', () => resolve(null));
         req.setTimeout(3000, () => { req.destroy(); resolve(null); });
     });
+}
+
+// Get persistent state (cold-start safe)
+function getState() {
+    if (HiveCore && HiveCore.hiveState) {
+        return HiveCore.hiveState.state;
+    }
+    return { teams: [], messages: [], memories: [], decrees: [], votes: [], history: [] };
 }
 
 // Load Hive modules
@@ -44,6 +61,17 @@ try {
 
 // In-memory store
 const liveData = { votes: [], memories: [], teams: [], decrees: [], senators: [] };
+// Use persistent state from HiveCore (cold-start safe)
+function getLiveData() {
+    const state = getState();
+    return {
+        votes: state.votes.slice(-20),
+        memories: state.memories.slice(-50),
+        teams: state.teams,
+        decrees: state.decrees,
+        senators: liveData.senators.length ? liveData.senators : generateSenators()
+    };
+}
 
 // Initialize
 function initializeData() {
@@ -88,7 +116,7 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             status: 'ok', version: '2.0', uptime: process.uptime(), timestamp: Date.now(),
-            stats: { totalSenators: 94, activeDecrees: liveData.decrees.length || 1, totalVotes: liveData.votes.length || 5, activeTeams: liveData.teams.length || 0, memories: liveData.memories.length || 0 },
+            stats: { totalSenators: 94, activeDecrees: getLiveData().decrees.length || 1, totalVotes: getLiveData().votes.length || 5, activeTeams: getLiveData().teams.length || 0, memories: getLiveData().memories.length || 0 },
             system: { cpu: 'Normal', memory: Math.round(process.memoryUsage().heapUsed / 1048576), platform: process.platform }
         }));
         return;
@@ -198,7 +226,7 @@ const server = http.createServer(async (req, res) => {
     // Memories
     if (pathname === '/api/memories') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ memories: liveData.memories, count: liveData.memories.length }));
+        res.end(JSON.stringify({ memories: getLiveData().memories, count: getLiveData().memories.length }));
         return;
     }
 
