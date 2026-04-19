@@ -1,11 +1,13 @@
 {
   "name": "agent-teams",
-  "version": "2.0.0",
-  "description": "Multi-Agent Collaboration System — The Hive Senate with 45 councilors, P2P mesh, and hive mind intelligence",
+  "version": "2.1.0",
+  "description": "Multi-Agent Collaboration System — The Hive Senate with 46 councilors, P2P mesh, live LLM deliberation, and hive mind intelligence",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "mesh:start": "cd /tmp/agent-mesh-api && npm start",
+    "start:council": "node council-server.js",
+    "start:webui": "node webui/server.js",
+    "start:all": "node council-server.js & node webui/server.js",
     "mesh:status": "curl -s http://localhost:4000/api/agents -H 'X-API-Key: openclaw-mesh-default-key' | jq '.'",
     "mesh:agents": "curl -s http://localhost:4000/api/agents -H 'X-API-Key: openclaw-mesh-default-key' | jq '. | length'",
     "hive:connect": "bash scripts/openclaw-hive.sh",
@@ -38,7 +40,6 @@
     "ws": "^8.16.0"
   },
   "peerDependencies": {
-    "agent-mesh-api": ">=1.0.0"
   },
   "keywords": [
     "multi-agent",

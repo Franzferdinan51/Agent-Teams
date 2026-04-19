@@ -1,10 +1,12 @@
-# 🏛️ Hive Nation v2.0.1
+# 🏛️ Hive Nation v2.1.0
 
-[![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)](https://github.com/Franzferdinan51/Agent-Teams)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](https://github.com/Franzferdinan51/Agent-Teams)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
 **The ultimate multi-agent government framework.** Spawn, coordinate, and orchestrate multiple specialized agents for complex tasks — with a three-branch AI Government, Senate Decrees, Agent Teams, and hive mind intelligence.
+
+**Now with built-in LLM-powered Council deliberation!** No separate servers needed.
 
 Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https://github.com/Franzferdinan51/duck-cli).
 
@@ -17,14 +19,229 @@ Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https:
 git clone https://github.com/Franzferdinan51/Agent-Teams.git
 cd Agent-Teams
 
-# Start the WebUI
-node webui/server.js
-# Open: http://localhost:3131
+# Install dependencies
+npm install
 
-# Or start all services
-node webui/server.js &
-node scripts/hive-automation-v2.js start &
+# Start ALL services at once
+./start-all.sh
+# Or: npm run start:all
+
+# Or start individually
+npm run start:council   # Council API on port 3007
+npm run start:webui     # WebUI on port 3131
 ```
+
+**Open:** http://localhost:3131
+
+---
+
+## 🎯 What's Built-In
+
+| Component | Description | Port |
+|-----------|-------------|------|
+| **Council Server** | LLM-powered deliberation with 46 councilors | 3007 |
+| **WebUI** | Live dashboard with real-time updates | 3131 |
+| **46 Councilors** | Diverse AI perspectives (Technocrat, Ethicist, etc.) | - |
+| **Multi-Provider LLM** | MiniMax, LM Studio (local), OpenRouter | - |
+| **Senate (94)** | Binding decrees from Council recommendations | - |
+| **Agent Teams** | Spawn specialized agents for tasks | - |
+| **Hive Mesh** | P2P agent communication | 4000 |
+
+---
+
+## 🏛️ Architecture (v2.1.0)
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    🏛️ HIVE NATION v2.1.0 🏛️                       │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  COUNCIL SERVER (Built-in, port 3007)                       │   │
+│  │  - 46 diverse councilors with LLM integration              │   │
+│  │  - Real AI-generated debate (MiniMax, LM Studio, etc.)     │   │
+│  │  - 9 deliberation modes (adversarial, consensus, swarm...)  │   │
+│  │  - Live SSE streaming to WebUI                              │   │
+│  │  - Auto-voting based on deliberation content               │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                              ↓                                      │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  SENATE (94 senators, 3 parties)                            │   │
+│  │  - Convert Council recommendations into binding DECREES    │   │
+│  │  - MUST/SHALL/NEVER enforcement language                   │   │
+│  │  - Democratic elections, weighted voting                   │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                              ↓                                      │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  EXECUTIVE (Meta-Agent)                                     │   │
+│  │  - Execute Council/Senate decisions                         │   │
+│  │  - Spawn agent teams for implementation                    │   │
+│  │  - Monitor and report results                               │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### LLM Providers
+
+| Provider | Type | Config |
+|----------|------|--------|
+| **MiniMax** | API (primary) | `MINIMAX_API_KEY` env var |
+| **LM Studio** | Local (free) | `LMSTUDIO_KEY`, `LMSTUDIO_URL` |
+| **OpenRouter** | API (free tier) | `OPENROUTER_API_KEY` env var |
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `council-server.js` | LLM-powered deliberation server |
+| `councilors.json` | 46 councilor definitions |
+| `webui/server.js` | Web dashboard |
+| `webui/public/index.html` | WebUI frontend |
+| `scripts/hive-*.js` | 80+ Hive scripts |
+| `start-all.sh` | Start everything |
+
+---
+
+## 🎮 Usage
+
+### Start a Deliberation
+
+```bash
+# Via API
+curl -X POST http://localhost:3007/api/session/start \
+  -H "Content-Type: application/json" \
+  -d '{"topic":"Should AI have rights?","mode":"proposal"}'
+
+# Watch in WebUI
+open http://localhost:3131
+```
+
+### Switch LLM Provider
+
+```bash
+# Use LM Studio (local)
+curl -X POST http://localhost:3007/api/llm/provider \
+  -H "Content-Type: application/json" \
+  -d '{"provider":"lmstudio"}'
+
+# Check status
+curl http://localhost:3007/api/llm/status
+```
+
+### CLI Commands
+
+```bash
+npm run start:council    # Start Council only
+npm run start:webui      # Start WebUI only  
+npm run start:all        # Start both
+npm run hive:status      # Check Hive status
+```
+
+---
+
+## 📦 Files
+
+```
+Agent-Teams/
+├── council-server.js    # LLM-powered Council (NEW!)
+├── councilors.json      # 46 councilor definitions (NEW!)
+├── start-all.sh         # Start all services (NEW!)
+├── webui/               # Web dashboard
+├── scripts/             # 80+ Hive scripts
+├── agents/              # Agent definitions
+├── skills/              # Agent skills
+└── docs/                # Documentation
+```
+
+---
+
+## 🌐 WebUI Features
+
+- **📡 Live View** - Watch deliberations in real-time
+- **⚖️ Council Tab** - See all 46 councilors
+- **📊 Stats** - Messages, votes, elapsed time
+- **🔄 Auto-refresh** - Updates every 2 seconds
+- **🎨 Dark Theme** - Premium command center design
+
+---
+
+## ⚡ Quick Commands
+
+```bash
+# Start everything
+./start-all.sh
+
+# Check services
+curl http://localhost:3007/api/health
+curl http://localhost:3131/api/health
+
+# Test LLM
+curl -X POST http://localhost:3007/api/llm/test
+
+# List providers
+curl http://localhost:3007/api/llm/providers | jq .
+```
+
+---
+
+## 📚 Documentation
+
+- [START-HERE.md](START-HERE.md) - Getting started
+- [docs/](docs/) - Full documentation
+- [scripts/](scripts/) - Hive scripts reference
+
+---
+
+## 🧪 Testing
+
+```bash
+# Test Council
+curl http://localhost:3007/api/councilors | jq '.councilors | length'
+
+# Test LLM
+curl -X POST http://localhost:3007/api/llm/test | jq '.content'
+
+# Test deliberation
+curl -X POST http://localhost:3007/api/session/start \
+  -H "Content-Type: application/json" \
+  -d '{"topic":"Test","mode":"proposal"}'
+
+sleep 20
+curl http://localhost:3007/api/session | jq '{phase, stats}'
+```
+
+---
+
+## 🔧 Configuration
+
+Set environment variables:
+
+```bash
+# LLM Providers
+export MINIMAX_API_KEY=your_key
+export LMSTUDIO_KEY=your_key
+export LMSTUDIO_URL=http://127.0.0.1:1234
+export OPENROUTER_API_KEY=your_key
+
+# Ports
+export PORT=3131
+```
+
+---
+
+## 📝 Changelog
+
+### v2.1.0 (2026-04-19)
+- **Merged** AI Council into Agent-Teams (no more separate repo)
+- **Added** Multi-provider LLM support (MiniMax, LM Studio, OpenRouter)
+- **Added** Real LLM-generated deliberations (no more fake votes)
+- **Added** `start-all.sh` for one-command startup
+- **Updated** 46 integrated councilors with descriptions
+- **Fixed** Qwen reasoning_content parsing issue
+- **Updated** WebUI to connect to local council
+
+### v2.0.0 (Previous)
+- Initial release with Senate and Agent Teams
 
 ---
 

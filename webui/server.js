@@ -18,7 +18,7 @@ const PORT = parseInt(process.env.PORT || '3131');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const SCRIPTS_DIR = path.join(__dirname, '..', 'scripts');
 const COUNCIL_HOST = process.env.COUNCIL_HOST || 'localhost';
-const COUNCIL_PORT = parseInt(process.env.COUNCIL_PORT || '3006');
+const COUNCIL_PORT = parseInt(process.env.COUNCIL_PORT || '3007');
 const LM_STUDIO_URL = process.env.LMSTUDIO_URL || 'http://192.168.1.81:1234/v1';
 
 // Rate limiting config (from env)
