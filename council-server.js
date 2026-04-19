@@ -717,3 +717,102 @@ app.listen(PORT, () => {
     console.log(`   SSE: http://localhost:${PORT}/api/events`);
     console.log(`   REST: http://localhost:${PORT}/api/session/*`);
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// MCP TOOLS (for Agent Control) — Added from merged code
+// ═══════════════════════════════════════════════════════════════════
+
+const mcpTools = [
+    {
+        name: 'council_status',
+        description: 'Get Council health and provider status',
+        inputSchema: { type: 'object', properties: {} }
+    },
+    {
+        name: 'council_deliberate',
+        description: 'Start a new deliberation session',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                topic: { type: 'string', description: 'Topic to deliberate' },
+                mode: { type: 'string', description: 'Mode: proposal, deliberation, etc.' }
+            },
+            required: ['topic']
+        }
+    },
+    {
+        name: 'council_messages',
+        description: 'Get current session messages',
+        inputSchema: { type: 'object', properties: {} }
+    },
+    {
+        name: 'council_vote',
+        description: 'Get current vote results',
+        inputSchema: { type: 'object', properties: {} }
+    },
+    {
+        name: 'council_councilors',
+        description: 'List all available councilors',
+        inputSchema: { type: 'object', properties: {} }
+    },
+    {
+        name: 'council_llm_test',
+        description: 'Test LLM provider connection',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                provider: { type: 'string', description: 'Provider: minimax, lmstudio, openrouter' }
+            }
+        }
+    }
+];
+
+// MCP JSON-RPC endpoint
+app.post('/mcp', async (req, res) => {
+    try {
+        const { method, params } = req.body;
+        
+        if (method === 'tools/list') {
+            return res.json({ jsonrpc: '2.0', id: req.body.id, result: { tools: mcpTools } });
+        }
+        
+        if (method === 'tools/call') {
+            const { name, arguments: args = {} } = params;
+            
+            let result;
+            switch (name) {
+                case 'council_status':
+                    result = await apiGet('/health');
+                    break;
+                case 'council_deliberate':
+                    result = await apiPost('/session/start', args);
+                    break;
+                case 'council_messages':
+                    result = await apiGet('/session/messages');
+                    break;
+                case 'council_vote':
+                    result = await apiGet('/session');
+                    break;
+                case 'council_councilors':
+                    result = await apiGet('/councilors');
+                    break;
+                case 'council_llm_test':
+                    result = await apiPost('/llm/test', args);
+                    break;
+                default:
+                    throw new Error(`Unknown tool: ${name}`);
+            }
+            
+            return res.json({ jsonrpc: '2.0', id: req.body.id, result });
+        }
+        
+        res.json({ jsonrpc: '2.0', id: req.body.id, error: { code: -32601, message: 'Method not found' } });
+    } catch (e) {
+        res.json({ jsonrpc: '2.0', id: req.body.id, error: { code: -32603, message: e.message } });
+    }
+});
+
+// MCP tools list endpoint
+app.get('/mcp/tools', (req, res) => {
+    res.json({ tools: mcpTools, count: mcpTools.length });
+});

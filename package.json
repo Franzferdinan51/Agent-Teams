@@ -8,14 +8,18 @@
     "start:council": "node council-server.js",
     "start:webui": "node webui/server.js",
     "start:all": "./start-all.sh",
-    "start:council-app": "cd council-app-react && npm install && npm run dev",
     "start:council-api": "node council-api-server.cjs",
-    "start:mcp": "node council-mcp-server.js",
+    "start:mcp": "node council-server.js",
+    "start:cli": "node council-cli.js",
     "council:status": "curl -s http://localhost:3007/api/health | jq .",
     "council:test": "curl -s -X POST http://localhost:3007/api/llm/test | jq .",
     "council:providers": "curl -s http://localhost:3007/api/llm/providers | jq .",
-    "council:deliberate": "curl -s -X POST http://localhost:3007/api/session/start -H \"Content-Type: application/json\" -d \"{\"topic\":\"Test\",\"mode\":\"proposal\"}\" | jq .",
-    "council:list": "curl -s http://localhost:3007/api/councilors | jq \".councilors | length\""
+    "council:deliberate": "curl -s -X POST http://localhost:3007/api/session/start -H \"Content-Type: application/json\" -d \"{\"topic\":\"Test deliberation\",\"mode\":\"proposal\"}\" | jq .",
+    "council:list": "curl -s http://localhost:3007/api/councilors | jq \".councilors | length\"",
+    "council:mcp-tools": "curl -s http://localhost:3007/api/mcp/tools | jq .",
+    "council:cli": "node council-cli.js --help",
+    "mcp:status": "curl -s http://localhost:3007/api/health | jq .",
+    "mcp:tools": "curl -s http://localhost:3007/mcp/tools | jq ."
   },
   "engines": {
     "node": ">=18.0.0"

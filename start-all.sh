@@ -1,37 +1,80 @@
 #!/bin/bash
-# start-all.sh - Start all Agent-Teams services
+# start-all.sh - Start ALL Agent-Teams v2.1.0 services
+# Usage: ./start-all.sh
 
-set -a && source ~/.openclaw/workspace/.env && set +a
+set -a && source ~/.openclaw/workspace/.env 2>/dev/null; set +a
 
-echo "🚀 Starting Agent-Teams v2.1.0"
-echo "================================"
+echo "🚀 Starting Agent-Teams v2.1.0 (Full Stack)"
+echo "============================================"
 
-# Start Council (port 3007)
-echo -e "\n📋 Starting Council Server (port 3007)..."
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
 cd ~/Desktop/AgentTeam-GitHub
+
+# Kill existing services
+echo -e "\n${YELLOW}Stopping existing services...${NC}"
+pkill -f "council-server\|webui/server\|agent-api" 2>/dev/null
+sleep 2
+
+# Set environment
+export MINIMAX_API_KEY="${MINIMAX_API_KEY:-}"
+export LMSTUDIO_KEY="${LMSTUDIO_KEY:-sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf}"
+export LMSTUDIO_URL="${LMSTUDIO_URL:-http://127.0.0.1:1234}"
+export OPENROUTER_API_KEY="${OPENROUTER_API_KEY:-}"
+
+echo -e "\n${GREEN}Starting Council Server (port 3007)...${NC}"
 MINIMAX_API_KEY="$MINIMAX_API_KEY" \
 LMSTUDIO_KEY="$LMSTUDIO_KEY" \
 LMSTUDIO_URL="$LMSTUDIO_URL" \
 OPENROUTER_API_KEY="$OPENROUTER_API_KEY" \
-node council-server.js > /tmp/council-merged.log 2>&1 &
-
-sleep 2
-
-# Start WebUI (port 3131)
-echo -e "\n🌐 Starting WebUI Server (port 3131)..."
-node webui/server.js > /tmp/webui-merged.log 2>&1 &
+node council-server.js > /tmp/council.log 2>&1 &
+COUNCIL_PID=$!
+echo "   Council PID: $COUNCIL_PID"
 
 sleep 3
 
-echo -e "\n✅ All Services Started!"
-echo "========================"
-echo "   Council: http://localhost:3007"
-echo "   WebUI:   http://localhost:3131"
+echo -e "\n${GREEN}Starting Hive WebUI (port 3131)...${NC}"
+node webui/server.js > /tmp/webui.log 2>&1 &
+WEBUI_PID=$!
+echo "   WebUI PID: $WEBUI_PID"
+
+sleep 2
+
+echo -e "\n${GREEN}Starting Full Council API + MCP (port 3001)...${NC}"
+node council-api-server.cjs > /tmp/council-api.log 2>&1 &
+API_PID=$!
+echo "   API PID: $API_PID"
+
+sleep 2
+
+echo -e "\n"
+echo "╔═══════════════════════════════════════════════════════════════╗"
+echo "║              ✅ Agent-Teams v2.1.0 Started!                ║"
+echo "╠═══════════════════════════════════════════════════════════════╣"
+echo "║  Service              Port   PID    URL                     ║"
+echo "╠═══════════════════════════════════════════════════════════════╣"
+echo "║  Council API          3007   $COUNCIL_PID   localhost:3007    ║"
+echo "║  Hive WebUI           3131   $WEBUI_PID   localhost:3131     ║"
+echo "║  Council API+MCP       3001   $API_PID    localhost:3001      ║"
+echo "╠═══════════════════════════════════════════════════════════════╣"
+echo "║  MCP Tools:           /mcp   (JSON-RPC)                     ║"
+echo "║  CLI:                 ./council-cli.js                      ║"
+echo "╠═══════════════════════════════════════════════════════════════╣"
+echo "║  WebUI:               http://localhost:3131                 ║"
+echo "╚═══════════════════════════════════════════════════════════════╝"
 echo ""
-echo "📊 Check status:"
-echo "   npm run start:council -- status"
-echo "   npm run start:webui -- status"
+echo "📝 Logs: /tmp/council.log, /tmp/webui.log, /tmp/council-api.log"
 echo ""
-echo "📝 Logs:"
-echo "   tail -f /tmp/council-merged.log"
-echo "   tail -f /tmp/webui-merged.log"
+echo "Quick Commands:"
+echo "  npm run council:status    # Check Council"
+echo "  npm run council:test      # Test LLM"
+echo "  npm run council:mcp-tools # List MCP tools"
+echo "  node council-cli.js       # CLI interface"
+echo ""
+echo "Stop: pkill -f 'council-server|webui/server|agent-api'"
+
+# Save PIDs
+echo "$COUNCIL_PID $WEBUI_PID $API_PID" > /tmp/agent-teams.pids
