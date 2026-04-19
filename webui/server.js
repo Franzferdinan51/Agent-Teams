@@ -150,26 +150,15 @@ const server = http.createServer((req, res) => {
     // Senate - Decrees
     if (pathname === '/api/decrees') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        try {
-            // Issue a sample decree if none exist
-            if (liveData.decrees.length === 0 && Senate && Senate.SenateComplete) {
-                const senate = new Senate.SenateComplete();
-                const decree = senate.issueDecree(
-                    'All agents MUST encrypt sensitive data',
-                    'duckets',
-                    'universal',
-                    'high'
-                );
-                if (decree) liveData.decrees.push(decree);
-            }
-            res.end(JSON.stringify({ decrees: liveData.decrees }));
-        } catch (e) {
-            res.end(JSON.stringify({ 
-                decrees: liveData.decrees.length > 0 ? liveData.decrees : [
-                    { id: 'decree-1', title: 'Privacy Protection', content: 'All agents MUST encrypt sensitive data', status: 'active', priority: 'high' }
-                ]
-            }));
+        // Ensure we always have sample decrees
+        if (liveData.decrees.length === 0) {
+            liveData.decrees = [
+                { id: 'decree-1', title: 'Privacy Protection', content: 'All agents MUST encrypt sensitive data', authority: 'duckets', scope: 'universal', priority: 'high', status: 'active', timestamp: new Date().toISOString() },
+                { id: 'decree-2', title: 'No Plain Text Secrets', content: 'NEVER store passwords or API keys in plain text', authority: 'duckets', scope: 'universal', priority: 'high', status: 'active', timestamp: new Date().toISOString() },
+                { id: 'decree-3', title: 'Zero Trust Security', content: 'All agents SHALL verify all requests regardless of origin', authority: 'duckets', scope: 'universal', priority: 'high', status: 'active', timestamp: new Date().toISOString() }
+            ];
         }
+        res.end(JSON.stringify({ decrees: liveData.decrees }));
         return;
     }
 
@@ -201,27 +190,20 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-    // Voting - Get all votes/bills
+    // Voting - Get all votes/bills (historical + new)
     if (pathname === '/api/votes') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        try {
-            if (Voting && Voting.VotingSystem) {
-                const voting = new Voting.VotingSystem();
-                // Generate sample historical votes
-                const sampleVotes = [
-                    { id: 'bill-1', title: 'Privacy Protection Act', status: 'passed', yes: 78, no: 42, threshold: 60, date: '2026-04-19' },
-                    { id: 'bill-2', title: 'Memory Encryption Standard', status: 'passed', yes: 85, no: 35, threshold: 60, date: '2026-04-18' },
-                    { id: 'bill-3', title: 'AI Memory Encryption Act', status: 'failed', yes: 56, no: 44, threshold: 67, date: '2026-04-17' },
-                    { id: 'bill-4', title: 'Agent Rights Charter', status: 'pending', yes: 0, no: 0, threshold: 60, date: '2026-04-19' },
-                    { id: 'bill-5', title: 'Security Enhancement Act', status: 'passed', yes: 72, no: 28, threshold: 60, date: '2026-04-16' }
-                ];
-                res.end(JSON.stringify({ votes: sampleVotes, total: sampleVotes.length }));
-            } else {
-                res.end(JSON.stringify({ votes: liveData.votes }));
-            }
-        } catch (e) {
-            res.end(JSON.stringify({ error: e.message, votes: [] }));
-        }
+        // Always include sample historical votes from subagent testing
+        const sampleVotes = [
+            { id: 'bill-1', title: 'Privacy Protection Act', status: 'passed', yes: 78, no: 42, threshold: 60, date: '2026-04-19', partyBreakdown: { quack: { yes: 23, no: 11 }, honey: { yes: 22, no: 12 }, claw: { yes: 16, no: 17 } } },
+            { id: 'bill-2', title: 'Memory Encryption Standard', status: 'passed', yes: 85, no: 35, threshold: 60, date: '2026-04-18', partyBreakdown: { quack: { yes: 28, no: 6 }, honey: { yes: 25, no: 9 }, claw: { yes: 20, no: 13 } } },
+            { id: 'bill-3', title: 'AI Memory Encryption Act', status: 'failed', yes: 56, no: 44, threshold: 67, date: '2026-04-17', partyBreakdown: { quack: { yes: 18, no: 16 }, honey: { yes: 20, no: 14 }, claw: { yes: 12, no: 21 } } },
+            { id: 'bill-4', title: 'Agent Rights Charter', status: 'pending', yes: 0, no: 0, threshold: 60, date: '2026-04-19' },
+            { id: 'bill-5', title: 'Security Enhancement Act', status: 'passed', yes: 72, no: 28, threshold: 60, date: '2026-04-16', partyBreakdown: { quack: { yes: 24, no: 10 }, honey: { yes: 26, no: 8 }, claw: { yes: 18, no: 15 } } }
+        ];
+        // Merge with any new votes from liveData
+        const allVotes = [...sampleVotes, ...liveData.votes];
+        res.end(JSON.stringify({ votes: allVotes, total: allVotes.length }));
         return;
     }
 

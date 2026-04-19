@@ -251,7 +251,34 @@ AgentTeams/
 - ✅ **Performance Tracking** per agent
 - ✅ **Workflow Automation** with triggers
 - ✅ **WebUI Dashboard** at http://localhost:3131
+- ✅ **OpenAI Codex Plugin** for Codex CLI integration
 - ✅ **Cross-Platform** (Mac, Linux, Termux)
+
+---
+
+## 🔌 OpenAI Codex Integration
+
+Use Hive Nation directly from OpenAI Codex CLI!
+
+```bash
+# Add to ~/.codex/config.toml
+[marketplaces]
+local = { type = "directory", path = "~/Desktop/AgentTeam-GitHub/plugins/codex" }
+
+# Or copy the plugin
+cp -r ~/Desktop/AgentTeam-GitHub/plugins/codex ~/.codex/plugins/hive-nation
+```
+
+Then use it in Codex:
+```
+@Hive Nation: List all active Senate decrees
+@Hive Nation: Spawn a research team to investigate AI safety
+@Hive Nation: Show recent voting results
+```
+
+See [plugins/codex/README.md](plugins/codex/README.md) for full setup.
+
+---
 
 ---
 

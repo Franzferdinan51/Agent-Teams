@@ -1,0 +1,93 @@
+openapi: 3.0.0
+info:
+  title: Hive Nation API
+  description: Multi-agent government framework API
+  version: 1.9.5
+servers:
+  - url: http://localhost:3131/api
+paths:
+  /dashboard:
+    get:
+      summary: Get system overview
+      responses:
+        '200':
+          description: Dashboard data
+  /senate:
+    get:
+      summary: Get Senate roster
+      responses:
+        '200':
+          description: List of senators
+  /decrees:
+    get:
+      summary: Get active decrees
+      responses:
+        '200':
+          description: List of decrees
+    post:
+      summary: Issue new decree
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                authority:
+                  type: string
+                scope:
+                  type: string
+                priority:
+                  type: string
+      responses:
+        '200':
+          description: Decree created
+  /votes:
+    get:
+      summary: Get historical votes
+      responses:
+        '200':
+          description: List of votes
+  /teams:
+    get:
+      summary: Get active teams
+      responses:
+        '200':
+          description: List of teams
+    post:
+      summary: Spawn new team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template:
+                  type: string
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Team spawned
+  /memory:
+    get:
+      summary: Get memories
+      responses:
+        '200':
+          description: List of memories
+    post:
+      summary: Store new memory
+      responses:
+        '200':
+          description: Memory stored
+  /scoring:
+    get:
+      summary: Get agent scores
+      responses:
+        '200':
+          description: Agent rankings
