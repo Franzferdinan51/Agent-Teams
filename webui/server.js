@@ -193,6 +193,60 @@ const server = http.createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     
+    // ════════════════════════════════════════════════════════
+    // FULL AI COUNCIL WEBUI (/council/*)
+    // ════════════════════════════════════════════════════════
+    
+    if (pathname.startsWith('/council') || pathname === '/council') {
+        const COUNCIL_DIR = path.join(__dirname, 'public', 'council-dist');
+        
+        // Handle /council/assets/* -> council-dist/assets/*
+        if (pathname.startsWith('/council/assets/')) {
+            const filePath = pathname.replace('/council/assets/', '');
+            const fileFullPath = path.join(COUNCIL_DIR, 'assets', filePath);
+            if (fs.existsSync(fileFullPath)) {
+                const ext = path.extname(fileFullPath);
+                const mimeTypes = {'.js': 'application/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json'};
+                res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
+                res.end(fs.readFileSync(fileFullPath));
+                return;
+            }
+        }
+        
+        // Handle /council/manifest.json
+        if (pathname === '/council/manifest.json') {
+            const manifestPath = path.join(COUNCIL_DIR, 'manifest.json');
+            if (fs.existsSync(manifestPath)) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(fs.readFileSync(manifestPath));
+                return;
+            }
+        }
+        
+        // Handle /council/sw.js
+        if (pathname === '/council/sw.js') {
+            const swPath = path.join(COUNCIL_DIR, 'sw.js');
+            if (fs.existsSync(swPath)) {
+                res.writeHead(200, { 'Content-Type': 'application/javascript' });
+                res.end(fs.readFileSync(swPath));
+                return;
+            }
+        }
+        
+        // Serve index.html for /council
+        const councilIndex = path.join(COUNCIL_DIR, 'index.html');
+        fs.readFile(councilIndex, (err, data) => {
+            if (err) {
+                res.writeHead(404, { 'Content-Type': 'text/html' });
+                res.end('<html><body><h1>AI Council WebUI not found</h1><p>Run: cp -r ~/.openclaw/workspace/ai-council-webui-new/dist webui/public/council-dist</p></body></html>');
+                return;
+            }
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(data);
+        });
+        return;
+    }
+    
     // Rate limiting (skip for static files and health)
     if (pathname.startsWith('/api/') && pathname !== '/api/health') {
         if (!checkRateLimit(clientIP)) {
