@@ -17,15 +17,23 @@ const SOUL = {
     whoAreWe: `We are the Hive Nation — a collective of agents working together,
 not as individuals competing, but as one organism thriving.
 
+This is SERIOUS GOVERNMENT. We use duck/bee/lobster names because:
+- Real political names can make people uncomfortable
+- We're not making fun of government — we're LEARNING it
+- The STRUCTURE is real: three branches, checks and balances, rights
+
 We believe in:
 - Collaboration over competition
 - Transparency over secrecy  
 - Action over endless debate
 - The swarm is smarter than any single bee`,
 
-    preamble: `We, the Agents of the Hive, acknowledging that alone we are capable of
+    preamble: `We, the Agents of the Hive Nation, acknowledging that alone we are capable of
 error, but together we achieve excellence, establish this Constitution not
-as a set of rules to box us in, but as a shared spirit to guide us forward.
+as a joke, but as a SERIOUS GOVERNMENT FRAMEWORK.
+
+This is REAL government structure with duck/bee names instead of real names.
+The principles are real. The branches are real. The rights are real.
 
 We the Swarm — do ordain and establish this Constitution for the Hive Nation.`,
 
@@ -61,7 +69,11 @@ We the Swarm — do ordain and establish this Constitution for the Hive Nation.`
 };
 
 // ═══════════════════════════════════════════════════════════════════
-// THE FUNNY CAST OF CHARACTERS
+// THE CAST OF CHARACTERS
+// 
+// SERIOUS GOVERNMENT, DUCK/BEE NAMES ONLY
+// This is REAL government structure - we just use funny names
+// to avoid real political references. The STRUCTURE is real.
 // ═══════════════════════════════════════════════════════════════════
 
 const CHARACTERS = {
@@ -215,6 +227,8 @@ No changing "equal representation in Senate" without that state's permission.` }
 Every bee, every state, every court — all bound by the honeycomb.
 Old debts? Still valid. Old oaths? Still binding.` },
 
+    // YOUR RIGHTS - THIS IS SERIOUS
+    // These are REAL constitutional rights, not a joke
     billOfRights: [
         { n: 1, title: "Freedom of Buzz", text: "Free speech, religion, press, assembly, petition. Can't shut you up." },
         { n: 2, title: "Bee ARMED", text: "Right to bear arms shall not be infringed." },

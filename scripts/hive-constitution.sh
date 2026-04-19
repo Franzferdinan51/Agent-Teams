@@ -1,11 +1,17 @@
 #!/bin/bash
 # hive-constitution.sh — The Founding Document
+# 
+# SERIOUS GOVERNMENT STRUCTURE with duck/bee names.
+# Real constitution. Real structure. Just funny names.
 
 VERSION="1.0.0"
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════════╗"
-echo "║        📜 HIVE CONSTITUTION — The Founding Document v${VERSION} ║"
+echo "║        📜 HIVE CONSTITUTION — The Founding Document v${VERSION}   ║"
+echo "╠══════════════════════════════════════════════════════════════════╣"
+echo "║  SERIOUS GOVERNMENT STRUCTURE with duck/bee names              ║"
+echo "║  Real constitution. Real structure. Just funny names.           ║"
 echo "╚══════════════════════════════════════════════════════════════════╝"
 echo ""
 
