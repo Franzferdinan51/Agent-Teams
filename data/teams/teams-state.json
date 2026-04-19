@@ -1,0 +1,18 @@
+{
+  "teams": [],
+  "senateReports": [
+    {
+      "id": "report-1776625522974",
+      "teamId": "team-1776625513175-vqyprddar",
+      "teamName": "Test Research Hive",
+      "status": "active",
+      "activeMembers": 0,
+      "totalMembers": 4,
+      "pendingTasks": 1,
+      "completedTasks": 0,
+      "lastActivity": "2026-04-19T19:05:22.952Z",
+      "reportedAt": "2026-04-19T19:05:22.974Z"
+    }
+  ],
+  "decrees": []
+}
