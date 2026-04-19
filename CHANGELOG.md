@@ -4,6 +4,40 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.4] - 2026-04-19 - Agent Coordinator Anti-Spam System
+
+### Added
+
+#### 🤖 Agent Coordinator — Smart Sub-Agent Management
+- **agent-coordinator.js** (20KB) — Intelligent coordination engine
+  - **Batching Logic** — Combines similar tasks into single runs
+  - **Queue Management** — Overflow queuing instead of spam
+  - **Mesh Coordination** — Check existing agents before spawning
+  - **Rules Engine** — Per-task-type coordination rules
+  - **Resource Limits** — Max concurrent agents enforced
+  - **Efficiency Tracking** — Batch rate, avg task time
+  - **Anti-Spam Patterns** — 4 patterns for efficient spawning
+
+#### Coordination Rules by Task Type
+| Type | Max Concurrent | Batch Similar | Strategy |
+|------|---------------|--------------|----------|
+| research | 3 | ✅ | Delegate to mesh |
+| coding | 2 | ❌ | Spawn fresh |
+| review | 2 | ✅ | Local only |
+| test | 3 | ✅ | Spawn fresh |
+
+#### Anti-Spam Patterns
+1. **Batch Similar** — 10 research topics = 1 agent, not 10
+2. **Mesh Check First** — Avoid duplicating work
+3. **Queue When Busy** — Don't overwhelm system
+4. **Priority Queuing** — Critical tasks skip queue
+
+#### Updated
+- `skills/micro-agents/SKILL.md` — Complete coordination guide
+- `scripts/agent-coordinator.sh` — CLI wrapper
+
+---
+
 ## [1.0.3] - 2026-04-19 - Hive Senate 2.0 Enhancements
 
 ### Added

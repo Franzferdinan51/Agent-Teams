@@ -163,6 +163,23 @@ node scripts/hive-discovery.js find <capability>     # Find who has it
 
 ---
 
+## 🤖 AGENT COORDINATOR (Anti-Spam)
+
+```bash
+./scripts/agent-coordinator.sh status             # Coordinator status
+./scripts/agent-coordinator.sh spawn <type> <task> # Spawn with coordination
+./scripts/agent-coordinator.sh batch <count>       # Batch test
+./scripts/agent-coordinator.sh rules               # View coordination rules
+```
+
+**Anti-Spam Features:**
+- Batches similar tasks (10 research = 1 agent, not 10)
+- Checks mesh before spawning (no duplicates)
+- Max 5 concurrent agents enforced
+- Queue overflow instead of spam
+
+---
+
 ## 🧠 META-AGENT
 
 ```bash
