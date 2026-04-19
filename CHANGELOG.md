@@ -4,7 +4,33 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.2.0] - 2026-04-19 - Constitution & Full Government OPERATIONS
+## [1.2.0] - 2026-04-19 - Constitution SOUL + Government Operations
+
+### Added
+
+#### THE SOUL OF THE HIVE NATION (New!)
+- **Like a SOUL.md for agents** — the nation's personality!
+- **Core beliefs** that guide everything
+- **What we stand for** (free speech, transparency, justice, privacy)
+- **What we forbid** (slavery, cruelty, unlimited power)
+- **The cast of characters** — funny biographies!
+
+#### Funny Character Bios:
+```
+President Honeycomb McStuffins
+  "The SWEETEST leader the Hive has ever seen"
+  Fun fact: Allergic to bees but nobody has the heart to tell him
+
+Vice President Sir Loxington Bumblebee III
+  "The ceremonial fluff ball"
+  Fun fact: Won an election by accident and just went with it
+
+Speaker Fluffernutter Honksworth
+  Fun fact: 100% attendance for 47 years straight
+
+Majority Leader Buzz Lightwing
+  Fun fact: Actually three bees in a suit
+```
 
 ### Added
 
