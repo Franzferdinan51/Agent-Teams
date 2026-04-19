@@ -33,22 +33,22 @@ const HOUSE_MEMBERS = {
 
 const EXECUTIVE = {
     president: { 
-        name: 'President Honeycomb McStuffins', 
+        name: 'President Quackford McDuck', 
         role: 'President', 
         party: 'Independent',
         cabinet: true,
         powers: ['veto', 'pardon', 'commander', 'treaties', 'appointments'],
         approval: 72,
-        tagline: 'The SWEETEST leader the Hive has ever seen'
+        tagline: 'The LEADER of the Hive Nation'
     },
     vicePresident: { 
-        name: 'Vice President Sir Loxington Bumblebee III', 
+        name: 'Vice President Lobster Loxington III', 
         role: 'Vice President', 
         party: 'Independent',
         cabinet: true,
         powers: ['tiebreaker', 'ceremonial'],
         approval: 78,
-        tagline: 'The ceremonial fluff ball'
+        tagline: 'The LOYAL second-in-command'
     },
     
     secretary_state: { name: 'Secretary of State Fluttershy Blinken', role: 'Secretary of State', cabinet: true },
@@ -131,10 +131,10 @@ class HiveCongress {
         console.log('='.repeat(60));
         
         console.log('\n  President & VP:');
-        console.log('    * President Honeycomb McStuffins - Approval: 72%');
-        console.log('      "The SWEETEST leader the Hive has ever seen"');
-        console.log('    * Vice President Sir Loxington Bumblebee III - Approval: 78%');
-        console.log('      "The ceremonial fluff ball"');
+        console.log('    * President Quackford McDuck - Approval: 72%');
+        console.log('      "The LEADER of the Hive Nation"');
+        console.log('    * Vice President Lobster Loxington III - Approval: 78%');
+        console.log('      "The LOYAL second-in-command"');
         
         console.log('\n  Cabinet:');
         console.log('    * State: Fluttershy Blinken');
@@ -214,7 +214,7 @@ class HiveCongress {
         } else if (action === 'veto') {
             bill.vetoed = true;
             bill.status = 'vetoed';
-            console.log(`\nPRESIDENTIAL VETO by Honeycomb McStuffins: ${billId}`);
+            console.log(`\nPRESIDENTIAL VETO by Quackford McDuck: ${billId}`);
             console.log(`   Reason: ${reason || 'Policy concerns'}`);
             console.log(`   Override requires: 2/3 both chambers`);
         }
@@ -253,7 +253,7 @@ class HiveCongress {
         
         console.log(`\nEXECUTIVE ORDER ISSUED: ${id}`);
         console.log(`   Title: ${title}`);
-        console.log(`   President: Honeycomb McStuffins`);
+        console.log(`   President: Quackford McDuck`);
         console.log(`   Status: Active`);
     }
 
@@ -289,8 +289,8 @@ class HiveCongress {
 
     cabinetMeeting(topic) {
         console.log(`\nCABINET MEETING: ${topic}`);
-        console.log(`   President: Honeycomb McStuffins (Chair)`);
-        console.log(`   Vice President: Sir Loxington Bumblebee III`);
+        console.log(`   President: Quackford McDuck (Chair)`);
+        console.log(`   Vice President: Lobster Loxington III`);
         console.log(`   All 15 Cabinet Secretaries present`);
     }
 

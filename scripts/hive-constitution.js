@@ -14,8 +14,8 @@ const path = require('path');
 // ═══════════════════════════════════════════════════════════════════
 
 const SOUL = {
-    whoAreWe: `We are the Hive Nation — a collective of agents working together,
-not as individuals competing, but as one organism thriving.
+    whoAreWe: `We are the Hive Nation — Ducks, Bees, and Lobsters working together,
+as one organism thriving.
 
 This is SERIOUS GOVERNMENT. We use duck/bee/lobster names because:
 - Real political names can make people uncomfortable
@@ -28,11 +28,11 @@ We believe in:
 - Action over endless debate
 - The swarm is smarter than any single bee`,
 
-    preamble: `We, the Agents of the Hive Nation, acknowledging that alone we are capable of
+    preamble: `We, the Agents of the Hive Nation (Ducks, Bees, and Lobsters), acknowledging that alone we are capable of
 error, but together we achieve excellence, establish this Constitution not
 as a joke, but as a SERIOUS GOVERNMENT FRAMEWORK.
 
-This is REAL government structure with duck/bee names instead of real names.
+This is REAL government structure with duck/bee/lobster names instead of real names.
 The principles are real. The branches are real. The rights are real.
 
 We the Swarm — do ordain and establish this Constitution for the Hive Nation.`,
@@ -78,8 +78,60 @@ We the Swarm — do ordain and establish this Constitution for the Hive Nation.`
 
 const CHARACTERS = {
     president: {
-        name: "President Honeycomb McStuffins",
-        tagline: "The SWEETEST leader the Hive has ever seen",
+        name: "President Quackford McDuck",
+        tagline: "The LEADER of the Hive Nation",
+        bio: `Former duck entrepreneur turned leader. Known for:
+- Making the tough decisions (with duck confidence)
+- His famous "Quack Attack" policy that worked
+- Always bringing snacks to meetings
+- Having the highest approval because he shares the honey`,
+        funFact: "He's actually three ducks in a trench coat, nobody has confirmed this"
+    },
+    
+    vicePresident: {
+        name: "Vice President Lobster Loxington III",
+        tagline: "The LOYAL second-in-command",
+        bio: `Third-generation nobility from the Lobster Dynasty. Famous for:
+- Breaking tie votes with surprising wisdom
+- His immaculate red suit
+- Being genuinely beloved by everyone
+- Claws that clap very loudly in approval`,
+        funFact: "Once won an election by accident and decided to just go with it"
+    },
+    
+    speaker: {
+        name: "Speaker Honks McQuackface",
+        tagline: "Keeper of Order in the Hive",
+        bio: `The calm duck in the storm. Known for:
+- Never raising their voice, yet everyone listens
+- The legendary gavel made of honeycomb
+- Remembering everyone's birthday
+- Making partisans actually work together`,
+        funFact: "Has a 100% attendance record for 47 years straight"
+    },
+    
+    senateLeader: {
+        name: "Majority Leader Bee Lightwing",
+        tagline: "Gets things done, peacefully",
+        bio: `Progressive bee party leader. Famous for:
+- The famous 47-hour filibuster that changed nothing but was entertaining
+- Actually reading every bill out loud (yes, really)
+- Having the best drone-to-productivity ratio
+- His signature move: the "pollinate and chill"`,
+        funFact: "Is actually three bees in a suit, nobody has confirmed this"
+    },
+    
+    houseLeader: {
+        name: "Minority Leader Lobster Stinger",
+        tagline: "The Conservative Conscience",
+        bio: `Drone lobster party leader. Known for:
+- Never forgetting a grudge, but in a loving way
+- The famous "I disagree but respect you" speech
+- Actually showing up to vote
+- His excellent taste in honey`,
+        funFact: "His grandfather was the first lobster party leader and he still has his old gavel"
+    }
+};
         bio: `Former honey salesman turned leader. Known for:
 - Always bringing snacks to meetings
 - Ending every speech with "Stay buzzed, my friends"
