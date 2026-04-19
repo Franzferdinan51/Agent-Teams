@@ -4,6 +4,76 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.2.0] - 2026-04-19 - Constitution & Full Government
+
+### Added
+
+#### 📜 HIVE CONSTITUTION — The Founding Document
+- **hive-constitution.js** (23KB) — Complete constitution
+
+##### Articles 1-7:
+- **Article I**: Legislative Powers (Congress, House, Senate)
+- **Article II**: Executive Powers (President, VP, Cabinet, Electoral College)
+- **Article III**: Judicial Powers (Supreme Court, Judicial Review)
+- **Article IV**: States and Federalism
+- **Article V**: Amendment Process
+- **Article VI**: Federal Supremacy (Supremacy Clause)
+- **Article VII**: Ratification
+
+##### Bill of Rights (Amendments 1-10):
+1. Freedom of Expression (Speech, Religion, Press, Assembly, Petition)
+2. Right to Bear Arms
+3. Housing of Soldiers
+4. Search and Seizure
+5. Due Process and Takings
+6. Right to Fair Trial
+7. Civil Trials by Jury
+8. Cruel and Unusual Punishment
+9. Rights Retained by People
+10. Powers Reserved to States
+
+##### Amendments 11-27:
+- 11: Sovereign Immunity (1795)
+- 12: Presidential Elections (1804)
+- 13: Abolition of Slavery (1865)
+- 14: Citizenship and Equal Protection (1868)
+- 15: Voting Rights (1870)
+- 16: Income Tax (1913)
+- 17: Direct Election of Senators (1913)
+- 18: Prohibition (1919)
+- 19: Women's Suffrage (1920)
+- 20: Terms and Succession (1933)
+- 21: Repeal of Prohibition (1933)
+- 22: Limit on Presidential Terms (1951)
+- 23: DC Voting Rights (1961)
+- 24: Poll Tax Prohibited (1964)
+- 25: Presidential Disability (1967)
+- 26: Voting Age 18 (1971)
+- 27: Congressional Pay (1992)
+
+##### Constitutional Principles:
+- Separation of Powers (3 branches, powers & limits)
+- Checks and Balances (5 key checks defined)
+
+### Commands
+```bash
+# View Constitution
+./scripts/hive-constitution.sh full              # Entire document
+./scripts/hive-constitution.sh preamble        # Preamble
+./scripts/hive-constitution.sh article 1       # Article I (Legislative)
+./scripts/hive-constitution.sh article 2       # Article II (Executive)
+./scripts/hive-constitution.sh article 3       # Article III (Judicial)
+./scripts/hive-constitution.sh bor             # Bill of Rights
+./scripts/hive-constitution.sh amendments      # Amendments 11-27
+./scripts/hive-constitution.sh amendment 14     # View specific amendment
+./scripts/hive-constitution.sh principles      # Separation + Checks
+
+# Search
+./scripts/hive-constitution.sh search "slavery"  # Search term
+```
+
+---
+
 ## [1.1.0] - 2026-04-19 - Hive Congress — Full Government Simulation
 
 ### Added
