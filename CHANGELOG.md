@@ -4,6 +4,72 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.5] - 2026-04-19 - Hive Senate Pro Enhancements
+
+### Added
+
+#### 🏛️ Hive Senate Pro — Advanced Congressional Features
+- **hive-senate-pro.js** (22KB) — Advanced senate simulation
+
+##### Bill Lifecycle System
+- Introduce legislation with sponsors/cosponsors
+- Track through 8 steps (introduced → law)
+- Amendment proposals and voting
+- Presidential veto and override (67 votes)
+
+##### Witness Testimony
+- Expert witnesses by category (tech, business, legal, emergency, agriculture)
+- Formal hearing transcripts
+- Senator questions and witness answers
+
+##### Floor Debate Transcripts
+- Full session transcripts
+- Pro/con speeches recorded
+- Speaker tracking and duration
+
+##### Senator Profiles
+- Detailed backgrounds (name, age, state, experience)
+- Voting records (attendance, aye/nay percentage)
+- Committee assignments
+- Constituency representation
+
+##### Party Leadership
+- Majority/Minority Leaders and Whips
+- Policy Chairs per party
+- Neutral Bloc coordination
+
+##### Constituency System
+- Each senator represents an interest group
+- Polling/approval ratings
+- Key interests tracked
+
+### Commands
+```bash
+# Bills
+./scripts/hive-senate-pro.sh bill "Privacy Act"  
+./scripts/hive-senate-pro.sh bills
+./scripts/hive-senate-pro.sh advance S.123 "Committee Vote"
+
+# Hearings
+./scripts/hive-senate-pro.sh hearing Judiciary "AI Regulation" legal
+./scripts/hive-senate-pro.sh testimony HRG-123 "My testimony..."
+
+# Floor
+./scripts/hive-senate-pro.sh session "Immigration Reform"
+./scripts/hive-senate-pro.sh speak SESSION-123 Senator pro "I believe..."
+
+# Profiles
+./scripts/hive-senate-pro.sh profile botanist
+./scripts/hive-senate-pro.sh leadership
+./scripts/hive-senate-pro.sh constit meteorologist
+
+# Veto
+./scripts/hive-senate-pro.sh veto S.123 "Constitutional concerns"
+./scripts/hive-senate-pro.sh override S.123 70
+```
+
+---
+
 ## [1.0.4] - 2026-04-19 - Agent Coordinator Anti-Spam System
 
 ### Added
