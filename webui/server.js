@@ -438,16 +438,14 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // Start council deliberation
+    // Start council deliberation (via /api/session/start)
     if (pathname === '/api/council/deliberate' && req.method === 'POST') {
         let body = '';
         req.on('data', chunk => body += chunk);
         req.on('end', async () => {
             try {
                 const { topic, mode } = JSON.parse(body);
-                // Start deliberation on Council server (format: {topic, mode})
                 const startRes = await httpPost(COUNCIL_HOST, COUNCIL_PORT, '/api/session/start', { topic, mode: mode || 'balanced' });
-                // Council returns {ok: true, sessionId} on success
                 if (startRes && startRes.ok) {
                     broadcastSSE({ type: 'council-started', topic, mode });
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -461,6 +459,43 @@ const server = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ success: false, error: e.message }));
             }
         });
+        return;
+    }
+    
+    // Agent-started deliberation (via /api/ask)
+    if (pathname === '/api/council/ask' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const { question, mode } = JSON.parse(body);
+                // Use /api/ask endpoint which is for agent-initiated deliberations
+                const startRes = await httpPost(COUNCIL_HOST, COUNCIL_PORT, '/api/ask', { question, mode: mode || 'deliberation' });
+                if (startRes && startRes.sessionId) {
+                    broadcastSSE({ type: 'council-agent-started', question, mode });
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true, sessionId: startRes.sessionId, message: `Agent started deliberation: ${question}` }));
+                } else {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, error: 'Failed to start deliberation' }));
+                }
+            } catch (e) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: e.message }));
+            }
+        });
+        return;
+    }
+    
+    // Get all active deliberations (current session)
+    if (pathname === '/api/council/all') {
+        const session = await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/session');
+        const history = {
+            current: session,
+            viewerCount: session?.viewerCount || 0
+        };
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(history));
         return;
     }
     
