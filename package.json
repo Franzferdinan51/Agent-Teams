@@ -1,26 +1,22 @@
 {
   "name": "agent-teams",
   "version": "1.0.0",
-  "description": "Multi-agent coordination system for OpenClaw and Duck CLI",
-  "main": "dist/TeamCLI.js",
-  "type": "module",
+  "description": "Multi-Agent Collaboration System — spawn, coordinate, and orchestrate multiple specialized agents",
+  "version": "1.0.0",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/TeamCLI.js",
-    "dev": "npx tsx src/TeamCLI.ts",
-    "test": "node --test"
+    "start": "node src/index.js",
+    "mesh:register": "node scripts/mesh-register.js",
+    "mesh:status": "curl http://localhost:4000/api/agents -H 'X-API-Key: openclaw-mesh-default-key'",
+    "agent:register": "node scripts/register-agent.js",
+    "test": "node scripts/run-tests.js"
   },
-  "keywords": [
-    "agent",
-    "multi-agent",
-    "team",
-    "duck-cli",
-    "openclaw"
-  ],
-  "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^20.10.0",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.0"
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "peerDependencies": {
+    "agent-mesh-api": ">=1.0.0"
   }
 }

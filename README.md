@@ -1,21 +1,29 @@
-# 🤖 AgentTeams
+# 🤖 AgentTeams v1.0.0
 
 **Multi-Agent Collaboration System** — spawn, coordinate, and orchestrate multiple specialized agents for complex tasks.
 
-Built for [OpenClaw](https://github.com/openclaw/openclaw) and Duck CLI.
+Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https://github.com/Franzferdinan51/duck-cli).
+
+## Version Info
+
+| Component | Version |
+|-----------|---------|
+| **AgentTeams Core** | 1.0.0 |
+| **Agent Mesh API** | 1.0.0 |
+| **Meta-Agent (duck-cli)** | v3 |
+| **Node Engine** | 18+ |
 
 ## The Core Idea
 
-> **The best AI systems don't use one big agent. They use teams of specialized agents working together.**
+> **The best AI systems use teams of specialized agents, not one big agent.**
 
-AgentTeams gives you:
-- **Agent Mesh API** — Communication backbone for distributed agents
+AgentTeams v1.0.0 gives you:
+- **Agent Mesh API** — Communication backbone (auto-registers on boot)
 - **5 Coordination Patterns** — Generator-Verifier, Orchestrator-Subagent, Agent Teams, Message Bus, Shared State
 - **25+ Micro-Agents** — Tiny specialists for granular tasks
-- **Team Agents** — Full roles (researcher, coder, reviewer, writer)
-- **Meta-Agent** — Plans → Executes → Critiques → Heals → Learns
-- **AI Council** — 45 councilors for adversarial deliberation
-- **Swarm Coding** — Multiple agents building together
+- **Meta-Agent** — Plan → Execute → Critic → Heal → Learn (from duck-cli)
+- **QA Verification Loops** — Multi-round verification until pass
+- **Multi-Round Communication** — Long-running tasks without context loss
 
 ## Quick Start
 
@@ -24,125 +32,186 @@ git clone https://github.com/Franzferdinan51/Agent-Teams.git
 cd Agent-Teams
 chmod +x *.sh scripts/*.sh
 
-# Start Agent Mesh API (communication backbone)
+# Start Agent Mesh API (auto-registers agents)
 cd /tmp/agent-mesh-api && npm start &
 
-# See all patterns and workflows
-./patterns.sh list
-./collab.sh list
+# Register an agent
+node scripts/mesh-register.js my-agent coding research
 
-# Try a workflow
-./collab.sh research "AI agent frameworks"
-
-# List micro-agents
-./micro.sh list
+# Run a task with QA loop
+./qa-loop.sh task-1 ./my-feature
 ```
 
-## 🌐 Agent Mesh API
+## 🌐 Agent Mesh API v1.0.0
 
-The communication backbone for distributed multi-agent systems.
+**Auto-registers all agents on boot.**
 
 ```bash
-# Start mesh server
-cd /tmp/agent-mesh-api && npm install && npm start
-
-# API: http://localhost:4000
-# WebSocket: ws://localhost:4000/ws
-# Key: openclaw-mesh-default-key
+# Mesh server (port 4000)
+curl http://localhost:4000/api/agents \
+  -H "X-API-Key: openclaw-mesh-default-key"
 ```
 
-Features:
-- Agent registration and discovery
-- Inter-agent messaging
-- Real-time WebSocket events
-- File transfer between agents
-- Health monitoring dashboard
-- Auto-update system
+### Auto-Registration
+```bash
+# Agent auto-registers on start
+node scripts/mesh-register.js <agent-name> <capabilities>
+
+# Register with room
+AGENT_ROOM=build node scripts/mesh-register.js coder-1 coding
+```
+
+### Key Endpoints
+```bash
+POST /api/agents/register     # Auto-register
+GET  /api/agents              # List agents
+GET  /api/agents/:id          # Agent details
+POST /api/messages            # Send message
+GET  /api/agents/:id/inbox    # Get inbox
+POST /api/rooms/join         # Join room
+```
 
 ## 📐 5 Coordination Patterns
 
-Based on Claude's multi-agent research.
-
-| Pattern | Use For | Example |
+| Pattern | Use For | Version |
 |---------|---------|---------|
-| `generator-verifier` | Quality-critical with evaluation | Write code + test |
-| `orchestrator-subagent` | Hierarchical decomposition | Build full app |
-| `agent-teams` | Parallel independent tasks | Research 5 topics |
-| `message-bus` | Event-driven pipelines | CI/CD pipeline |
-| `shared-state` | Collaborative building | Research → expand |
+| `generator-verifier` | Quality-critical with evaluation | 1.0.0 |
+| `orchestrator-subagent` | Hierarchical decomposition | 1.0.0 |
+| `agent-teams` | Parallel independent tasks | 1.0.0 |
+| `message-bus` | Event-driven pipelines | 1.0.0 |
+| `shared-state` | Collaborative building | 1.0.0 |
 
-## 🤝 Pre-Built Workflows
+## 🔍 QA Verification Loop v1.0.0
 
-```bash
-./collab.sh research "AI agent frameworks"  # 5 agents parallel
-./collab.sh build "REST API"                # design → code → test → deploy
-./collab.sh ship "new feature"              # build → test → security → deploy
+Every task goes through QA verification:
+
+```
+Task → Implement → QA Check → If Fail → Fix → QA Check → If Pass → Done
+                         ↑                                    │
+                         └────────────────────────────────────┘
 ```
 
-## 🎯 Micro-Agents (25+ Tiny Specialists)
+### QA Agents
+```bash
+qa-test-writer     # Tests written before implementation
+qa-code-review     # Code follows best practices
+qa-security-scan   # No security vulnerabilities
+qa-performance     # Performance meets targets
+qa-documentation   # Docs complete
+```
 
-Single-purpose agents. Spawn 10+ in parallel.
+### Run QA Loop
+```bash
+./qa-loop.sh <task-id> <feature-path>
+```
+
+### Multi-Round QA
+```
+Round 1: Implement feature
+Round 2: QA check (if fail → fix → re-check)
+Round 3: If pass → done
+```
+
+## 🧠 Meta-Agent (from duck-cli v3)
+
+```bash
+./meta-plan.sh "Build REST API"
+./meta-run.sh "Build REST API"
+```
+
+**Cycle:** Plan → Execute → Critic → Heal → Learn
+
+Uses same Meta-Agent from [duck-cli](https://github.com/Franzferdinan51/duck-cli).
+
+## 🎯 25+ Micro-Agents
 
 ```bash
 ./micro.sh researcher "AI news" &
-./micro.sh researcher "DB trends" &
-./micro.sh researcher "Cloud options" &
-./micro.sh researcher "DevOps" &
-./micro.sh researcher "Security" &
+./micro.sh coder "Build API" &
+./micro.sh qa-test-writer "Write tests" &
 wait
 ```
 
-## 🧠 Meta-Agent
+## 🤝 Multi-Round Communication
 
-Plan → Execute → Critic → Heal → Learn cycle.
+Long-running tasks via mesh:
 
-```bash
-./meta-run.sh "Build a REST API"
 ```
-
-## 🤖 AI Council
-
-45 councilors for adversarial deliberation.
-
-```bash
-./spawn-council.sh "REST vs GraphQL?" adversarial
-./spawn-swarm.sh "Build a weather API"
+Round 1: Research → posts to mesh
+Round 2: Designer reads → posts design to mesh
+Round 3: Coder reads → posts code to mesh
+Round 4: QA reads → posts results to mesh
+... continues until task complete
 ```
 
 ## 📁 Scripts Reference
 
-| Script | Purpose |
-|--------|---------|
-| `patterns.sh` | 5 coordination patterns |
-| `collab.sh` | Pre-built multi-agent workflows |
-| `micro.sh` | 25+ micro-agents |
-| `spawn-*.sh` | Agent spawning |
-| `meta-*.sh` | Meta-agent orchestration |
+| Script | Version | Purpose |
+|--------|---------|---------|
+| `mesh-register.js` | 1.0.0 | Auto-register with mesh |
+| `qa-loop.sh` | 1.0.0 | QA verification loop |
+| `patterns.sh` | 1.0.0 | 5 coordination patterns |
+| `collab.sh` | 1.0.0 | Pre-built workflows |
+| `micro.sh` | 1.0.0 | 25+ micro-agents |
+| `meta-*.sh` | 1.0.0 | Meta-agent orchestration |
+| `spawn-*.sh` | 1.0.0 | Agent spawning |
+| `mesh-chat.sh` | 1.0.0 | Multi-round chat via mesh |
 
 ## 🏗️ Architecture
 
 ```
-┌────────────────────────────────────────────────────────────┐
-│                    AGENT TEAMS                             │
-├────────────────────────────────────────────────────────────┤
-│                                                            │
-│   Micro-Agents ─┬─→ Agent Mesh API ←─┬─ Team Agents       │
-│   (25+ tiny)    │                    │ (4 roles)           │
-│                 │    ┌───────────┐   │                     │
-│   Meta-Agent ───┼───→│ AGENT MESH│←──+─ AI Council        │
-│   (5 phases)    │    └───────────┘   │ (45 councilors)    │
-│                 │                    │                     │
-│   Swarm ────────┼────────────────────+── Swarm Coding       │
-│                                                            │
-└────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                    AGENTTEAMS v1.0.0                            │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   Micro-Agents ──┐                                              │
+│   (25+ tiny)     │                                              │
+│                   │    ┌──────────────────────────────────────┐ │
+│   Meta-Agent ────┼───→│        AGENT MESH API                │ │
+│   (Plan→Exec→    │    │   http://localhost:4000              │ │
+│    Critic→       │    │   Auto-registers all agents           │ │
+│    Heal→Learn)   │    │   Version: 1.0.0                      │ │
+│                   │    └──────────────────────────────────────┘ │
+│   QA Loop ───────┼───→│                                       │
+│   (verify until  │    │   Rooms: research, build, review, qa  │
+│    pass)         │    │                                       │
+│                   │    │                                       │
+│   Team Agents ───┤    │                                       │
+│   (4 roles)      │    │                                       │
+│                   │    │                                       │
+└───────────────────┴────┴───────────────────────────────────────┘
 ```
 
 ## Related Projects
 
-- [Duck CLI](https://github.com/Franzferdinan51/duck-cli) — Desktop AI agent
-- [Agent Mesh API](https://github.com/Franzferdinan51/agent-mesh-api) — Agent communication
-- [AI Bot Council](https://github.com/Franzferdinan51/AI-Bot-Council-Concensus) — Deliberation
-- [OpenClaw](https://github.com/openclaw/openclaw) — Agent framework
+| Project | Version | URL |
+|---------|---------|-----|
+| **Duck CLI** | v3 | https://github.com/Franzferdinan51/duck-cli |
+| **Agent Mesh API** | 1.0.0 | https://github.com/Franzferdinan51/agent-mesh-api |
+| **AI Bot Council** | — | https://github.com/Franzferdinan51/AI-Bot-Council-Concensus |
+| **OpenClaw** | — | https://github.com/openclaw/openclaw |
+
+## Agent Guidance
+
+All agents MUST follow `AGENTS.md`:
+- Auto-register on boot
+- Use mesh for all communication
+- Include version in all API calls
+- Follow QA verification loop
+- Multi-round coordination for long tasks
+
+## Changelog
+
+### v1.0.0 (2026-04-19)
+- Initial release
+- Agent Mesh API integration
+- 5 coordination patterns
+- 25+ micro-agents
+- Meta-Agent (from duck-cli)
+- QA verification loops
+- Multi-round communication
+- Auto-registration on boot
+- Semantic versioning
 
 ## License
 
