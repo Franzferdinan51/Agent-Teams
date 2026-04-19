@@ -138,6 +138,18 @@ node scripts/hive-discovery.js find <capability>     # Find who has it
 ./scripts/micro.sh 3d-modeler <description>        # Create 3D
 ```
 
+### Vision (Analyze Images)
+```bash
+./scripts/hive-vision.sh analyze <image> [prompt]   # Analyze image
+./scripts/hive-vision.sh screen-analyze [prompt]   # Screen + analyze
+./scripts/hive-vision.sh growth <image>             # Plant/grow analysis
+./scripts/hive-vision.sh chart <image>              # Chart/graph analysis
+./scripts/hive-vision.sh document <image>           # Document analysis
+./scripts/hive-vision.sh receipt <image>           # Receipt extraction
+./scripts/hive-vision.sh compare <img1> <img2>    # Compare images
+./scripts/hive-vision.sh models                     # List vision models
+```
+
 ---
 
 ## 🧠 META-AGENT

@@ -98,6 +98,30 @@ node scripts/dreaming-engine.js dream
 # Consolidates memories while you sleep!
 ```
 
+### 👁️ I want to... analyze images and screenshots
+
+```bash
+# Analyze any image
+./scripts/hive-vision.sh analyze photo.jpg "Describe this"
+
+# Capture and analyze screen
+./scripts/hive-vision.sh screen-analyze "What windows are open?"
+
+# Plant/grow analysis 🌿
+./scripts/hive-vision.sh growth plant.jpg
+
+# Chart/graph analysis 📊
+./scripts/hive-vision.sh chart graph.png
+
+# Receipt extraction 🧾
+./scripts/hive-vision.sh receipt receipt.jpg
+
+# Compare two images
+./scripts/hive-vision.sh compare before.jpg after.jpg
+```
+
+**Vision Models:** Kimi K2.5 (screenshots), GPT-5.4 (complex), Qwen VL (local), Gemini 2.0 (fast)
+
 ### 🕸️ I want to... go decentralized (P2P)
 
 ```bash
