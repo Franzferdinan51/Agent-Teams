@@ -33,7 +33,9 @@ setInterval(async () => {
         if (session && session.phase !== 'idle') {
             broadcastSSE({ type: 'council-update', data: session });
         }
-    } catch (e) {}
+    } catch (e) {
+        // Silently ignore polling errors
+    }
 }, 3000); // Poll every 3 seconds
 
 // Load Hive Core (persistent state + LLM integration)
@@ -143,18 +145,60 @@ const server = http.createServer(async (req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const pathname = parsedUrl.pathname;
     const query = parsedUrl.query;
-
-    // CORS
+    const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    
+    // CORS - configurable for production
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
+    
+    // Rate limiting (skip for static files and health)
+    if (pathname.startsWith('/api/') && pathname !== '/api/health') {
+        if (!checkRateLimit(clientIP)) {
+            res.writeHead(429, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Rate limit exceeded. Try again later.' }));
+            return;
+        }
+    }
+    
     if (req.method === 'OPTIONS') { res.writeHead(200); res.end(); return; }
-
+    
     // ═══════════════════════════════════════════
     // API ROUTES
     // ═══════════════════════════════════════════
-
+    
+    // Request ID for tracing
+    const requestId = Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    res.setHeader('X-Request-Id', requestId);
+    
+    // Log API requests (excluding SSE stream)
+    if (pathname.startsWith('/api/') && !pathname.includes('/stream')) {
+        log(LOG_LEVELS.DEBUG, `[${requestId}] ${req.method} ${pathname}`);
+    }
+    
+    // Enhanced Health check
+    if (pathname === '/api/health') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        const mem = process.memoryUsage();
+        res.end(JSON.stringify({
+            status: 'ok',
+            timestamp: Date.now(),
+            uptime: process.uptime(),
+            memory: {
+                used: Math.round(mem.heapUsed / 1048576),
+                total: Math.round(mem.heapTotal / 1048576),
+                percentage: Math.round((mem.heapUsed / mem.heapTotal) * 100)
+            },
+            sseClients: sseClients.size,
+            rateLimitEntries: rateLimitMap.size,
+            services: {
+                council: !!await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/status'),
+                hiveCore: !!HiveCore
+            }
+        }));
+        return;
+    }
+    
     // Dashboard
     if (pathname === '/api/dashboard') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -212,11 +256,30 @@ const server = http.createServer(async (req, res) => {
         req.on('end', () => {
             try {
                 const { title, content } = JSON.parse(body);
-                const decree = { id: 'decree-' + Date.now(), title: title || 'Decree', content: content || '', authority: 'duckets', scope: 'universal', priority: 'high', status: 'active', timestamp: new Date().toISOString() };
+                // Validate input
+                if (!title && !content) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Title or content required' }));
+                    return;
+                }
+                const decree = {
+                    id: 'decree-' + Date.now(),
+                    title: sanitize(title || content.substring(0, 30)),
+                    content: sanitize(content || ''),
+                    authority: 'duckets',
+                    scope: 'universal',
+                    priority: 'high',
+                    status: 'active',
+                    timestamp: new Date().toISOString()
+                };
                 liveData.decrees.push(decree);
+                broadcastSSE({ type: 'decree-passed', decree });
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: true, decree }));
-            } catch (e) { res.writeHead(400); res.end(JSON.stringify({ error: e.message })); }
+            } catch (e) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid request body' }));
+            }
         });
         return;
     }
@@ -473,6 +536,104 @@ server.listen(PORT, () => {
 ║  Council:     http://localhost:${COUNCIL_PORT}                            ║
 ╚══════════════════════════════════════════════════════════════════╝
 `);
+    log(LOG_LEVELS.INFO, 'Server started on port', PORT);
 });
 
-process.on('SIGINT', () => { console.log('\n👋 Shutting down...'); server.close(); process.exit(0); });
+// Graceful shutdown
+let isShuttingDown = false;
+
+function gracefulShutdown(signal) {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+    log(LOG_LEVELS.WARN, `Received ${signal}, shutting down gracefully...`);
+    
+    // Close all SSE connections
+    sseClients.forEach(client => {
+        try {
+            client.write('data: {"type":"shutdown","message":"Server shutting down"}\n\n');
+            client.end();
+        } catch (e) {}
+    });
+    sseClients.clear();
+    
+    // Close HTTP server
+    server.close(() => {
+        log(LOG_LEVELS.INFO, 'Server closed gracefully');
+        process.exit(0);
+    });
+    
+    // Force exit after 10 seconds
+    setTimeout(() => {
+        log(LOG_LEVELS.ERROR, 'Forced exit after timeout');
+        process.exit(1);
+    }, 10000);
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
+// Unhandled rejection handler
+process.on('unhandledRejection', (reason, promise) => {
+    log(LOG_LEVELS.ERROR, 'Unhandled Rejection:', reason);
+});
+
+// Catch uncaught exceptions
+process.on('uncaughtException', (error) => {
+    log(LOG_LEVELS.ERROR, 'Uncaught Exception:', error.message);
+    gracefulShutdown('uncaughtException');
+});
+
+// Rate limiting (simple in-memory implementation)
+const rateLimitMap = new Map();
+const RATE_LIMIT = 100; // requests per minute
+const RATE_WINDOW = 60000; // 1 minute
+
+// Logger with timestamps and levels
+const LOG_LEVELS = { DEBUG: 0, INFO: 1, WARN: 2, ERROR: 3 };
+const currentLevel = LOG_LEVELS.INFO;
+
+function log(level, ...args) {
+    if (level >= currentLevel) {
+        const timestamp = new Date().toISOString();
+        const prefix = level === LOG_LEVELS.ERROR ? '❌' : level === LOG_LEVELS.WARN ? '⚠️' : '✅';
+        console.log(`[${timestamp}] ${prefix}`, ...args);
+    }
+}
+
+function logRequest(req) {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] 📡 ${req.method} ${req.url}`);
+}
+
+function checkRateLimit(ip) {
+    const now = Date.now();
+    const record = rateLimitMap.get(ip);
+    
+    if (!record) {
+        rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
+        return true;
+    }
+    
+    if (now > record.resetAt) {
+        rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
+        return true;
+    }
+    
+    if (record.count >= RATE_LIMIT) {
+        return false;
+    }
+    
+    record.count++;
+    return true;
+}
+
+// Sanitize input
+function sanitize(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
