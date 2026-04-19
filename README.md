@@ -5,70 +5,63 @@
 Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https://github.com/Franzferdinan51/duck-cli).
 Inspired by [Hermes Agent](https://github.com/NousResearch/hermes-agent).
 
-## 🧠 THE HIVE MIND
-
-Every system connected to the mesh becomes part of the hive:
+## 🧠 THE HIVE MIND — All Systems Connected
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                     THE HIVE MIND                                 │
-│                                                                  │
-│   Every agent, system, and AI is connected                       │
-│                                                                  │
-│   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
-│   │  Duck CLI   │  │  Dashboard  │  │  AI Council  │             │
-│   │  (Coding)   │  │  (Status)   │  │(Deliberation)│             │
-│   └──────┬──────┘  └──────┬──────┘  └──────┬──────┘             │
-│          │                │                │                      │
-│   ┌──────┴──────┐  ┌──────┴──────┐  ┌──────┴──────┐            │
-│   │Creative    │  │  Android    │  │  Meta       │            │
-│   │Agents      │  │  Control    │  │  Agents     │            │
-│   │(Image/3D)  │  │  (ADB)      │  │(Plan/Exec)  │            │
-│   └────────────┘  └────────────┘  └────────────┘            │
-│                                                                  │
-│              ┌────────────────────────┐                          │
-│              │     AGENT MESH API     │                         │
-│              │   (Central Nervous)    │                         │
-│              └────────────────────────┘                          │
-└──────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                        THE HIVE MIND                                │
+│                                                                     │
+│   EVERYTHING IS CONNECTED:                                          │
+│                                                                     │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │                      OPENCLAW 🦞                           │   │
+│   │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐          │   │
+│   │  │Gateway  │ │Memory   │ │Skills   │ │Channels│          │   │
+│   │  │Port 18789│ │MEMORY.md│ │clawhub  │ │Telegram│          │   │
+│   │  └─────────┘ └─────────┘ └─────────┘ └─────────┘          │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                              │                                      │
+│   ┌─────────────────────────┼─────────────────────────────────┐   │
+│   │                         ▼                                 │   │
+│   │              ┌────────────────────────┐                   │   │
+│   │              │     AGENT MESH API     │                   │   │
+│   │              │   (Central Nervous)    │                   │   │
+│   │              │    localhost:4000      │                   │   │
+│   │              └────────────────────────┘                   │   │
+│   │                         │                                │   │
+│   └─────────────────────────┼─────────────────────────────────┘   │
+│                             │                                   │
+│   ┌─────────────────────────┼─────────────────────────────────┐   │
+│   │                         ▼                                 │   │
+│   │  ┌───────────┐  ┌───────────┐  ┌───────────┐           │   │
+│   │  │  Duck CLI │  │AI Council │  │ Dashboard │           │   │
+│   │  │ (Coding) │  │(Deliberate)│  │ (Status)  │           │   │
+│   │  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘           │   │
+│   │        │              │              │                  │   │
+│   │  ┌─────┴─────┐  ┌─────┴─────┐  ┌─────┴─────┐            │   │
+│   │  │Creative  │  │ 30+      │  │ Android  │            │   │
+│   │  │Agents    │  │Micro     │  │ Control  │            │   │
+│   │  │(Image/3D)│  │Agents   │  │ (ADB)    │            │   │
+│   │  └──────────┘  └──────────┘  └──────────┘            │   │
+│   └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-**Connect ANY system:** `./scripts/hive-connect.sh <name> [capabilities]`
+**Every system coordinates via the mesh!**
 
-## Core Features
-
-- **🧠 Hive Mind** — All agents/systems connected and coordinating
-- **🎨 Creative Agents** — Image, Video, 3D, Music generation
-- **🌐 Live Communication** — Real-time WebSocket messaging
-- **🌙 Dreaming Engine** — Light→REM→Deep memory consolidation
-- **🤖 30+ Micro-Agents** — Single-purpose specialists
-- **🧠 Meta-Agent** — Plan→Execute→Critic→Heal→Learn
-- **📱 Android Control** — ADB + reflection loop
-- **✅ QA Verification** — Multi-round verification
-
-## 🎨 Creative Agents
-
-| Agent | Purpose | Tools |
-|-------|---------|-------|
-| `image-generator` | Text-to-image | ComfyUI, MiniMax, SDXL |
-| `video-generator` | Video creation | MiniMax, AnimateDiff, SVD |
-| `3d-modeler` | 3D mesh creation | Blender, GLTF export |
-| `blender-artist` | Blender scripting | Python API, Cycles |
-| `texture-artist` | Procedural textures | Stable Diffusion |
-| `music-generator` | Music creation | MiniMax |
-| `speech-agent` | TTS + voice | MiniMax |
-| `animate-artist` | Animation sequences | ComfyUI |
-
-### Connect Creative Tools
+## Connect OpenClaw
 
 ```bash
-# Connect all creative agents
-./scripts/creative-hive.sh
+# Connect OpenClaw gateway to hive
+./scripts/openclaw-hive.sh
 
-# Or individual
-./scripts/hive-connect.sh "comfyui" "image,workflows"
-./scripts/hive-connect.sh "minimax-creative" "speech,music,video"
-./scripts/hive-connect.sh "blender" "3d,rendering"
+# OpenClaw registers:
+# - openclaw-gateway (orchestration)
+# - openclaw-memory (dreaming, MEMORY.md)
+# - openclaw-skills (clawhub skills)
+# - openclaw-channels (Telegram, Discord, etc.)
+# - openclaw-mcp (MCP server)
+# - openclaw-acp (ACP server)
 ```
 
 ## Quick Start
@@ -81,59 +74,69 @@ chmod +x *.sh scripts/*.sh
 # Start mesh (hive nervous system)
 cd /tmp/agent-mesh-api && npm start &
 
-# Connect to hive
-./scripts/hive-connect.sh my-system
+# Connect OpenClaw first
+./scripts/openclaw-hive.sh
 
-# List agents
+# Then connect other systems
+./scripts/hive-connect.sh "duck-cli"
+./scripts/hive-connect.sh "ai-council"
+./scripts/hive-connect.sh "dashboard"
+
+# Connect creative tools
+./scripts/creative-hive.sh
+
+# Run tasks
 ./scripts/micro.sh list
-
-# Spawn creative agent
-./scripts/micro.sh image-generator "futuristic city at sunset"
+./scripts/micro.sh image-generator "futuristic city"
 ```
 
-## Hive Mind Scripts
+## All Connected Systems
+
+| System | Type | Capabilities |
+|--------|------|-------------|
+| **OpenClaw** 🦞 | Framework | Gateway, Memory, Skills, Channels, MCP, ACP |
+| **Duck CLI** | Agent | Coding, Research, Meta-agent |
+| **AI Council** | Council | Deliberation, Analysis, Consensus |
+| **Dashboard** | UI | Status, Metrics, Control |
+| **30+ Micro-Agents** | Specialists | Each does ONE thing well |
+| **Creative Agents** | Creative | Image, Video, 3D, Music |
+| **Android Control** | Device | ADB, Screens, Input |
+
+## Core Features
+
+- **🧠 Hive Mind** — All systems connected and coordinating
+- **🦞 OpenClaw** — Gateway + memory + skills + channels
+- **🎨 Creative Agents** — Image, Video, 3D, Music
+- **🌐 Live Communication** — Real-time WebSocket
+- **🌙 Dreaming** — Light→REM→Deep memory
+- **🤖 30+ Micro-Agents** — All can spawn sub-agents
+- **🧠 Meta-Agent** — Plan→Execute→Critic→Heal→Learn
+
+## Hive Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `hive-connect.sh` | Connect any system to hive |
-| `hive-mind.js` | Orchestrate multi-system tasks |
-| `creative-hive.sh` | Connect all creative agents |
-| `live-messenger.js` | Real-time messaging |
-
-## Micro-Agents (30+)
-
-**Research:** researcher, researcher-deep, comparer, summarizer
-
-**Coding:** coder, debugger, bug-hunt, optimizer, security-scan, refactor
-
-**Creative:** image-generator, video-generator, 3d-modeler, music-generator, speech-agent
-
-**QA:** test-writer, code-review, qa-test-writer, qa-security-scan
-
-**Planning:** planner, architect
-
-**All can spawn sub-agents as needed**
+| `openclaw-hive.sh` | Connect OpenClaw to hive |
+| `hive-connect.sh` | Connect any system |
+| `hive-mind.js` | Orchestrate multi-system |
+| `creative-hive.sh` | Connect creative tools |
 
 ## Related Projects
 
 | Project | Purpose |
 |---------|---------|
-| [Duck CLI](https://github.com/Franzferdinan51/duck-cli) | Desktop AI agent |
-| [Agent Mesh API](https://github.com/Franzferdinan51/agent-mesh-api) | Hive communication |
-| [MiniMax CLI](https://github.com/MiniMax-AI/cli) | Speech, video, music |
-| [ComfyUI](https://github.com/comfyanonymous/ComfyUI) | Image workflows |
+| [OpenClaw](https://github.com/openclaw/openclaw) | 🦞 Agent framework |
+| [Duck CLI](https://github.com/Franzferdinan51/duck-cli) | 💻 Desktop AI |
+| [Agent Mesh API](https://github.com/Franzferdinan51/agent-mesh-api) | 🔗 Hive communication |
 
 ## Changelog
 
 ### v1.0.0 (2026-04-19)
-- **Hive Mind** — unified multi-system coordination
-- **Creative Agents** — image, video, 3D, music, speech
-- Agent Mesh API live WebSocket
-- Dreaming Engine (Light→REM→Deep)
+- 🦞 **OpenClaw** integration — Gateway + components
+- 🧠 **Hive Mind** — Unified coordination
+- 🎨 **Creative Agents** — Image, Video, 3D, Music
 - 30+ Micro-Agents (all can spawn sub-agents)
 - Meta-Agent with sub-agent support
-- Android control (ADB + reflection)
-- Hermes patterns, Active memory
 
 ## License
 
