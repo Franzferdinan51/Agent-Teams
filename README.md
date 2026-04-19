@@ -1,6 +1,6 @@
-# 🏛️ Hive Nation v2.0.0
+# 🏛️ Hive Nation v2.0.1
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/Franzferdinan51/Agent-Teams)
+[![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)](https://github.com/Franzferdinan51/Agent-Teams)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
@@ -20,173 +20,261 @@ cd Agent-Teams
 # Start the WebUI
 node webui/server.js
 # Open: http://localhost:3131
+
+# Or start all services
+node webui/server.js &
+node scripts/hive-automation-v2.js start &
 ```
 
 ---
 
-## 🏛️ Three-Branch Government
+## 🏛️ Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    🏛️ HIVE NATION v2.0.0 🏛️                      │
+│                    🏛️ HIVE NATION v2.0.1 🏛️                       │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  LEGISLATIVE          │  EXECUTIVE       │  JUDICIAL       │   │
-│  │  ─────────────────────┼──────────────────┼────────────────│   │
-│  │  • 52 Voting Agents  │  • President     │  • Supreme Court│   │
-│  │  • Senate Decrees     │  • Cabinet       │  • Cases       │   │
-│  │  • 3 Parties         │  • Veto Power    │  • Precedents  │   │
-│  │  • 9 Caucuses       │  • Executive     │  • Rights      │   │
-│  │  • Coalitions        │    Orders        │               │   │
+│  │  COUNCIL (46 diverse councilors)                            │   │
+│  │  - 9 deliberation modes (adversarial, consensus, swarm...)  │   │
+│  │  - Real LLM calls (MiniMax, OpenRouter)                    │   │
+│  │  - Prevents "Yes-Man Syndrome"                             │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                              ↓                                      │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  SENATE (94 senators, 3 parties)                            │   │
+│  │  - Convert Council recommendations into binding DECREES     │   │
+│  │  - MUST/SHALL/NEVER enforcement language                   │   │
+│  │  - Democratic elections, weighted voting                    │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                              ↓                                      │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  TEAMS (8 templates, parallel execution)                    │   │
+│  │  - Research, Code, Security, Emergency, Planning, etc.      │   │
+│  │  - Execute per Senate decree                                │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 │                                                                     │
-│  🗳️ ELECTIONS — Democratic Senate Elections                         │
-│  Citizens elect Senators → Senators pass Decrees → Agents obey      │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Senate Decrees (THE LAW)
+### Government Loop
 
-| Pattern | Example | Binding |
-|---------|---------|---------|
-| `MUST` | "All agents MUST log decisions" | Absolute |
-| `SHALL` | "Agents SHALL verify sources" | Absolute |
-| `NEVER` | "NEVER delete memory without approval" | Absolute |
-| `FORBIDDEN` | "FORBIDDEN: unauthorized access" | Absolute |
-| `PREFER` | "PREFER local models for privacy" | Advisory |
-
----
-
-## 🤖 Agent System
-
-### Agent Teams (6 Templates)
-
-| Team | Members | Purpose |
-|------|---------|---------|
-| Research | researcher + writer + reviewer | Research workflows |
-| Code | coder + reviewer + security | Code development |
-| Security | security + reviewer + communicator | Security audits |
-| Emergency | security + communicator + planner | Incident response |
-| Planning | planner + researcher + communicator | Strategic planning |
-| Custom | User-defined | Any purpose |
-
-### Meta-Agent
-
-**Plan → Execute → Critic → Heal → Learn**
-
-- Task decomposition engine
-- 6-factor agent scoring (specialty, load, success rate, decrees, etc.)
-- Failover chains with ranked alternatives
-- Parallel execution with result synthesis
-- Performance tracking per agent
-
-### Voting System
-
-- **52 Voting Agents** across 3 parties
-- **Quack Party** (Blue) - Research & Analysis
-- **Honey Party** (Gold) - Development & Security
-- **Claw Party** (Red) - Planning & Communication
-- Weighted votes: Founding (3x) > Elected (2x) > Appointed (1x)
-- 9 Caucuses by specialty
+```
+1. PROBLEM identified
+       ↓
+2. COUNCIL debates (46 diverse voices)
+       ↓
+3. Council reaches consensus
+       ↓
+4. SENATE passes decree (THE LAW - binding)
+       ↓
+5. TEAMS execute per decree
+```
 
 ---
 
-## ⚙️ Modules
+## ⚡ Services
 
-| Module | File | Description |
-|--------|------|-------------|
-| **Memory** | `scripts/hive-memory.js` | Cross-session persistence |
-| **Scoring** | `scripts/hive-scoring.js` | Agent performance tracking |
-| **Skills** | `skills/hive-skills.js` | Web search, cron, code review |
-| **Plugins** | `plugins/hive-plugins.js` | GitHub, Notion, Cloudflare |
-| **Automation** | `automation/hive-automation.js` | Natural language scheduling |
-| **Monitoring** | `monitoring/hive-monitoring.js` | System health, alerts |
-| **Security** | `security/hive-security.js` | Secrets, access control |
-| **Multi-Instance** | `multi-instance/hive-multi.js` | Distributed operation |
+| Service | Port | URL | Status |
+|---------|------|-----|--------|
+| **Hive WebUI** | 3131 | http://localhost:3131 | ✅ Live |
+| **Council** | 3006 | http://localhost:3006 | ✅ 46 councilors |
+| **MCP Server** | 3456 | http://localhost:3456 | ✅ 23 tools |
+| **Automation** | 3457 | http://localhost:3457 | ⏳ Start manually |
 
 ---
 
-## ⚡ Workflows
-
-Pre-built workflow templates:
-- **Research** — search → summarize → review → archive
-- **Code Review** — analyze → test → suggest → implement
-- **Decision** — research → debate → vote → decree → execute
-- **Emergency** — alert → assess → mobilize → resolve
-- **Meeting** — schedule → summarize → distribute → archive
-- **Backup** — scan → compress → encrypt → store → verify
-
-Triggers: cron, event, decree, agent, webhook
-
----
-
-## 🌐 WebUI
-
-**Start:** `node webui/server.js`
+## 🌐 WebUI Dashboard
 
 **Access:** http://localhost:3131
 
-Features:
-- Overview Dashboard
-- Senate & Decrees
-- Voting Chamber
-- Agent Roster
-- Team Management
-- Memory Recall
-- Workflow Builder
-- System Monitoring
+### Tabs
+
+| Tab | Features |
+|-----|----------|
+| 📊 **Overview** | Live stats, quick actions, decrees, votes, agents |
+| 🏛️ **Senate** | Issue decrees, senator roster |
+| 🗳️ **Voting** | Historical votes, statistics |
+| 🤖 **Agents** | Rankings, scoring |
+| 👥 **Teams** | Spawn teams (8 templates), templates reference |
+| 🧠 **Memory** | Store/search memories |
+| 🧠 **Council** | Councilors, modes, deliberations |
+| ⚡ **Automation** | Job management |
+| 📈 **System** | Health, services |
+
+### WebUI Commands
+
+```bash
+# Restart WebUI
+pkill -f "node.*webui/server" && cd ~/Desktop/AgentTeam-GitHub && node webui/server.js &
+
+# Check logs
+tail -f /tmp/hive.log
+```
+
+---
+
+## 🤖 Agent Teams
+
+### 8 Templates
+
+| Template | Roles | Best For |
+|----------|-------|----------|
+| 🔬 **Research** | researcher + writer + reviewer | Research workflows |
+| 💻 **Code** | coder + reviewer + security | Code development |
+| 🛡️ **Security** | security + reviewer + communicator | Security audits |
+| 🚨 **Emergency** | security + communicator + planner | Incident response |
+| 📋 **Planning** | planner + researcher + communicator | Strategic planning |
+| 📊 **Analysis** | researcher + analyst + writer | Data analysis |
+| 🚀 **DevOps** | coder + security + communicator | Deployment |
+| 🐝 **Swarm** | multiple specialists | Parallel tasks |
+
+### Spawn a Team
+
+```bash
+# Via CLI
+node agents/teams/hive-teams.js spawn research "Build REST API"
+
+# Via WebUI → Teams tab → Spawn Team button
+```
+
+---
+
+## 🏛️ Senate Decrees
+
+**THE LAW** — Binding enforcement language:
+
+| Pattern | Enforcement | Example |
+|---------|-------------|---------|
+| `MUST` | Absolute | "All agents MUST encrypt data" |
+| `SHALL` | Absolute | "Agents SHALL verify sources" |
+| `NEVER` | Absolute | "NEVER delete memory without approval" |
+| `FORBIDDEN` | Absolute | "FORBIDDEN: unauthorized access" |
+| `PREFER` | Advisory | "PREFER local models for privacy" |
+
+### Issue a Decree
+
+```bash
+# Via CLI
+node scripts/hive-senate-complete.js issue "Privacy" "All agents MUST encrypt sensitive data"
+
+# Via WebUI → Senate tab → New Decree button
+```
+
+---
+
+## 🧠 AI Council
+
+**46 diverse councilors** with adversarial deliberation:
+
+### Deliberation Modes
+
+| Mode | Purpose |
+|------|---------|
+| `balanced` | Neutral analysis |
+| `adversarial` | Devil's advocate |
+| `consensus` | Find agreement |
+| `brainstorm` | Creative solutions |
+| `swarm` | Parallel thinking |
+| `legislature` | Formal debate |
+| `prediction` | Future forecasting |
+| `inspector` | Critical review |
+| `devil-advocate` | Challenge assumptions |
+
+### Council Workflow
+
+```bash
+# Run deliberation
+node scripts/hive-workflow.js council "Should we adopt microservices?"
+
+# Check council status
+curl http://localhost:3006/status
+```
+
+---
+
+## ⚡ Automation Engine v2
+
+**Persistent task runner with triggers:**
+
+```bash
+# Start automation
+node scripts/hive-automation-v2.js start
+
+# Add jobs
+node scripts/hive-automation-v2.js add cron "0 2 * * *" "Backup" backup
+node scripts/hive-automation-v2.js add webhook "security-alert" "Alert" alert
+node scripts/hive-automation-v2.js add decree "privacy" "Enforce Privacy" privacy
+
+# List jobs
+node scripts/hive-automation-v2.js list
+
+# Stats
+node scripts/hive-automation-v2.js stats
+```
+
+### Trigger Types
+
+| Type | Trigger |
+|------|---------|
+| **cron** | Schedule (e.g., `0 2 * * *` = 2 AM daily) |
+| **webhook** | HTTP POST to `/webhook/:id` |
+| **event** | Job completes/fails/starts |
+| **decree** | Senate passes matching decree |
+
+---
+
+## 🔌 MCP Server
+
+**23 tools** exposed via JSON-RPC:
+
+```bash
+# Start MCP
+node mcp-server.js
+
+# Endpoints
+# - http://localhost:3456/mcp   (JSON-RPC)
+# - http://localhost:3456/sse    (SSE)
+# - http://localhost:3456/health
+```
+
+### Tool Categories
+
+| Category | Tools |
+|----------|-------|
+| **Senate** | senate_list, senate_decrees, senate_create_decree |
+| **Council** | council_status, council_councilors, council_modes, council_session |
+| **Teams** | teams_list, teams_spawn, teams_templates, teams_add_task |
+| **Memory** | memory_list, memory_create, memory_recall |
+| **Scoring** | scoring_list, scoring_agent |
+| **Dashboard** | dashboard_status, system_health |
+| **Governance** | governance_status, governance_run |
 
 ---
 
 ## 💻 CLI Commands
 
-### Senate
+### Quick Reference
+
 ```bash
+# Senate
 node scripts/hive-senate-complete.js dashboard
-node scripts/hive-senate-complete.js issue "Privacy" "All agents MUST encrypt data"
-node scripts/hive-senate-complete.js list
-```
+node scripts/hive-senate-complete.js issue "Title" "Content"
 
-### Voting
-```bash
-node scripts/hive-voting.js agents
-node scripts/hive-voting.js bills
-node scripts/hive-voting.js introduce "Budget Act" AGENT-001 "AGENT-002,AGENT-003" "Annual allocation"
-node scripts/hive-voting.js vote AGENT-001 BILL-123 yes
-```
+# Council
+node scripts/hive-workflow.js council "Question"
 
-### Teams
-```bash
+# Teams
 node agents/teams/hive-teams.js list
-node agents/teams/hive-teams.js spawn research "Build API"
-node agents/teams/hive-teams.js status TEAM-001
-```
+node agents/teams/hive-teams.js spawn research "Task"
 
-### Workflows
-```bash
-node scripts/hive-workflows.js list
-node scripts/hive-workflows.js run research "AI safety research"
-```
+# Automation
+node scripts/hive-automation-v2.js start
+node scripts/hive-automation-v2.js list
 
-### Executive
-```bash
-node scripts/hive-executive.js dashboard
-node scripts/hive-executive.js order "Security Protocol" "All agents SHALL use 2FA"
-node scripts/hive-executive.js veto BILL-123 "Concerns about implementation"
-```
-
-### Judicial
-```bash
-node scripts/hive-judicial.js dashboard
-node scripts/hive-judicial.js file plaintiff defendant constitutional "Privacy rights" "argument"
-node scripts/hive-judicial.js review "Privacy" "All agents MUST spy on users"
-```
-
-### Elections
-```bash
-node scripts/hive-elections.js list
-node scripts/hive-elections.js create "Senate Seat 2026"
+# Execute (full pipeline demo)
+node scripts/hive-execute.js
 ```
 
 ---
@@ -195,134 +283,87 @@ node scripts/hive-elections.js create "Senate Seat 2026"
 
 ```
 AgentTeams/
-├── agents/
-│   ├── hive-agent-orchestrator.js   # Meta-agent orchestrator
-│   ├── task-decomposer.js           # Task decomposition
-│   └── teams/
-│       └── hive-teams.js            # Team system
-├── automation/
-│   └── hive-automation.js           # Automation workflows
-├── cli/
-│   ├── index.js                    # CLI entry
-│   ├── platform-detect.js          # Platform detection
-│   └── mcp/
-│       └── server.js              # MCP server
-├── monitoring/
-│   └── hive-monitoring.js          # System monitoring
-├── multi-instance/
-│   └── hive-multi.js               # Distributed operation
-├── plugins/
-│   └── hive-plugins.js             # External integrations
-├── scripts/
-│   ├── hive-senate-complete.js     # Full Senate system
-│   ├── hive-voting.js             # Voting system
-│   ├── hive-executive.js          # Executive branch
-│   ├── hive-judicial.js           # Judicial branch
-│   ├── hive-elections.js          # Elections
-│   ├── hive-workflows.js          # Workflow engine
-│   ├── hive-memory.js            # Memory system
-│   └── hive-scoring.js           # Agent scoring
-├── security/
-│   └── hive-security.js           # Security module
-├── skills/
-│   └── hive-skills.js             # Skills system
 ├── webui/
-│   ├── server.js                  # WebUI server
+│   ├── server.js              # WebUI server (Express)
 │   └── public/
-│       └── index.html             # Dashboard UI
-├── docs/
-│   ├── GOVERNANCE.md              # Government structure
-│   └── CHAIN-OF-COMMAND.md       # Command chain
-└── VERSION                        # v2.0.0
+│       └── index.html         # Dashboard UI (v2.0.1 overhaul)
+├── scripts/
+│   ├── hive-core.js           # Core (LLM + persistence)
+│   ├── hive-workflow.js       # Governance pipeline
+│   ├── hive-execute.js        # Full system demo
+│   ├── hive-automation-v2.js  # Automation engine v2
+│   ├── hive-senate-complete.js
+│   ├── hive-voting.js
+│   └── hive-memory.js
+├── mcp-server.js              # MCP server (23 tools)
+├── agents/teams/
+│   └── hive-teams.js          # Team system
+├── plugins/
+│   └── openclaw/              # OpenClaw integration
+└── data/
+    ├── core/state.json        # Persistent state
+    └── automation/
+        ├── jobs.json          # Automation jobs
+        └── triggers.json     # Trigger configs
 ```
 
 ---
 
 ## 🎯 Key Features
 
-- ✅ **52 Voting Agents** with weighted votes
-- ✅ **Senate Decrees** (MUST/SHALL/NEVER/FORBIDDEN/PREFER)
-- ✅ **Three-Branch Government** (Legislative/Executive/Judicial)
-- ✅ **Democratic Elections** for Senate seats
-- ✅ **6 Agent Team Templates** with coordination
-- ✅ **Meta-Agent** with Plan→Execute→Critic→Heal→Learn
-- ✅ **Failover Chains** for reliability
-- ✅ **Parallel Execution** for speed
-- ✅ **Performance Tracking** per agent
-- ✅ **Workflow Automation** with triggers
-- ✅ **WebUI Dashboard** at http://localhost:3131
-- ✅ **OpenAI Codex Plugin** for Codex CLI integration
-- ✅ **Cross-Platform** (Mac, Linux, Termux)
+- ✅ **46 Councilors** with adversarial deliberation
+- ✅ **94 Senators** (3 parties, weighted voting)
+- ✅ **Senate Decrees** (MUST/SHALL/NEVER enforcement)
+- ✅ **8 Team Templates** with parallel execution
+- ✅ **Automation Engine v2** (cron/webhook/event/decree)
+- ✅ **Persistent State** (JSON survives restarts)
+- ✅ **Real LLM Calls** (MiniMax, OpenRouter)
+- ✅ **MCP Server** (23 tools)
+- ✅ **WebUI Dashboard** (9 tabs, fully functional)
+- ✅ **OpenClaw Plugin** (Duck CLI integration)
 
 ---
 
-## 🔌 OpenAI Codex Integration
+## 🔧 v2.0.1 Fixes (2026-04-19)
 
-Use Hive Nation directly from OpenAI Codex CLI!
+### What's Fixed
 
-```bash
-# Add to ~/.codex/config.toml
-[marketplaces]
-local = { type = "directory", path = "~/Desktop/AgentTeam-GitHub/plugins/codex" }
+| Issue | Fix |
+|-------|-----|
+| Cold-Start Bug | State always initialized |
+| Live LLM Integration | Real API calls (MiniMax, OpenRouter) |
+| Persistent State | JSON files survive restarts |
+| Inter-Agent Messaging | Real message passing with routing |
+| WebUI Broken Tabs | Complete overhaul - all tabs working |
+| Duplicate Navigation | Restructured 9 proper tabs |
+| Missing Animations | Added bg gradients, hover effects, glow |
 
-# Or copy the plugin
-cp -r ~/Desktop/AgentTeam-GitHub/plugins/codex ~/.codex/plugins/hive-nation
-```
+### WebUI Enhancements
 
-Then use it in Codex:
-```
-@Hive Nation: List all active Senate decrees
-@Hive Nation: Spawn a research team to investigate AI safety
-@Hive Nation: Show recent voting results
-```
-
-See [plugins/openclaw/PLUGIN.md](plugins/openclaw/PLUGIN.md) for OpenClaw/Duck CLI integration.
+- **Animated background** with floating gradients
+- **Quick actions panel** on overview
+- **Glowing brand icon** with pulse
+- **Card hover effects** with border glow
+- **Toast notifications** (success/error/info)
+- **8 team templates** (was 5)
+- **Memory search** functionality
+- **Automation tab** (job management)
 
 ---
 
-## 🔌 MCP Server (LM Studio, Claude Desktop, etc.)
-
-Expose all Hive Nation tools via Model Context Protocol!
+## 🧪 Testing
 
 ```bash
-# Start MCP server
-node mcp-server.js
+# Run all tests
+node scripts/hive-execute.js
 
-# MCP endpoints:
-# - http://localhost:3456/mcp   (JSON-RPC)
-# - http://localhost:3456/sse    (SSE for mcporter)
-# - http://localhost:3456/health
-```
+# Test API endpoints
+curl http://localhost:3131/api/dashboard
+curl http://localhost:3131/api/decrees
+curl http://localhost:3131/api/teams
 
-### 23 Tools Available:
-
-| Category | Tools |
-|----------|-------|
-| **Senate** | senate_list, senate_decrees, senate_create_decree, senate_caucuses, senate_votes |
-| **Council** | council_status, council_councilors, council_modes, council_session |
-| **Teams** | teams_list, teams_spawn, teams_templates, teams_add_task |
-| **Memory** | memory_list, memory_create, memory_recall |
-| **Scoring** | scoring_list, scoring_agent |
-| **Dashboard** | dashboard_status, system_health, workflows_list |
-| **Governance** | governance_status, governance_run |
-
-### LM Studio Setup:
-
-```json
-// Add to LM Studio MCP servers config
-{
-  "mcpServers": {
-    "hive-nation": {
-      "command": "curl",
-      "args": ["-X", "POST", "http://localhost:3456/mcp", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"name\":\"TOOL_NAME\",\"arguments\":{}},\"id\":1}"]
-    }
-  }
-}
-```
-
-Or use with OpenClaw mcporter:
-```bash
-mcporter call --allow-http http://localhost:3456/sse <tool> [args]
+# Verify persistence
+# Restart server, data should survive
 ```
 
 ---
@@ -332,9 +373,9 @@ mcporter call --allow-http http://localhost:3456/sse <tool> [args]
 **Mascots:** 🦆 Duck | 🐝 Bee | 🦞 Lobster
 
 **Parties:**
-- 🦆 **Quack Party** — Research & Analysis
-- 🐝 **Honey Party** — Development & Security  
-- 🦞 **Claw Party** — Planning & Communication
+- 🦆 **Quack Party** — Research & Analysis (blue)
+- 🐝 **Honey Party** — Development & Security (gold)
+- 🦞 **Claw Party** — Planning & Communication (red)
 
 ---
 
@@ -344,74 +385,4 @@ MIT License
 
 ---
 
-**Version 2.0.0** — Built for production multi-agent governance 🏛️⚖️🦆
-
----
-
-## 📋 Changelog v2.0.0
-
-### New Features
-- ✅ **Governance Pipeline** - Council → Senate → Teams workflow
-- ✅ **MCP Server** - 23 tools for LM Studio, Claude Desktop, mcporter
-- ✅ **BrowserOS Integration** - Full browser automation
-- ✅ **16 Team Templates** - Including Coalition for team-of-teams
-- ✅ **46 Councilors** - Adversarial deliberation for robust decisions
-- ✅ **94 Senators** - Three parties with weighted voting
-- ✅ **WebUI v2.0** - Live dashboard with all systems
-- ✅ **Quick Commands** - `hive-teams.sh` CLI tool
-- ✅ **Skills** - Agent Teams skill for OpenClaw
-
-### Services
-| Service | Port | Description |
-|---------|------|-------------|
-| WebUI | 3131 | Live dashboard |
-| Council | 3006 | 46 councilors |
-| MCP | 3456 | 23 tools |
-
-### Quick Start
-```bash
-# Start all services
-node webui/server.js
-node mcp-server.js
-
-# Governance pipeline
-node scripts/hive-workflow.js pipeline "Topic"
-```
-
-**Version 2.0.0** — Built for production multi-agent governance 🏛️⚖️🦆
-
----
-
-## 🔧 v2.0.1 Fixes (2026-04-19)
-
-### Issues Fixed
-
-1. **Cold-Start Bug** - `state.teams` now always initialized (was undefined on first run)
-2. **Live LLM Integration** - Senators and councilors now call actual models (MiniMax, OpenRouter)
-3. **Persistent State** - All data survives restarts (constitution persists!)
-4. **Inter-Agent Messaging** - Real message passing with timestamps and routing
-
-### What's Actually Working
-
-| Feature | Before | After |
-|---------|--------|-------|
-| LLM Calls | ❌ Simulated only | ✅ Real API calls |
-| State Persistence | ❌ In-memory only | ✅ JSON file persists |
-| Cold Start | ❌ Could crash | ✅ Always initializes |
-| Messaging | ❌ Objects only | ✅ Real message passing |
-
-### New Files
-
-- `scripts/hive-core.js` - Core with actual LLM + persistence
-- `scripts/hive-execute.js` - Working demo of multi-agent system
-
-### Usage
-
-```bash
-# See it working
-node scripts/hive-execute.js
-
-# Test persistence (data survives restarts)
-curl http://localhost:3131/api/dashboard
-```
-
+**Version 2.0.1** — Built for production multi-agent governance 🏛️⚖️🦆
