@@ -280,6 +280,51 @@ See [plugins/codex/README.md](plugins/codex/README.md) for full setup.
 
 ---
 
+## 🔌 MCP Server (LM Studio, Claude Desktop, etc.)
+
+Expose all Hive Nation tools via Model Context Protocol!
+
+```bash
+# Start MCP server
+node mcp-server.js
+
+# MCP endpoints:
+# - http://localhost:3456/mcp   (JSON-RPC)
+# - http://localhost:3456/sse    (SSE for mcporter)
+# - http://localhost:3456/health
+```
+
+### 23 Tools Available:
+
+| Category | Tools |
+|----------|-------|
+| **Senate** | senate_list, senate_decrees, senate_create_decree, senate_caucuses, senate_votes |
+| **Council** | council_status, council_councilors, council_modes, council_session |
+| **Teams** | teams_list, teams_spawn, teams_templates, teams_add_task |
+| **Memory** | memory_list, memory_create, memory_recall |
+| **Scoring** | scoring_list, scoring_agent |
+| **Dashboard** | dashboard_status, system_health, workflows_list |
+| **Governance** | governance_status, governance_run |
+
+### LM Studio Setup:
+
+```json
+// Add to LM Studio MCP servers config
+{
+  "mcpServers": {
+    "hive-nation": {
+      "command": "curl",
+      "args": ["-X", "POST", "http://localhost:3456/mcp", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"name\":\"TOOL_NAME\",\"arguments\":{}},\"id\":1}"]
+    }
+  }
+}
+```
+
+Or use with OpenClaw mcporter:
+```bash
+mcporter call --allow-http http://localhost:3456/sse <tool> [args]
+```
+
 ---
 
 ## 🦆 Branding
