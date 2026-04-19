@@ -573,6 +573,84 @@
             }
         }
         
+        // SSE Live Stream - Real-time updates
+        let eventSource = null;
+        let liveConnectionActive = false;
+        
+        function connectLiveStream() {
+            if (eventSource) {
+                eventSource.close();
+            }
+            
+            eventSource = new EventSource(API + '/stream/live');
+            
+            eventSource.onopen = () => {
+                liveConnectionActive = true;
+                document.getElementById('live-status').textContent = 'Live';
+                document.getElementById('live-dot').style.background = '#10b981';
+            };
+            
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleLiveUpdate(data);
+                } catch (e) {
+                    console.error('SSE parse error:', e);
+                }
+            };
+            
+            eventSource.onerror = () => {
+                liveConnectionActive = false;
+                document.getElementById('live-status').textContent = 'Reconnecting...';
+                document.getElementById('live-dot').style.background = '#f59e0b';
+                // Reconnect after 3 seconds
+                setTimeout(connectLiveStream, 3000);
+            };
+        }
+        
+        function handleLiveUpdate(data) {
+            switch(data.type) {
+                case 'connected':
+                    showToast('Live updates active', 'success');
+                    break;
+                case 'council-update':
+                    // Update council messages live
+                    if (data.data && data.data.messages) {
+                        updateCouncilMessages(data.data.messages);
+                    }
+                    break;
+                case 'council-started':
+                    showToast('Council deliberation started: ' + data.topic, 'info');
+                    loadCouncil();
+                    break;
+                case 'decree-passed':
+                    showToast('Decree passed: ' + data.title, 'success');
+                    loadDecrees();
+                    break;
+                case 'team-spawned':
+                    showToast('Team spawned: ' + data.name, 'success');
+                    loadTeams();
+                    break;
+                default:
+                    console.log('Unknown live update:', data.type);
+            }
+        }
+        
+        function updateCouncilMessages(messages) {
+            const container = document.getElementById('council-messages');
+            if (!messages || messages.length === 0) return;
+            
+            container.innerHTML = messages.slice(0, 10).map(m => 
+                `<div class="memory-item" style="border-left: 3px solid var(--accent3)">
+                    <div class="memory-cat">${m.councilor || 'Council'} — ${m.timestamp || ''}</div>
+                    <div class="memory-content">${m.content || ''}</div>
+                </div>`
+            ).join('');
+        }
+        
+        // Start live stream on page load
+        connectLiveStream();
+        
         // Load tabs
         function loadTab(tab) {
             if (tab === 'council') loadCouncil();
@@ -846,8 +924,20 @@
         }
         
         async function startDeliberation() {
+            const topic = prompt('Enter deliberation topic:');
+            if (!topic) return;
+            
+            const mode = prompt('Select mode (balanced/adversarial/consensus):') || 'balanced';
+            
             showToast('Starting deliberation...', 'info');
-            // Would integrate with Council server API
+            const r = await apiPost('/council/deliberate', { topic, mode });
+            
+            if (r.success) {
+                showToast('Deliberation started!', 'success');
+                loadCouncil();
+            } else {
+                showToast('Failed to start deliberation', 'error');
+            }
         }
         
         // Automation

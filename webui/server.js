@@ -15,6 +15,27 @@ const SCRIPTS_DIR = path.join(__dirname, '..', 'scripts');
 const COUNCIL_HOST = 'localhost';
 const COUNCIL_PORT = 3006;
 
+// SSE clients for live updates
+const sseClients = new Set();
+
+// Broadcast to all SSE clients
+function broadcastSSE(data) {
+    const message = `data: ${JSON.stringify(data)}\n\n`;
+    sseClients.forEach(client => {
+        try { client.write(message); } catch (e) { sseClients.delete(client); }
+    });
+}
+
+// Poll Council for updates and broadcast
+setInterval(async () => {
+    try {
+        const session = await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/session');
+        if (session && session.phase !== 'idle') {
+            broadcastSSE({ type: 'council-update', data: session });
+        }
+    } catch (e) {}
+}, 3000); // Poll every 3 seconds
+
 // Load Hive Core (persistent state + LLM integration)
 let HiveCore;
 try {
@@ -34,7 +55,30 @@ function httpGet(host, port, p) {
             res.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve(null); } });
         });
         req.on('error', () => resolve(null));
-        req.setTimeout(3000, () => { req.destroy(); resolve(null); });
+        req.setTimeout(5000, () => { req.destroy(); resolve(null); });
+    });
+}
+
+// HTTP POST helper
+function httpPost(host, port, p, data) {
+    return new Promise((resolve) => {
+        const body = JSON.stringify(data);
+        const options = {
+            hostname: host,
+            port,
+            path: p,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+        };
+        const req = http.request(options, (res) => {
+            let d = '';
+            res.on('data', c => d += c);
+            res.on('end', () => { try { resolve(JSON.parse(d)); } catch { resolve(null); } });
+        });
+        req.on('error', () => resolve(null));
+        req.setTimeout(10000, () => { req.destroy(); resolve(null); });
+        req.write(body);
+        req.end();
     });
 }
 
@@ -318,6 +362,59 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    // Start council deliberation
+    if (pathname === '/api/council/deliberate' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const { topic, mode } = JSON.parse(body);
+                // Start deliberation on Council server (format: {topic, mode})
+                const startRes = await httpPost(COUNCIL_HOST, COUNCIL_PORT, '/api/session/start', { topic, mode: mode || 'balanced' });
+                // Council returns {ok: true, sessionId} on success
+                if (startRes && startRes.ok) {
+                    broadcastSSE({ type: 'council-started', topic, mode });
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true, sessionId: startRes.sessionId, message: `Deliberation started: ${topic}` }));
+                } else {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, error: 'Failed to start deliberation' }));
+                }
+            } catch (e) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: e.message }));
+            }
+        });
+        return;
+    }
+    
+    // ═══════════════════════════════════════════
+    // SSE STREAMING (Real-time updates)
+    // ═══════════════════════════════════════════
+    
+    if (pathname === '/api/stream/live') {
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'Access-Control-Allow-Origin': '*'
+        });
+        
+        // Send initial connection message
+        res.write('data: {"type":"connected","message":"Live stream active"}\n\n');
+        
+        // Add to SSE clients
+        sseClients.add(res);
+        console.log(`[SSE] Client connected (${sseClients.size} total)`);
+        
+        // Remove on close
+        req.on('close', () => {
+            sseClients.delete(res);
+            console.log(`[SSE] Client disconnected (${sseClients.size} total)`);
+        });
+        return;
+    }
+    
     // ═══════════════════════════════════════════
     // STATIC FILES
     // ═══════════════════════════════════════════
