@@ -6,32 +6,99 @@
 
 **The ultimate multi-agent government framework.** Spawn, coordinate, and orchestrate multiple specialized agents for complex tasks — with a three-branch AI Government, Senate Decrees, Agent Teams, and hive mind intelligence.
 
-**Now with built-in LLM-powered Council deliberation!** No separate servers needed.
+**Now with built-in LLM-powered Council deliberation!** No separate servers or repos needed.
 
 Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https://github.com/Franzferdinan51/duck-cli).
 
 ---
 
-## 🚀 Quick Start
+## 📋 Requirements
+
+| Requirement | Version | Notes |
+|-------------|---------|-------|
+| **Node.js** | 18+ | [Download](https://nodejs.org/) |
+| **npm** | 9+ | Comes with Node.js |
+| **Git** | Any recent | For cloning |
+
+### Optional (for LLM-powered deliberation)
+
+| Provider | Required | Notes |
+|----------|----------|-------|
+| **MiniMax API Key** | Recommended | [Get from platform.minimax.io](https://platform.minimax.io/) |
+| **LM Studio** | Alternative | [Download](https://lmstudio.ai/) - Local, free |
+| **OpenRouter API Key** | Alternative | [Get from openrouter.ai](https://openrouter.ai/) - Free tier |
+
+---
+
+## 🚀 Setup (5 Minutes)
+
+### Step 1: Clone the Repo
 
 ```bash
-# Clone the repo
 git clone https://github.com/Franzferdinan51/Agent-Teams.git
 cd Agent-Teams
-
-# Install dependencies
-npm install
-
-# Start ALL services at once
-./start-all.sh
-# Or: npm run start:all
-
-# Or start individually
-npm run start:council   # Council API on port 3007
-npm run start:webui     # WebUI on port 3131
 ```
 
-**Open:** http://localhost:3131
+### Step 2: Install Dependencies
+
+```bash
+npm install
+```
+
+This will install:
+- `express` - Web server
+- `cors` - Cross-origin support
+- `ws` - WebSocket support
+
+### Step 3: Configure LLM (Optional but Recommended)
+
+**Option A: MiniMax (Recommended - Best Quality)**
+
+```bash
+# Get your API key from: https://platform.minimax.io/
+export MINIMAX_API_KEY=sk-your-key-here
+```
+
+**Option B: LM Studio (Free - Local)**
+
+1. Download [LM Studio](https://lmstudio.ai/)
+2. Download a model (e.g., Gemma-4, Qwen-3)
+3. Start LM Studio and enable "Local Server" (port 1234)
+
+```bash
+export LMSTUDIO_URL=http://127.0.0.1:1234/v1
+export LMSTUDIO_KEY=sk-lm-any-key
+```
+
+**Option C: OpenRouter (Free Tier)**
+
+```bash
+# Get key from: https://openrouter.ai/keys
+export OPENROUTER_API_KEY=sk-or-your-key
+```
+
+### Step 4: Start Services
+
+```bash
+# Start everything at once
+./start-all.sh
+```
+
+Or start individually:
+
+```bash
+# Council API (port 3007)
+npm run start:council
+
+# WebUI (port 3131)
+npm run start:webui
+```
+
+### Step 5: Open in Browser
+
+**WebUI:** http://localhost:3131
+
+**Council API:** http://localhost:3007/api/health
 
 ---
 
