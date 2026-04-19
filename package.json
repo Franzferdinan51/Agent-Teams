@@ -1,22 +1,67 @@
 {
   "name": "agent-teams",
   "version": "1.0.0",
-  "description": "Multi-Agent Collaboration System — spawn, coordinate, and orchestrate multiple specialized agents",
-  "version": "1.0.0",
+  "description": "Multi-Agent Collaboration System — The Hive Senate with 45 councilors, P2P mesh, and hive mind intelligence",
+  "description": "The ultimate multi-agent collaboration system. Spawn, coordinate, and orchestrate multiple specialized agents — with a giant AI Senate, decentralized P2P mesh, and hive mind intelligence.",
   "scripts": {
     "start": "node src/index.js",
+    
+    "mesh:start": "cd /tmp/agent-mesh-api && npm start",
     "mesh:register": "node scripts/mesh-register.js",
-    "mesh:status": "curl http://localhost:4000/api/agents -H 'X-API-Key: openclaw-mesh-default-key'",
-    "agent:register": "node scripts/register-agent.js",
-    "test": "node scripts/run-tests.js"
+    "mesh:status": "curl -s http://localhost:4000/api/agents -H 'X-API-Key: openclaw-mesh-default-key' | jq '.'",
+    "mesh:agents": "curl -s http://localhost:4000/api/agents -H 'X-API-Key: openclaw-mesh-default-key' | jq '. | length'",
+    
+    "hive:connect": "bash scripts/openclaw-hive.sh",
+    "hive:council": "bash scripts/ai-council-hive.sh",
+    "hive:status": "node scripts/hive-mind.js status",
+    "hive:discover": "node scripts/hive-discovery.js discover",
+    
+    "agent:list": "bash scripts/micro.sh list",
+    "agent:spawn": "bash scripts/micro.sh",
+    "agent:meta": "bash scripts/meta-run.sh",
+    
+    "p2p:relay": "bash scripts/hive-p2p.sh 4100 relay",
+    "p2p:peer": "bash scripts/hive-p2p.sh 4101 peer",
+    "p2p:status": "bash scripts/hive-p2p.sh 4100 status",
+    
+    "dream:start": "node scripts/dreaming-engine.js dream",
+    "queue:status": "node scripts/hive-queue.js status",
+    "queue:enqueue": "node scripts/hive-queue.js enqueue",
+    
+    "emergency:defcon1": "bash scripts/hive-emergency.sh DEFCON1",
+    "emergency:defcon3": "bash scripts/hive-emergency.sh DEFCON3",
+    "emergency:defcon5": "bash scripts/hive-emergency.sh DEFCON5",
+    
+    "consensus:poll": "node scripts/hive-consensus.js poll",
+    "consensus:vote": "node scripts/hive-consensus.js vote",
+    
+    "test": "node scripts/qa-loop.sh 'echo test'",
+    "help": "cat START-HERE.md"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "ws": "^8.16.0"
   },
   "peerDependencies": {
     "agent-mesh-api": ">=1.0.0"
+  },
+  "keywords": [
+    "multi-agent",
+    "ai-council",
+    "hive-mind",
+    "collaboration",
+    "coordination",
+    "agent",
+    "p2p",
+    "decentralized",
+    "deliberation"
+  ],
+  "author": "AgentTeams",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Franzferdinan51/Agent-Teams.git"
   }
 }

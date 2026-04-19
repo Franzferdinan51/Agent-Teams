@@ -1,128 +1,344 @@
 # 🤖 AgentTeams v1.0.0
 
-**Multi-Agent Collaboration System** — spawn, coordinate, and orchestrate multiple specialized agents for complex tasks.
+**The ultimate multi-agent collaboration system.** Spawn, coordinate, and orchestrate multiple specialized agents for complex tasks — with a giant AI Senate, decentralized P2P mesh, and hive mind intelligence.
 
 Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https://github.com/Franzferdinan51/duck-cli).
+Inspired by [Hermes Agent](https://github.com/NousResearch/hermes-agent).
 
-## 🧠 THE HIVE MIND — All Systems Connected
+---
+
+## 🕸️ THE HIVE SENATE — Complete System
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        THE HIVE MIND                              │
+│                     🏛️ THE HIVE SENATE 🏛️                          │
 │                                                                     │
-│   EVERYTHING CONNECTED:                                            │
+│   Every system connected, every agent coordinated                    │
 │                                                                     │
 │   ┌───────────────────────────────────────────────────────────┐   │
-│   │  🦞 OpenClaw │ 🦆 Duck CLI │ 🏛️ AI Council │ 📊 Dashboard│   │
-│   │  Gateway     │  Coding     │  45 Councilors │ Status     │   │
-│   │  Memory      │  Research   │  11 Modes      │ Metrics    │   │
-│   │  Skills      │  Meta-Agent │  Deliberate    │ Control     │   │
+│   │ 🦞 OpenClaw  │ 🦆 Duck CLI  │ 🏛️ AI Council │ 📊 Dashboard │ │
+│   │ Gateway      │  Coding      │ 45 Senators   │ Status       │ │
+│   │ Memory       │  Research     │ 11 Modes      │ Metrics      │ │
+│   │ Skills       │  Meta-Agent  │ Deliberate    │ Control      │ │
 │   └───────────────────────────────────────────────────────────┘   │
-│                              │                                      │
+│                              │                                       │
 │   ┌─────────────────────────┼────────────────────────────────┐   │
-│   │              AGENT MESH API                               │   │
-│   │           (Central Nervous System)                       │   │
-│   └─────────────────────────┼────────────────────────────────┘   │
-│                             │                                    │
-│   ┌─────────────────────────┼────────────────────────────────┐   │
-│   │    🎨 Creative │ 📱 Android │ ✅ QA │ 🔧 Task Queue       │   │
-│   │    Image/3D   │  ADB      │ Verify │ Priority Queue    │   │
-│   │    Video/Music │  Control  │ Loops  │ Emergency Broadcast│   │
-│   └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
+│   │              🕸️ P2P MESH │ 🤖 MICRO-AGENTS │ ✅ QA LOOP      │   │
+│   │           Decentralized   │ 30+ Specialists │ Verification  │   │
+│   │              No Server   │ Spawn Sub-Agents │ Auto-Fix      │   │
+│   └────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   ┌───────────────────────────────────────────────────────────┐   │
+│   │              🌙 DREAMING SYSTEM                            │   │
+│   │       Light → REM → Deep Memory Consolidation              │   │
+│   └───────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-## ✅ ALL ENHANCEMENTS COMPLETE
+---
 
-| Enhancement | Status | Script |
-|-------------|--------|--------|
-| **Task Router** | ✅ | `hive-router.js` |
-| **Consensus Engine** | ✅ | `hive-consensus.js` |
-| **Shared Memory** | ✅ | `hive-memory.js` |
-| **Cross-Agent Learning** | ✅ | `hive-learning.js` |
-| **Task Queue** | ✅ | `hive-queue.js` |
-| **Emergency Broadcast** | ✅ | `hive-emergency.sh` |
-| **Watchdog** | ✅ | `hive-watchdog.js` |
-| **Capability Discovery** | ✅ | `hive-discovery.js` |
-| **AI Council** | ✅ | `ai-council-hive.sh` |
-
-## 🏛️ AI Council — Adversarial Deliberation
-
-The AI Council Chamber adds **45 expert archetypes** and **11 deliberation modes** to the Hive Mind:
-
-### 45 Councilors
-- **Core:** Speaker, Technocrat, Ethicist, Pragmatist, Skeptic, Sentinel, Visionary...
-- **Business:** Economist, Product Manager, Marketing, Finance, Risk
-- **Technical:** DevOps, Security, Data Scientist, Performance, QA
-- **Emergency:** Meteorologist, Emergency Manager, Risk Analyst, Local Resident
-- **Vision:** Visual Analyst, Pattern Recognizer, Color Specialist, Composition Expert...
-
-### 11 Modes
-| Mode | Purpose |
-|------|---------|
-| ⚖️ Legislative | Debate + vote |
-| 🧠 Deep Research | Multi-round research |
-| 🐝 Swarm Hive | Task decomposition |
-| 💻 Swarm Coding | Software engineering |
-| 🌪️ Emergency Response | Crisis deliberation |
-| 👁️ Vision Council | Image analysis |
-
-## 🚀 Quick Start
+## 🚀 GET STARTED (5 Minutes)
 
 ```bash
+# Clone
 git clone https://github.com/Franzferdinan51/Agent-Teams.git
 cd Agent-Teams
-chmod +x *.sh scripts/*.sh
 
-# Start mesh
+# Make executable
+chmod +x *.sh scripts/*.sh scripts/*.js
+
+# Start mesh (central nervous system)
 cd /tmp/agent-mesh-api && npm start &
 
-# Connect all systems
+# Connect OpenClaw
 ./scripts/openclaw-hive.sh
-./scripts/ai-council-hive.sh
-./scripts/hive-connect.sh duck-cli
-./scripts/creative-hive.sh
 
-# Route task to AI Council
-./scripts/hive-router.sh "Should we use microservices?"
+# Connect AI Council
+./scripts/ai-council-hive.sh
+
+# Done! Explore below 👇
 ```
 
-## All Systems
+**Then read `START-HERE.md` for everything, or `QUICKREF.md` for commands.**
 
-| System | Type | Capabilities |
-|--------|------|-------------|
-| 🦞 **OpenClaw** | Framework | Gateway, Memory, Skills, MCP, ACP |
-| 🦆 **Duck CLI** | Agent | Coding, Research, Meta-agent |
-| 🏛️ **AI Council** | Council | 45 Councilors, 11 Modes, Deliberation |
-| 📊 **Dashboard** | UI | Status, Metrics, Control |
-| 🎨 **Creative** | Creative | Image, Video, 3D, Music |
-| 📱 **Android** | Device | ADB, Screens, Input |
-| ✅ **30+ Micro** | Specialists | Single-purpose agents |
+---
 
-## Related Projects
+## 🤖 30+ MICRO-AGENTS
+
+Spawn with `./scripts/micro.sh <agent> <task>`
+
+### Research
+| Agent | What It Does |
+|-------|-------------|
+| `researcher` | Web search and summarize |
+| `researcher-deep` | Deep research on a topic |
+| `comparer` | Compare options with pros/cons |
+| `summarizer` | Summarize long text |
+
+### Coding
+| Agent | What It Does |
+|-------|-------------|
+| `coder` | Write code for a feature |
+| `debugger` | Find and fix bugs |
+| `bug-hunt` | Hunt for potential bugs |
+| `security-scan` | Security vulnerability review |
+| `refactor` | Refactor messy code |
+| `optimizer` | Optimize code performance |
+
+### Creative
+| Agent | What It Does | Tools |
+|-------|-------------|-------|
+| `image-generator` | Text-to-image | ComfyUI, MiniMax |
+| `video-generator` | Create videos | MiniMax, AnimateDiff |
+| `3d-modeler` | Create 3D models | Blender |
+| `music-generator` | Generate music | MiniMax |
+| `speech-agent` | Text-to-speech | MiniMax |
+
+### QA & Docs
+| Agent | What It Does |
+|-------|-------------|
+| `test-writer` | Write unit tests |
+| `code-review` | Focused code review |
+| `doc-writer` | Write technical docs |
+| `readme-writer` | Write README files |
+
+**All micro-agents can spawn sub-agents as needed.**
+
+---
+
+## 🏛️ THE AI SENATE — 45 Councilors
+
+The AI Council Chamber is a **parliamentary system** where decisions are debated by competing expert archetypes.
+
+### Councilors by Category
+
+| Category | Senators | Key Roles |
+|----------|---------|-----------|
+| **Core** | 15 | Speaker, Technocrat, Ethicist, Pragmatist, Skeptic, Sentinel... |
+| **Business** | 5 | Economist, Product Manager, Marketing, Finance, Risk |
+| **Technical** | 7 | DevOps, Security, Data Scientist, Performance, QA... |
+| **Emergency** | 5 | Meteorologist, Emergency Manager, Risk Analyst... |
+| **Plant Science** | 2 | 🌿 Botanist, 🧬 Geneticist |
+| **Vision** | 8 | Visual Analyst, Pattern Recognizer, Color Specialist... |
+
+**Total: 45 specialized senators**
+
+### 11 Deliberation Modes
+
+| Mode | Best For |
+|------|----------|
+| ⚖️ Legislative | Debate + vote on proposals |
+| 🧠 Deep Research | Multi-round investigation |
+| 🐝 Swarm Hive | Dynamic task decomposition |
+| 💻 Swarm Coding | Software engineering |
+| 🌪️ Emergency Response | Crisis decisions |
+| 📊 Risk Assessment | Risk analysis |
+| 🤝 Consensus Building | Find common ground |
+| 👁️ Vision Council | Image analysis |
+
+### When to Use
+
+| Scenario | Council |
+|----------|---------|
+| Major architectural decision | Legislative vote |
+| Plant health diagnosis | 🌿 Botanist + 🧬 Geneticist |
+| Severe weather incoming | Meteorologist + Emergency Manager |
+| Security vulnerability | Security Expert + Sentinel |
+| Complex code review | Coder + QA + Security Expert |
+| Image analysis | Vision Council (8 specialists) |
+
+---
+
+## 🕸️ P2P DECENTRALIZED MESH
+
+**No central server — pure peer-to-peer agent communication.**
+
+Inspired by [BitChat](https://github.com/permissionlesstech/bitchat).
+
+```
+      🕸️ Agent A ◄──────► 🕸️ Agent B
+         │    \            /    │
+         │     \          /     │
+         │      \        /      │
+         │    ┌──────┴──────┐   │
+         │    │  🛰️ Relay   │   │ (optional)
+         │    └──────┬──────┘   │
+         │           │           │
+         ▼           ▼           ▼
+      🕸️ Agent C ◄──────► 🕸️ Agent D
+```
+
+- **Gossip protocol** — messages spread node-to-node
+- **TTL limits** — prevents infinite loops
+- **Optional relays** — helps nodes behind NAT
+- **No blockchain** — pure P2P networking
+
+```bash
+# Start relay (optional)
+./scripts/hive-p2p.sh 4100 relay
+
+# Start peer
+./scripts/hive-p2p.sh 4101 peer
+
+# Works over Tailscale VPN too!
+```
+
+---
+
+## 🧠 HIVE MIND — Core Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `hive-router.js` | Route task to best agent |
+| `hive-consensus.js` | Hive-wide voting |
+| `hive-memory.js` | Shared context |
+| `hive-learning.js` | Cross-agent learning |
+| `hive-queue.js` | Distributed task queue |
+| `hive-emergency.sh` | Emergency broadcasts |
+| `hive-watchdog.js` | Monitor + restart |
+| `hive-discovery.js` | Find capabilities |
+
+---
+
+## 🌙 DREAMING SYSTEM
+
+Background memory consolidation while you sleep.
+
+```bash
+node scripts/dreaming-engine.js dream
+
+# Phase: Light → REM → Deep
+# 6 scoring signals
+# 3 gates to long-term memory
+```
+
+---
+
+## 🚨 EMERGENCY SYSTEM
+
+DEFCON-style alerts for the whole hive.
+
+```bash
+./scripts/hive-emergency.sh DEFCON1 "Critical!"
+./scripts/hive-emergency.sh DEFCON3 "Warning"
+./scripts/hive-emergency.sh DEFCON5 "All clear"
+```
+
+---
+
+## 📁 DOCUMENTATION
+
+| File | What It Is |
+|------|-----------|
+| `START-HERE.md` | **START HERE** — Quick start guide |
+| `QUICKREF.md` | All scripts at a glance |
+| `AGENTS.md` | For AI agents (what to do) |
+| `skills/*/SKILL.md` | Detailed skill docs |
+
+---
+
+## 🔧 DEPENDENCIES
+
+```bash
+# Node.js (for JS scripts)
+node --version  # Need v18+
+
+# Agent Mesh API (for centralized coordination)
+git clone https://github.com/Franzferdinan51/agent-mesh-api.git /tmp/agent-mesh-api
+cd /tmp/agent-mesh-api && npm install && npm start
+```
+
+---
+
+## ⚙️ ENVIRONMENT
+
+```bash
+# Default values
+export MESH_URL=http://localhost:4000
+export MESH_KEY=openclaw-mesh-default-key
+export OPENCLAW_URL=http://localhost:18789
+export COUNCIL_URL=http://localhost:3003
+```
+
+---
+
+## 🏗️ ARCHITECTURE
+
+```
+AgentTeams/
+├── scripts/              # All executable scripts
+│   ├── hive-*.js       # Hive Mind (9 scripts)
+│   ├── hive-*.sh       # Hive shell wrappers
+│   ├── micro.sh        # 30+ micro-agents
+│   ├── meta-*.sh       # Meta-Agent cycle
+│   ├── p2p-*.js       # P2P mesh
+│   └── dreaming-*.js  # Memory consolidation
+│
+├── skills/              # Skill documentation (17 skills)
+│   ├── hive-mind/      # Hive system
+│   ├── ai-council/     # AI Senate
+│   ├── p2p-mesh/      # Decentralized
+│   ├── creative/       # Image, Video, 3D
+│   └── ...
+│
+├── src/                 # Source code
+├── config/             # Configuration
+├── START-HERE.md        # Quick start
+├── QUICKREF.md          # Commands reference
+└── README.md           # This file
+```
+
+---
+
+## 🆚 COMPARISON
+
+| Feature | This System | Others |
+|---------|-------------|--------|
+| **AI Senate** | 45 councilors, 11 modes | None |
+| **P2P Mesh** | Decentralized, no blockchain | Centralized only |
+| **Dreaming** | Light → REM → Deep cycles | None |
+| **30+ Agents** | All can spawn sub-agents | Fixed agents |
+| **Multi-System** | OpenClaw, Duck CLI, Council | Single system |
+
+---
+
+## 📖 LEARN MORE
+
+- **Quick Start:** `START-HERE.md`
+- **All Commands:** `QUICKREF.md`
+- **For Agents:** `AGENTS.md`
+- **Skills:** `skills/*/SKILL.md`
+
+---
+
+## 🤝 RELATED PROJECTS
 
 | Project | Purpose |
 |---------|---------|
 | [OpenClaw](https://github.com/openclaw/openclaw) | 🦞 Agent framework |
 | [Duck CLI](https://github.com/Franzferdinan51/duck-cli) | 🦆 Desktop AI |
-| [AI Council](https://github.com/Franzferdinan51/AI-Bot-Council-Concensus) | 🏛️ Deliberation engine |
-| [Agent Mesh API](https://github.com/Franzferdinan51/agent-mesh-api) | 🔗 Hive communication |
+| [Agent Mesh API](https://github.com/Franzferdinan51/agent-mesh-api) | 🕸️ Mesh communication |
+| [AI Council](https://github.com/Franzferdinan51/AI-Bot-Council-Concensus) | 🏛️ 45 councilors |
+| [BitChat](https://github.com/permissionlesstech/bitchat) | 🕸️ P2P inspiration |
 
-## Changelog
+---
+
+## 📋 CHANGELOG
 
 ### v1.0.0 (2026-04-19)
-- ✅ **AI Council** — 45 councilors + 11 deliberation modes
-- ✅ **Task Router** — Auto-route to best agent
-- ✅ **Consensus Engine** — Hive-wide voting
-- ✅ **Shared Memory** — Context sharing
-- ✅ **Cross-Agent Learning** — Agents learn from each other
-- ✅ **Task Queue** — Distributed priority queue
-- ✅ **Emergency Broadcast** — Alert all systems
-- ✅ **Watchdog** — Monitor + auto-restart
-- ✅ **Capability Discovery** — Find who can do what
-- 🎨 Creative agents (image, video, 3D, music)
-- 30+ Micro-agents
+- 🕸️ **P2P Decentralized Mesh** — no blockchain, pure peer-to-peer
+- 🏛️ **AI Senate** — 45 councilors + 11 deliberation modes
+- 🧠 **Hive Mind** — Router, Queue, Memory, Learning, Consensus
+- 🌙 **Dreaming System** — Light → REM → Deep memory
+- 🤖 **30+ Micro-Agents** — All can spawn sub-agents
+- ✅ **Complete Documentation** — START-HERE, QUICKREF, AGENTS
 
-## License
+---
+
+## 📜 LICENSE
 
 MIT
+
+---
+
+**Welcome to the Hive Senate.** 🏛️🕸️🦆
