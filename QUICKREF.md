@@ -173,11 +173,19 @@ node scripts/hive-discovery.js find <capability>     # Find who has it
 
 ---
 
-## 🏛️ AI COUNCIL
+## 🏛️ HIVE SENATE 2.0
 
 ```bash
-./scripts/ai-council-hive.sh                       # Connect to hive
-./scripts/spawn-council.sh "Should we...?"         # Spawn deliberation
+./scripts/hive-senate.sh roster                    # View 45 senators
+./scripts/hive-senate.sh vote <topic>              # Vote on proposal
+./scripts/hive-senate.sh committee <topic>        # Form committee
+./scripts/hive-senate.sh brainstorm <topic>       # Ideas (no criticism)
+./scripts/hive-senate.sh debate <proposal>         # Red vs Blue team
+./scripts/hive-senate.sh filibuster <topic>       # Start filibuster
+./scripts/hive-senate.sh cloture                   # End filibuster
+./scripts/hive-senate.sh bipartisan                # Form coalition
+./scripts/hive-senate.sh joint <topic>            # Full congress vote
+./scripts/hive-senate.sh election                  # Senator elections
 ```
 
 ---

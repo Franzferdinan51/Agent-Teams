@@ -4,6 +4,47 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.3] - 2026-04-19 - Hive Senate 2.0 Enhancements
+
+### Added
+
+#### 🏛️ Hive Senate 2.0 — Enhanced AI Council
+- **hive-senate.js** (18KB) — Complete senate simulation
+  - **45 Senators** with metadata (party, expertise, term, veto)
+  - **Committee System** — Topic-focused groups (auto-select experts)
+  - **Partisan Caucuses** — Coalition building by ideology
+  - **Bipartisan Coalition** — Cross-ideology cooperation
+  - **Filibuster Mode** — Extended debate with speeches
+  - **Cloture Votes** — 60% supermajority to end filibuster
+  - **Veto Power** — Security/Budget/Emergency vetoes
+  - **Brainstorm Mode** — Ideas without criticism
+  - **Red Team / Blue Team** — Adversarial debate format
+  - **Minority Reports** — Dissenting opinions recorded
+  - **Senator Elections** — Term limits and rotation
+  - **Joint Sessions** — Full congress for critical votes
+  - **Performance Tracking** — Senator effectiveness scores
+
+- **hive-senate.sh** — CLI wrapper
+
+- **skills/senate/SKILL.md** — Complete senate documentation
+
+### Features
+| Feature | Description |
+|---------|-------------|
+| Committee | 5 senators with matching expertise |
+| Caucus | 7-15 senators by ideology |
+| Filibuster | Indefinite debate until cloture |
+| Veto | Security/Budget/Emergency blocks |
+| Supermajority | 60% for constitutional changes |
+| Brainstorm | No criticism, just ideas |
+| Red/Blue | 4v4 adversarial debate |
+
+### Updated
+- `START-HERE.md` — Added Senate 2.0 section
+- `QUICKREF.md` — Added Senate commands
+
+---
+
 ## [1.0.2] - 2026-04-19 - ComfyUI Integration + Creative Suite
 
 ### Added

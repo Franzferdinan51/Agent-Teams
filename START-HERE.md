@@ -48,19 +48,34 @@ cd /tmp/agent-mesh-api && npm start &
 ./scripts/micro.sh image-generator "futuristic city at sunset"
 ```
 
-### 🏛️ I want to... debate decisions with the AI Council
+### 🏛️ I want to... debate with the Hive Senate (Enhanced!)
 
 ```bash
-# Start a council deliberation
-./scripts/ai-council-hive.sh
+# View all 45 senators
+./scripts/hive-senate.sh roster
 
-# The Council has 45 specialized senators:
-# - Economist (ROI, cost-benefit)
-# - Security Expert (threats, safety)
-# - Botanist 🌿 (plant health)
-# - Meteorologist (weather patterns)
-# - ...and 41 more!
+# Simple vote
+./scripts/hive-senate.sh vote "Should we adopt microservices?"
+
+# Form committee for deep dive
+./scripts/hive-senate.sh committee security
+
+# Brainstorm ideas (no criticism!)
+./scripts/hive-senate.sh brainstorm "improve performance"
+
+# Red vs Blue adversarial debate
+./scripts/hive-senate.sh debate "migrate to new framework"
+
+# Filibuster (extended debate)
+./scripts/hive-senate.sh filibuster "critical measure"
+./scripts/hive-senate.sh speech "I stand here to speak..."
+./scripts/hive-senate.sh cloture  # End filibuster
+
+# Full joint session (all senators)
+./scripts/hive-senate.sh joint "national priority"
 ```
+
+**45 Senators with:** Committee system, Caucuses, Filibuster, Veto power, Elections, Brainstorm mode
 
 ### 🧠 I want to... use the Hive Mind
 
