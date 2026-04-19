@@ -384,11 +384,11 @@ node cli/mcp/server.js
 
 ```bash
 # Start WebUI
-node cli/webui/server.js
+node webui/server.js
 
 # Access at:
 # http://localhost:3131
-# Or via Tailscale: http://100.68.208.113:3131
+# Or via Tailscale: http://<your-tailscale-ip>:3131
 ```
 
 **Features:**
@@ -448,7 +448,7 @@ cd /tmp/agent-mesh-api && npm start &
 node cli/mcp/server.js &
 
 # 5. Start WebUI
-node cli/webui/server.js &
+node webui/server.js &
 
 # 6. Connect OpenClaw
 ./scripts/openclaw-hive.sh
