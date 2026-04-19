@@ -769,3 +769,167 @@ npm run start:mcp            # MCP tools
 | MCP Server | 3850 | Tool protocol |
 | Mesh API | 4000 | P2P mesh |
 
+
+---
+
+## 🎨 Complete Feature List (v2.1.0)
+
+### Core Council Features
+| Feature | Description | Status |
+|---------|-------------|--------|
+| LLM-Powered Deliberation | Real AI-generated debate | ✅ |
+| 46 Councilors | Diverse AI perspectives | ✅ |
+| Multi-Provider LLM | MiniMax, LM Studio, OpenRouter | ✅ |
+| Real Voting | LLM-determined vote outcomes | ✅ |
+| SSE Streaming | Live updates to WebUI | ✅ |
+| 9 Deliberation Modes | proposal, deliberation, swarm, etc. | ✅ |
+
+### React UI Components (council-components/)
+| Component | Description |
+|-----------|-------------|
+| `ChatMessage.tsx` | Chat message with avatars |
+| `ChatWindow.tsx` | Main chat interface |
+| `CouncilorDeck.tsx` | Councilor selection cards |
+| `LiveSession.tsx` | Live deliberation view |
+| `LiveWatcher.tsx` | Real-time watcher mode |
+| `MessageInput.tsx` | Message input with auto-complete |
+| `OrchestrationPanel.tsx` | Swarm task orchestration |
+| `CodingInterface.tsx` | Code generation interface |
+| `SettingsPanel.tsx` | LLM provider settings |
+| `Toast.tsx` | Notification toasts |
+
+### Server Features (council-server.js)
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/health` | Health check with provider status |
+| `GET /api/llm/providers` | List all LLM providers |
+| `GET /api/llm/status` | Current LLM status |
+| `POST /api/llm/test` | Test LLM connection |
+| `POST /api/llm/provider` | Switch LLM provider |
+| `GET /api/session` | Get current session |
+| `POST /api/session/start` | Start deliberation |
+| `GET /api/session/messages` | Get all messages |
+| `POST /api/session/event` | Push session event |
+| `GET /api/councilors` | List all councilors |
+| `GET /api/events` | SSE event stream |
+
+### Additional Services
+| Service | Port | Description |
+|---------|------|-------------|
+| council-server.js | 3007 | Main Council API |
+| council-api-server.cjs | 3001 | Full API + MCP |
+| council-mcp-server.js | 3850 | MCP tool server |
+| webui/server.js | 3131 | Hive Dashboard |
+| agent-api-server/ | 8080 | Agent system |
+
+### React App (council-app.tsx)
+- Full Council React UI (50KB)
+- Live session watching
+- Councilor deck selection
+- Message input with councilor selection
+- Settings panel for LLM providers
+
+### Documentation
+| File | Description |
+|------|-------------|
+| docs/COUNCILORS.md | Councilor profiles |
+| docs/VISION-COUNCIL.md | Vision analysis system |
+| docs/SWARM-CODING.md | Swarm coding mode |
+| docs/COUNCIL-QUICKSTART.md | Quick start guide |
+
+---
+
+## 🚀 Quick Command Reference
+
+```bash
+# Start all services
+npm run start:all
+
+# Start individual services
+npm run start:council      # Council API (3007)
+npm run start:webui        # WebUI (3131)
+npm run start:council-app  # React app (3002)
+npm run start:council-api  # Full API (3001)
+npm run start:mcp          # MCP tools (3850)
+
+# Test Council
+npm run council:status     # Check health
+npm run council:test       # Test LLM
+npm run council:deliberate # Start deliberation
+npm run council:providers  # List providers
+npm run council:list      # Count councilors
+```
+
+---
+
+## 📊 Services & Ports
+
+| Port | Service | File |
+|------|---------|------|
+| 3001 | Full API + MCP | council-api-server.cjs |
+| 3002 | React App | (needs npm install) |
+| 3007 | Council API | council-server.js |
+| 3131 | Hive WebUI | webui/server.js |
+| 3850 | MCP Server | council-mcp-server.js |
+| 8080 | Agent API | agent-api-server/ |
+
+---
+
+## 🔧 Environment Variables
+
+```bash
+# Required for LLM
+MINIMAX_API_KEY=your_key        # MiniMax (primary)
+
+# Optional
+OPENROUTER_API_KEY=your_key    # OpenRouter
+LMSTUDIO_KEY=sk-lm-any         # LM Studio (local)
+LMSTUDIO_URL=http://localhost:1234/v1
+PORT=3007                       # Council port
+```
+
+---
+
+## 📁 Complete File Structure (All Merged)
+
+```
+Agent-Teams/
+├── 🏛️ Council System
+│   ├── council-server.js      # LLM deliberation API
+│   ├── council-api-server.cjs # Full API + MCP
+│   ├── council-mcp-server.js # MCP tools
+│   ├── council-app.tsx        # React frontend
+│   ├── councilors.json        # 46 councilors
+│   ├── council-components/    # React components
+│   │   ├── ChatMessage.tsx
+│   │   ├── ChatWindow.tsx
+│   │   ├── CouncilorDeck.tsx
+│   │   ├── LiveSession.tsx
+│   │   ├── LiveWatcher.tsx
+│   │   ├── MessageInput.tsx
+│   │   ├── OrchestrationPanel.tsx
+│   │   ├── CodingInterface.tsx
+│   │   ├── SettingsPanel.tsx
+│   │   └── Toast.tsx
+│   ├── council-constants.ts   # Model configs
+│   ├── council-types.ts       # TypeScript types
+│   ├── council-cli.js         # CLI tool
+│   └── council-dist/          # Pre-built UI
+│
+├── 🤖 Agent System
+│   ├── agent-api-server/      # Agent API
+│   └── agent-swarm-system/     # Swarm orchestration
+│
+├── 🌐 Hive WebUI
+│   ├── webui/server.js
+│   └── webui/public/
+│
+├── 🧠 Hive Scripts (80+)
+│   ├── hive-council.js
+│   └── scripts/hive-*.js
+│
+└── 📚 Documentation
+    ├── docs/
+    └── README.md
+```
+
