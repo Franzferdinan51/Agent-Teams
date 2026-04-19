@@ -276,7 +276,7 @@ Then use it in Codex:
 @Hive Nation: Show recent voting results
 ```
 
-See [plugins/codex/README.md](plugins/codex/README.md) for full setup.
+See [plugins/openclaw/PLUGIN.md](plugins/openclaw/PLUGIN.md) for OpenClaw/Duck CLI integration.
 
 ---
 
