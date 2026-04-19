@@ -411,8 +411,58 @@ function printBanner() {
 `);
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// CLI ENTRY POINT
+// ═══════════════════════════════════════════════════════════════════
+
 const args = process.argv.slice(2);
-const cmd = args[0];
+const cmd = args[0] || '';
+
+// Show help if no args or --help
+if (!cmd || cmd === '--help' || cmd === '-h' || cmd === 'help') {
+    printBanner();
+    console.log(`
+📖 USAGE:
+
+  node hive-workflow.js <command> [args]
+
+🛠️  COMMANDS:
+
+  pipeline <topic>     Run full Council→Senate→Teams pipeline
+                      Example: node hive-workflow.js pipeline "Enhance security"
+  
+  council <topic>     Request Council deliberation only
+                      Example: node hive-workflow.js council "Should we use 2FA?"
+  
+  senate <content>    Issue a Senate decree directly
+                      Example: node hive-workflow.js senate "All MUST use 2FA"
+  
+  teams [template] [name]   Spawn an execution team
+                      Examples:
+                        node hive-workflow.js teams
+                        node hive-workflow.js teams security
+                        node hive-workflow.js teams research "Research Team"
+  
+  status [id]         Show workflow status
+                      Example: node hive-workflow.js status
+  
+  dashboard           Show full governance overview
+  
+  --help, -h, help    Show this help message
+
+📋 TEMPLATES:
+  research, code, security, emergency, planning, analysis, devops, swarm
+
+🧠 COUNCIL DELIBERATION MODES:
+  balanced, adversarial, consensus, devil-advocate, brainstorm, legislature, prediction, swarm, inspector
+
+🔗 WEBUI:
+  http://localhost:3131
+
+🌐 For more info: https://github.com/Franzferdinan51/Agent-Teams
+`);
+    process.exit(0);
+}
 
 if (cmd === 'run' || cmd === 'execute') {
     const topic = args.slice(1).join(' ') || 'Standard governance review';
