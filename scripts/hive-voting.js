@@ -84,7 +84,7 @@ class HiveVoting {
             { name: 'Clawrence Grace', type: 'communicator', party: 'Claw', tenure: 'appointed' },
             { name: 'Clawrence Byrne', type: 'researcher', party: 'Claw', tenure: 'appointed' },
             { name: 'Clawrence Quinn', type: 'coder', party: 'Claw', tenure: 'appointed' },
-            { name: 'Clawrence O'Malley', type: 'reviewer', party: 'Claw', tenure: 'appointed' },
+            { name: 'Clawrence OMalley', type: 'reviewer', party: 'Claw', tenure: 'appointed' },
             { name: 'Clawrence Delaney', type: 'writer', party: 'Claw', tenure: 'appointed' },
             { name: 'Clawrence Healy', type: 'meta', party: 'Claw', tenure: 'appointed' },
             { name: 'Clawrence Flynn', type: 'security', party: 'Claw', tenure: 'appointed' },
@@ -519,7 +519,7 @@ class HiveVoting {
             parties[agent.party].push(agent);
         }
 
-        for const [party, members] of Object.entries(parties)) {
+        for (const [party, members] of Object.entries(parties)) {
             console.log(`\n${party.toUpperCase()} PARTY:`);
             for (const a of members) {
                 const caucus = this.caucuses.find(c => c.id === a.caucus);
