@@ -1,5 +1,77 @@
 {
-  "teams": [],
+  "teams": [
+    {
+      "id": "team-1776628060363-dqh6insfj",
+      "name": "Test Code Team",
+      "template": "code",
+      "description": "Software development with security review",
+      "color": "💻",
+      "roles": [
+        "coder",
+        "reviewer",
+        "security"
+      ],
+      "members": [
+        {
+          "id": "team-1776628060363-dqh6insfj-lead",
+          "name": "Beakovich",
+          "role": "lead",
+          "displayName": "Team Lead",
+          "avatar": "🦆🎯",
+          "status": "idle",
+          "currentTask": null,
+          "joinedAt": "2026-04-19T19:47:40.363Z"
+        },
+        {
+          "id": "team-1776628060363-dqh6insfj-0",
+          "name": "Daffytail",
+          "role": "coder",
+          "displayName": "Coder",
+          "avatar": "🦆💻",
+          "status": "idle",
+          "currentTask": null,
+          "joinedAt": "2026-04-19T19:47:40.363Z"
+        },
+        {
+          "id": "team-1776628060363-dqh6insfj-1",
+          "name": "Comb Commander",
+          "role": "reviewer",
+          "displayName": "Specialist",
+          "avatar": "🐝🔍",
+          "status": "idle",
+          "currentTask": null,
+          "joinedAt": "2026-04-19T19:47:40.363Z"
+        },
+        {
+          "id": "team-1776628060363-dqh6insfj-2",
+          "name": "Lobster Lohan",
+          "role": "security",
+          "displayName": "Security Analyst",
+          "avatar": "🦞🛡️",
+          "status": "idle",
+          "currentTask": null,
+          "joinedAt": "2026-04-19T19:47:40.363Z"
+        }
+      ],
+      "status": "active",
+      "tasks": [
+        {
+          "id": "task-1776628117614",
+          "description": "Process passed result: Research on quantum complete",
+          "status": "pending",
+          "passedFrom": "Test Research Team",
+          "createdAt": "2026-04-19T19:48:37.614Z",
+          "completedAt": null,
+          "result": null
+        }
+      ],
+      "results": [],
+      "createdAt": "2026-04-19T19:47:40.363Z",
+      "lastActivity": "2026-04-19T19:48:37.615Z",
+      "senateRegistered": false,
+      "parentSenateId": null
+    }
+  ],
   "senateReports": [
     {
       "id": "report-1776625522974",
@@ -12,7 +84,27 @@
       "completedTasks": 0,
       "lastActivity": "2026-04-19T19:05:22.952Z",
       "reportedAt": "2026-04-19T19:05:22.974Z"
+    },
+    {
+      "id": "report-1776628095184",
+      "teamId": "team-1776628055157-ep5mtz7bu",
+      "teamName": "Test Research Team",
+      "status": "active",
+      "activeMembers": 0,
+      "totalMembers": 4,
+      "pendingTasks": 1,
+      "completedTasks": 0,
+      "lastActivity": "2026-04-19T19:48:05.155Z",
+      "reportedAt": "2026-04-19T19:48:15.184Z"
     }
   ],
-  "decrees": []
+  "decrees": [
+    {
+      "decreeId": "decree-001",
+      "teamId": "team-1776628055157-ep5mtz7bu",
+      "teamName": "Test Research Team",
+      "compliedAt": "2026-04-19T19:48:26.536Z",
+      "result": "Completing decree as requested"
+    }
+  ]
 }

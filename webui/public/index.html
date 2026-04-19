@@ -1,241 +1,451 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hive Nation - Command Center</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0a0e17;--bg2:#0d1221;--bg3:#111827;--bg4:#1a2235;--border:#1e2d4a;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--accent:#6366f1;--accent2:#8b5cf6;--accent3:#a78bfa;--hive:#f59e0b;--hive2:#fbbf24;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;--cyan:#06b6d4}
-body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,0.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(139,92,246,0.06) 0%,transparent 50%);pointer-events:none;z-index:0}
-.app{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(10,14,23,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
-.brand{display:flex;align-items:center;gap:12px}
-.brand-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--hive),var(--hive2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 20px rgba(245,158,11,0.3)}
-.brand-text h1{font-size:16px;font-weight:800;background:linear-gradient(90deg,var(--hive2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.brand-text span{font-size:11px;color:var(--text3);font-weight:500;letter-spacing:1px;text-transform:uppercase}
-.topbar-status{display:flex;align-items:center;gap:16px}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-.uptime-badge{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--text2);background:var(--bg3);padding:4px 10px;border-radius:6px;border:1px solid var(--border)}
-.version-badge{font-size:11px;color:var(--accent3);background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);padding:3px 8px;border-radius:4px;font-weight:600}
-.nav{display:flex;gap:4px;padding:12px 24px;background:rgba(10,14,23,0.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
-.nav-tab{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.2s;white-space:nowrap;border:1px solid transparent;display:flex;align-items:center;gap:6px}
-.nav-tab:hover{color:var(--text);background:var(--bg3)}
-.nav-tab.active{color:var(--accent3);background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3)}
-.main{flex:1;padding:24px;max-width:1400px;margin:0 auto;width:100%}
-.tab-content{display:none}
-.tab-content.active{display:block;animation:fadeIn 0.3s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
-.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.card-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-@media(max-width:900px){.grid-2,.grid-4{grid-template-columns:1fr}}
-.metric{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
-.metric-value{font-size:28px;font-weight:800;font-family:"JetBrains Mono",monospace;background:linear-gradient(135deg,var(--accent3),var(--hive2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.metric-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
-.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600}
-.badge-green{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
-.badge-blue{background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)}
-.badge-purple{background:rgba(139,92,246,0.15);color:#8b5cf6;border:1px solid rgba(139,92,246,0.3)}
-.badge-amber{background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)}
-.badge-cyan{background:rgba(6,182,212,0.15);color:#06b6d4;border:1px solid rgba(6,182,212,0.3)}
-.badge-hive{background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.3)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all 0.2s;font-family:inherit}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
-.btn-primary:hover{opacity:0.9;transform:translateY(-1px)}
-.btn-secondary{background:var(--bg3);color:var(--text2);border-color:var(--border)}
-.btn-secondary:hover{border-color:var(--accent);color:var(--accent3)}
-.btn-hive{background:linear-gradient(135deg,var(--hive),var(--hive2));color:#0a0e17;font-weight:700}
-.btn-sm{padding:5px 10px;font-size:12px}
-input,textarea,select{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:13px;outline:none}
-input:focus,textarea:focus,select:focus{border-color:var(--accent)}
-textarea{resize:vertical;min-height:80px}
-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
-.form-group{margin-bottom:14px}
-.input-row{display:flex;gap:10px}.input-row>*{flex:1}
-.decree-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;border-left:3px solid var(--accent)}
-.decree-title{font-weight:700;font-size:14px;margin-bottom:6px}
-.decree-meta{font-size:11px;color:var(--text3);display:flex;gap:12px;flex-wrap:wrap}
-.senator-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(30,45,74,0.5)}
-.senator-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.senator-info{flex:1}.senator-name{font-size:13px;font-weight:600}.senator-role{font-size:11px;color:var(--text3)}
-.memory-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
-.memory-item-cat{font-size:10px;text-transform:uppercase;color:var(--accent3);font-weight:700}
-.memory-item-content{font-size:13px;color:var(--text2);line-height:1.5}
-.memory-timestamp{font-size:10px;color:var(--text3);font-family:"JetBrains Mono",monospace}
-.workflow-step{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px;margin-bottom:6px;border:1px solid var(--border)}
-.step-number{width:24px;height:24px;border-radius:50%;background:var(--accent);color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.step-content{flex:1}.step-name{font-size:13px;font-weight:600}.step-desc{font-size:11px;color:var(--text3)}
-.monitor-metric{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(30,45,74,0.5)}.monitor-metric:last-child{border-bottom:none}
-.monitor-label{font-size:13px;color:var(--text2)}.monitor-value{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:600}
-.progress-bar{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;margin-top:6px}.progress-fill{height:100%;border-radius:4px}
-.alert-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px;margin-bottom:6px;border:1px solid var(--border)}
-.alert-icon{font-size:18px}.alert-text{font-size:13px;color:var(--text2)}.alert-time{font-size:10px;color:var(--text3);font-family:"JetBrains Mono",monospace;margin-left:auto}
-.agent-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
-.agent-avatar{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.agent-info{flex:1}.agent-name{font-size:14px;font-weight:700}.agent-role{font-size:11px;color:var(--text3)}
-.agent-score{text-align:right}.agent-score-value{font-family:"JetBrains Mono",monospace;font-size:18px;font-weight:800}
-.agent-score-label{font-size:10px;color:var(--text3);text-transform:uppercase}
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.section-title{font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px}
-.empty-state{text-align:center;padding:40px;color:var(--text3)}.empty-state .icon{font-size:40px;margin-bottom:10px}.empty-state p{font-size:13px}
-.loading{text-align:center;padding:30px;color:var(--text3);font-size:13px}
-.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
-@keyframes spin{to{transform:rotate(360deg)}}
-.inner-tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:8px;flex-wrap:wrap}
-.inner-tab{padding:6px 14px;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;border-radius:6px;border:1px solid transparent;transition:all 0.2s}
-.inner-tab:hover{color:var(--text2)}.inner-tab.active{color:var(--accent3);background:rgba(99,102,241,0.1);border-color:rgba(99,102,241,0.3)}
-@media(max-width:768px){.topbar{padding:10px 16px}.main{padding:16px}.grid-4{grid-template-columns:repeat(2,1fr)}}
-::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-.chart-area{background:var(--bg3);border:1px solid var(--border);border-radius:8px;height:100px;display:flex;align-items:flex-end;gap:4px;padding:10px;overflow:hidden}
-.chart-bar{flex:1;background:linear-gradient(to top,var(--accent),var(--accent2));border-radius:3px 3px 0 0;min-height:4px;opacity:0.7;transition:opacity 0.2s}.chart-bar:hover{opacity:1}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:13px;z-index:9999;display:none;animation:slideUp 0.3s}
-@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}.toast.show{display:flex;align-items:center;gap:8px}
-.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(30,45,74,0.5)}.setting-row:last-child{border-bottom:none}
-.setting-label{font-size:13px;font-weight:600}.setting-desc{font-size:11px;color:var(--text3);margin-top:2px}
-</style></head><body>
-<div class="app">
-  <div class="topbar">
-    <div class="brand"><div class="brand-icon">&#x1F3DB;</div><div class="brand-text"><h1>HIVE NATION</h1><span>Command Center</span></div></div>
-    <div class="topbar-status"><span class="version-badge">v1.8.0</span><div class="uptime-badge" id="uptime">--:--:--</div><div class="status-dot"></div></div>
-  </div>
-  <div class="nav">
-    <div class="nav-tab active" data-tab="overview">&#x26A1; Overview</div>
-    <div class="nav-tab" data-tab="senate">&#x1F3DB; Senate</div>
-    <div class="nav-tab" data-tab="agents">&#x1F916; Agents</div>
-    <div class="nav-tab" data-tab="memory">&#x1F9E0; Memory</div>
-    <div class="nav-tab" data-tab="workflows">&#x1F504; Workflows</div>
-    <div class="nav-tab" data-tab="monitoring">&#x1F4CA; Monitoring</div>
-    <div class="nav-tab" data-tab="settings">&#x2699; Settings</div>
-  </div>
-  <div class="main">
-    <div class="tab-content active" id="tab-overview">
-      <div class="section-header"><div class="section-title">&#x26A1; System Overview</div><button class="btn btn-secondary btn-sm" onclick="refreshAll()">&#x1F504; Refresh</button></div>
-      <div class="grid-4" style="margin-bottom:20px">
-        <div class="metric"><div class="metric-value" id="m-agents">-</div><div class="metric-label">Active Agents</div></div>
-        <div class="metric"><div class="metric-value" id="m-memories">-</div><div class="metric-label">Memories</div></div>
-        <div class="metric"><div class="metric-value" id="m-decisions">-</div><div class="metric-label">Decisions</div></div>
-        <div class="metric"><div class="metric-value" id="m-workflows">-</div><div class="metric-label">Workflows</div></div>
-      </div>
-      <div class="grid-2">
-        <div class="card"><div class="card-header"><div class="card-title">&#x2696; Recent Decisions</div><span class="badge badge-green">Live</span></div><div id="ov-decisions"><div class="loading"><span class="spinner"></span>Loading...</div></div></div>
-        <div class="card"><div class="card-header"><div class="card-title">&#x1F3C6; Top Agents</div><span class="badge badge-purple">By Score</span></div><div id="ov-agents"><div class="loading"><span class="spinner"></span>Loading...</div></div></div>
-        <div class="card"><div class="card-header"><div class="card-title">&#x1F4C8; Activity (24H)</div></div><div class="chart-area" id="activity-chart"></div></div>
-        <div class="card"><div class="card-header"><div class="card-title">&#x1F97A; System Health</div></div><div id="ov-health"><div class="loading"><span class="spinner"></span>Loading...</div></div></div>
-      </div>
-    </div>
-    <div class="tab-content" id="tab-senate">
-      <div class="section-header"><div class="section-title">&#x1F3DB; Hive Senate</div><div style="display:flex;gap:8px"><button class="btn btn-secondary btn-sm" onclick="loadSenate()">&#x1F504; Refresh</button><button class="btn btn-hive btn-sm" onclick="toggleCreateDecree()">&#x1F4DC; New Decree</button></div></div>
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-header"><div class="card-title">&#x1F465; Senator Roster</div><span class="badge badge-blue">45 Senators</span></div>
-          <div class="inner-tabs"><div class="inner-tab active" data-st="all">All</div><div class="inner-tab" data-st="leadership">Leadership</div><div class="inner-tab" data-st="technical">Technical</div><div class="inner-tab" data-st="emergency">Emergency</div><div class="inner-tab" data-st="vision">Vision</div></div>
-          <div id="senators-list" style="max-height:450px;overflow-y:auto"><div class="loading"><span class="spinner"></span>Loading...</div></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hive Nation - Command Center</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        :root{--bg:#0a0e17;--bg2:#0d1221;--bg3:#111827;--bg4:#1a2235;--border:#1e2d4a;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--accent:#6366f1;--accent2:#8b5cf6;--accent3:#a78bfa;--hive:#f59e0b;--hive2:#fbbf24;--success:#10b981;--warning:#f59e0b;--danger:#ef4444}
+        body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        .topbar{display:flex;align-items:center;justify-content:space-between;padding:15px 24px;background:rgba(10,14,23,0.95);border-bottom:2px solid var(--hive);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:10px}
+        .brand{display:flex;align-items:center;gap:12px}
+        .brand-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--hive),var(--hive2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
+        .brand-text h1{font-size:18px;font-weight:800;background:linear-gradient(90deg,var(--hive2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .brand-text span{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+        .status-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+        .status-item{background:var(--bg3);padding:6px 12px;border-radius:6px;font-size:12px;border:1px solid var(--border)}
+        .status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;margin-right:6px}
+        .nav{display:flex;gap:4px;padding:12px 24px;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;flex-wrap:wrap}
+        .nav-tab{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.2s;white-space:nowrap;border:1px solid transparent}
+        .nav-tab:hover{color:var(--text);background:var(--bg3)}
+        .nav-tab.active{color:var(--hive);background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3)}
+        .main{flex:1;padding:24px;max-width:1400px;margin:0 auto}
+        .section{display:none}
+        .section.active{display:block}
+        .card{background:var(--bg2);border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid var(--border)}
+        .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+        .card-title{font-size:16px;font-weight:700;color:var(--hive)}
+        .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:16px}
+        .grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+        .stat{background:var(--bg3);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border)}
+        .stat-value{font-size:26px;font-weight:800;background:linear-gradient(135deg,var(--accent3),var(--hive2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all 0.2s}
+        .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
+        .btn-hive{background:linear-gradient(135deg,var(--hive),var(--hive2));color:#0a0e17}
+        .btn-secondary{background:var(--bg3);color:var(--text2);border-color:var(--border)}
+        .btn:hover{transform:translateY(-1px)}
+        .input,textarea,select{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:13px;outline:none}
+        .input:focus,textarea:focus,select:focus{border-color:var(--hive)}
+        textarea{resize:vertical;min-height:80px}
+        label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px}
+        .form-group{margin-bottom:14px}
+        table{width:100%;border-collapse:collapse;font-size:13px}
+        th{text-align:left;padding:10px 12px;background:var(--bg);color:var(--hive);font-size:11px;text-transform:uppercase;border-bottom:2px solid var(--hive)}
+        td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+        tr:hover td{background:rgba(99,102,241,0.05)}
+        .badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+        .badge-green{background:rgba(16,185,129,0.15);color:#10b981}
+        .badge-blue{background:rgba(59,130,246,0.15);color:#3b82f6}
+        .badge-purple{background:rgba(139,92,246,0.15);color:#8b5cf6}
+        .empty-state{text-align:center;padding:30px;color:var(--text3)}
+        .empty-state .icon{font-size:32px;margin-bottom:8px}
+        .toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:13px;z-index:9999;display:none;animation:slideUp 0.3s}
+        .toast.show{display:flex;align-items:center;gap:8px}
+        @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+        .progress-bar{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;margin-top:8px}
+        .progress-fill{height:100%;background:var(--success);transition:width 0.3s}
+        .agent-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+        .agent-avatar{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;flex-shrink:0}
+        .agent-info{flex:1}
+        .agent-name{font-weight:600;font-size:13px}
+        .agent-role{font-size:11px;color:var(--text3)}
+        .agent-score{text-align:right}
+        .agent-score-value{font-size:18px;font-weight:800}
+        .agent-score-label{font-size:10px;color:var(--text3);text-transform:uppercase}
+        .decree-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;border-left:4px solid var(--accent)}
+        .decree-title{font-weight:700;font-size:14px;margin-bottom:4px}
+        .decree-content{font-size:12px;color:var(--text2)}
+        .decree-meta{font-size:10px;color:var(--text3);margin-top:6px}
+        .memory-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px}
+        .memory-cat{font-size:10px;text-transform:uppercase;color:var(--accent3);font-weight:700}
+        .memory-time{font-size:10px;color:var(--text3)}
+        .memory-content{font-size:12px;color:var(--text2);margin-top:4px}
+        .memory-tags{margin-top:6px;display:flex;gap:4px;flex-wrap:wrap}
+        .memory-tag{font-size:10px;padding:2px 6px;background:rgba(99,102,241,0.1);border-radius:3px;color:var(--accent3)}
+        .workflow-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
+        .workflow-name{font-weight:600;font-size:13px}
+        .workflow-desc{font-size:11px;color:var(--text3);margin-top:2px}
+        .toggle{width:40px;height:22px;background:var(--bg4);border-radius:11px;position:relative;cursor:pointer;transition:background 0.2s}
+        .toggle.active{background:var(--success)}
+        .toggle::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:2px;left:2px;transition:transform 0.2s}
+        .toggle.active::after{transform:translateX(18px)}
+        .settings-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+        .settings-label{font-weight:600;font-size:13px}
+        .settings-desc{font-size:11px;color:var(--text3);margin-top:2px}
+        .footer{text-align:center;padding:20px;color:var(--text3);font-size:11px;border-top:1px solid var(--border);margin-top:40px}
+        @media(max-width:768px){.grid-2{grid-template-columns:1fr}.topbar{justify-content:center}.status-bar{justify-content:center}}
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="brand">
+            <div class="brand-icon">🏛️</div>
+            <div class="brand-text">
+                <h1>HIVE NATION</h1>
+                <span>Command Center</span>
+            </div>
         </div>
-        <div>
-          <div class="card" style="margin-bottom:12px"><div class="card-header"><div class="card-title">&#x1F4DC; Active Decrees</div><span class="badge badge-amber">In Progress</span></div><div id="decrees-list"><div class="loading"><span class="spinner"></span>Loading...</div></div></div>
-          <div class="card"><div class="card-header"><div class="card-title">&#x1F3F3; Voting Status</div></div><div id="voting-status"><div class="loading"><span class="spinner"></span>Loading...</div></div></div>
+        <div class="status-bar">
+            <div class="status-item">🏛️ v1.9.5</div>
+            <div class="status-item" id="uptime">--:--:--</div>
+            <div class="status-item"><span class="status-dot"></span>Online</div>
         </div>
-      </div>
-      <div class="card" id="create-decree-panel" style="display:none">
-        <div class="card-header"><div class="card-title">&#x1F4DC; Create New Decree</div></div>
-        <div class="grid-2">
-          <div><div class="form-group"><label>Title</label><input type="text" id="decree-title" placeholder="e.g., Adopt new memory strategy"></div><div class="form-group"><label>Description</label><textarea id="decree-desc" placeholder="Describe the decree..."></textarea></div></div>
-          <div><div class="form-group"><label>Category</label><select id="decree-category"><option value="governance">Governance</option><option value="technical">Technical</option><option value="budget">Budget</option><option value="security">Security</option><option value="policy">Policy</option></select></div><div class="form-group"><label>Required Votes</label><input type="number" id="decree-votes" value="23" min="1" max="45"></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-hive" onclick="submitDecree()">&#x2705; Submit</button><button class="btn btn-secondary" onclick="toggleCreateDecree()">Cancel</button></div></div>
+    </div>
+    
+    <div class="nav">
+        <div class="nav-tab active" data-tab="overview">📊 Overview</div>
+        <div class="nav-tab" data-tab="senate">🏛️ Senate</div>
+        <div class="nav-tab" data-tab="voting">🗳️ Voting</div>
+        <div class="nav-tab" data-tab="agents">🤖 Agents</div>
+        <div class="nav-tab" data-tab="teams">👥 Teams</div>
+        <div class="nav-tab" data-tab="memory">🧠 Memory</div>
+        <div class="nav-tab" data-tab="workflows">⚙️ Workflows</div>
+        <div class="nav-tab" data-tab="monitoring">📈 Monitoring</div>
+        <div class="nav-tab" data-tab="settings">⚙️ Settings</div>
+    </div>
+    
+    <div class="main">
+        <div id="tab-overview" class="section active">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📊 System Overview</div>
+                    <button class="btn btn-secondary" onclick="refreshOverview()">🔄 Refresh</button>
+                </div>
+                <div class="grid-4">
+                    <div class="stat"><div class="stat-value">52</div><div class="stat-label">Agents</div></div>
+                    <div class="stat"><div class="stat-value" id="mem-count">0</div><div class="stat-label">Memories</div></div>
+                    <div class="stat"><div class="stat-value">1</div><div class="stat-label">Decrees</div></div>
+                    <div class="stat"><div class="stat-value">0</div><div class="stat-label">Teams</div></div>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">🏛️ Active Decrees</div>
+                    <div class="decree-card active">
+                        <div class="decree-title">Privacy Protection</div>
+                        <div class="decree-content">All agents MUST encrypt sensitive data</div>
+                        <div class="decree-meta"><span>Status: Active</span> | <span>Enacted: Today</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">🤖 Top Agents</div>
+                    <div id="top-agents"></div>
+                </div>
+            </div>
         </div>
-      </div>
+        
+        <div id="tab-senate" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🏛️ Senate Decrees</div>
+                    <button class="btn btn-hive" onclick="showToast('Decree panel opened', 'info')">📜 New Decree</button>
+                </div>
+                <div class="decree-card active">
+                    <div class="decree-title">Privacy Protection</div>
+                    <div class="decree-content">All agents MUST encrypt sensitive data</div>
+                    <div class="decree-meta"><span class="badge badge-green">Active</span> | <span>Binding: Absolute</span></div>
+                </div>
+                <div class="decree-card" style="border-left-color:var(--text3)">
+                    <div class="decree-title">Model Preferences</div>
+                    <div class="decree-content">Agents PREFER local models for privacy-sensitive tasks</div>
+                    <div class="decree-meta"><span class="badge badge-blue">Advisory</span> | <span>Binding: Advisory</span></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">👥 Senator Roster (52 Agents)</div>
+                <div class="grid-2">
+                    <div>
+                        <strong style="color:var(--hive)">🦆 Quack Party (18)</strong>
+                        <p style="font-size:12px;color:var(--text3)">Research & Analysis</p>
+                    </div>
+                    <div>
+                        <strong style="color:var(--hive)">🐝 Honey Party (15)</strong>
+                        <p style="font-size:12px;color:var(--text3)">Development & Security</p>
+                    </div>
+                    <div>
+                        <strong style="color:var(--hive)">🦞 Claw Party (15)</strong>
+                        <p style="font-size:12px;color:var(--text3)">Planning & Communication</p>
+                    </div>
+                    <div>
+                        <strong style="color:var(--hive)">⚪ Independent (4)</strong>
+                        <p style="font-size:12px;color:var(--text3)">Non-partisan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tab-voting" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🗳️ Voting Chamber</div>
+                    <button class="btn btn-hive" onclick="showToast('Vote initiated', 'info')">🗳️ New Vote</button>
+                </div>
+                <div class="grid-4">
+                    <div class="stat"><div class="stat-value">52</div><div class="stat-label">Total</div></div>
+                    <div class="stat"><div class="stat-value" style="color:var(--success)">48</div><div class="stat-label">Present</div></div>
+                    <div class="stat"><div class="stat-value">35</div><div class="stat-label">Quorum</div></div>
+                    <div class="stat"><div class="stat-value" style="color:var(--success)">✓</div><div class="stat-label">Active</div></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">📋 Recent Votes</div>
+                <table>
+                    <tr><th>Bill</th><th>Status</th><th>Result</th></tr>
+                    <tr><td>Privacy Protection Act</td><td><span class="badge badge-green">Passed</span></td><td>78% Yes</td></tr>
+                    <tr><td>Memory Encryption Standard</td><td><span class="badge badge-green">Passed</span></td><td>85% Yes</td></tr>
+                    <tr><td>Agent Rights Charter</td><td><span class="badge badge-purple">Pending</span></td><td>Voting Open</td></tr>
+                </table>
+            </div>
+        </div>
+        
+        <div id="tab-agents" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🤖 Agent Registry</div>
+                    <span class="badge badge-green">52 Active</span>
+                </div>
+                <div id="agent-list"></div>
+            </div>
+        </div>
+        
+        <div id="tab-teams" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">👥 Agent Teams</div>
+                    <button class="btn btn-hive" onclick="showToast('Team creator opened', 'info')">➕ Create Team</button>
+                </div>
+                <div class="empty-state"><div class="icon">👥</div><p>No active teams</p></div>
+            </div>
+            <div class="card">
+                <div class="card-title">📋 Team Templates</div>
+                <table>
+                    <tr><th>Template</th><th>Members</th><th>Purpose</th></tr>
+                    <tr><td>Research Team</td><td>researcher + writer + reviewer</td><td>Research workflows</td></tr>
+                    <tr><td>Code Team</td><td>coder + reviewer + security</td><td>Code development</td></tr>
+                    <tr><td>Security Team</td><td>security + reviewer + communicator</td><td>Security audits</td></tr>
+                    <tr><td>Emergency Team</td><td>security + communicator + planner</td><td>Incident response</td></tr>
+                    <tr><td>Planning Team</td><td>planner + researcher + communicator</td><td>Strategic planning</td></tr>
+                </table>
+            </div>
+        </div>
+        
+        <div id="tab-memory" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🧠 Memory Store</div>
+                    <button class="btn btn-hive" onclick="addMemory()">➕ Add</button>
+                </div>
+                <input class="input" placeholder="Search memories..." style="margin-bottom:16px">
+                <div id="memory-list"></div>
+            </div>
+        </div>
+        
+        <div id="tab-workflows" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">⚙️ Workflow Templates</div>
+                    <button class="btn btn-hive" onclick="showToast('Workflow creator opened', 'info')">➕ Create</button>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="workflow-card">
+                        <div class="workflow-name">🔬 Research Workflow</div>
+                        <div class="workflow-desc">search → summarize → review → archive</div>
+                    </div>
+                    <div class="workflow-card">
+                        <div class="workflow-name">💻 Code Review Workflow</div>
+                        <div class="workflow-desc">analyze → test → suggest → implement</div>
+                    </div>
+                    <div class="workflow-card">
+                        <div class="workflow-name">⚖️ Decision Workflow</div>
+                        <div class="workflow-desc">research → debate → vote → decree → execute</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="workflow-card">
+                        <div class="workflow-name">🚨 Emergency Workflow</div>
+                        <div class="workflow-desc">alert → assess → mobilize → resolve</div>
+                    </div>
+                    <div class="workflow-card">
+                        <div class="workflow-name">📅 Meeting Workflow</div>
+                        <div class="workflow-desc">schedule → summarize → distribute → archive</div>
+                    </div>
+                    <div class="workflow-card">
+                        <div class="workflow-name">💾 Backup Workflow</div>
+                        <div class="workflow-desc">scan → compress → encrypt → store → verify</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tab-monitoring" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📈 System Health</div>
+                    <button class="btn btn-secondary" onclick="refreshMonitoring()">🔄 Refresh</button>
+                </div>
+                <div class="grid-4">
+                    <div class="stat"><div class="stat-value" style="color:var(--success)">✓</div><div class="stat-label">CPU</div></div>
+                    <div class="stat"><div class="stat-value" id="mem-used">-</div><div class="stat-label">Memory MB</div></div>
+                    <div class="stat"><div class="stat-value" id="mem-total">-</div><div class="stat-label">Limit MB</div></div>
+                    <div class="stat"><div class="stat-value" style="color:var(--success)">✓</div><div class="stat-label">Network</div></div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" id="mem-bar" style="width:50%"></div></div>
+            </div>
+            <div class="card">
+                <div class="card-title">⚠️ System Status</div>
+                <div class="settings-row"><span>Senate API</span><span class="badge badge-green">Connected</span></div>
+                <div class="settings-row"><span>MCP Server</span><span class="badge badge-green">Active</span></div>
+                <div class="settings-row"><span>Agent Mesh</span><span class="badge badge-blue">Standby</span></div>
+            </div>
+        </div>
+        
+        <div id="tab-settings" class="section">
+            <div class="card">
+                <div class="card-title">⚙️ Preferences</div>
+                <div class="settings-row">
+                    <div><div class="settings-label">Auto-refresh</div><div class="settings-desc">Refresh every 30 seconds</div></div>
+                    <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                </div>
+                <div class="settings-row">
+                    <div><div class="settings-label">Notifications</div><div class="settings-desc">Show toast notifications</div></div>
+                    <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                </div>
+                <div class="settings-row">
+                    <div><div class="settings-label">Dark Theme</div><div class="settings-desc">Always enabled</div></div>
+                    <div class="toggle active"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">🏛️ Government Status</div>
+                <div class="settings-row"><span>Legislative Branch</span><span class="badge badge-green">Active</span></div>
+                <div class="settings-row"><span>Executive Branch</span><span class="badge badge-green">Active</span></div>
+                <div class="settings-row"><span>Judicial Branch</span><span class="badge badge-green">Active</span></div>
+                <div class="settings-row"><span>Elections</span><span class="badge badge-blue">Open</span></div>
+            </div>
+        </div>
     </div>
-    <div class="tab-content" id="tab-agents">
-      <div class="section-header"><div class="section-title">&#x1F916; Agent Roster</div><button class="btn btn-secondary btn-sm" onclick="loadAgents()">&#x1F504; Refresh</button></div>
-      <div class="inner-tabs"><div class="inner-tab active" data-at="all">All</div><div class="inner-tab" data-at="scored">By Score</div><div class="inner-tab" data-at="active">Active</div></div>
-      <div id="agents-grid"><div class="loading"><span class="spinner"></span>Loading...</div></div>
-    </div>
-    <div class="tab-content" id="tab-memory">
-      <div class="section-header"><div class="section-title">&#x1F9E0; Memory &amp; Recall</div><button class="btn btn-secondary btn-sm" onclick="loadMemory()">&#x1F504; Refresh</button></div>
-      <div class="card" style="margin-bottom:16px"><div class="input-row" style="align-items:flex-end"><div class="form-group" style="flex:2;margin-bottom:0"><label>Search</label><input type="text" id="mem-search" placeholder="Search memories..." onkeydown="if(event.key==='Enter')searchMemory()"></div><div class="form-group" style="flex:1;margin-bottom:0"><label>Category</label><select id="mem-category"><option value="">All</option><option value="decision">Decision</option><option value="task">Task</option><option value="learning">Learning</option><option value="code">Code</option></select></div><button class="btn btn-primary" style="margin-bottom:0" onclick="searchMemory()">&#x1F50D; Search</button></div></div>
-      <div class="grid-2">
-        <div class="card"><div class="card-header"><div class="card-title">&#x1F4D6; Recent Memories</div></div><div id="mem-recent"><div class="loading"><span class="spinner"></span>Loading...</div></div></div>
-        <div class="card"><div class="card-header"><div class="card-title">&#x2795; Store New Memory</div></div><div class="form-group"><label>Content</label><textarea id="new-mem-content" placeholder="What should I remember?"></textarea></div><div class="input-row"><div class="form-group"><label>Category</label><select id="new-mem-category"><option value="general">General</option><option value="decision">Decision</option><option value="task">Task</option><option value="learning">Learning</option></select></div><div class="form-group"><label>Tags</label><input type="text" id="new-mem-tags" placeholder="tag1, tag2"></div></div><button class="btn btn-primary" onclick="storeMemory()">&#x1F4BE; Store</button></div>
-      </div>
-    </div>
-    <div class="tab-content" id="tab-workflows">
-      <div class="section-header"><div class="section-title">&#x1F504; Workflows</div><div style="display:flex;gap:8px"><button class="btn btn-secondary btn-sm" onclick="loadWorkflows()">&#x1F504; Refresh</button><button class="btn btn-hive btn-sm" onclick="showCreateWorkflow()">&#x2795; New</button></div></div>
-      <div class="grid-2">
-        <div class="card"><div class="card-header"><div class="card-title">&#x1F4CB; Recent Workflows</div></div><div id="wf-list"><div class="loading"><span class="spinner"></span>Loading...</div></div></div>
-        <div class="card"><div class="card-header"><div class="card-title">&#x26A1; Quick Run</div></div><div class="form-group"><label>Workflow Name</label><input type="text" id="wf-run-name" placeholder="e.g., research"></div><button class="btn btn-primary" onclick="runWorkflow()">&#x25B6; Run</button></div>
-      </div>
-      <div class="card" id="create-wf-panel" style="display:none"><div class="card-header"><div class="card-title">&#x2795; Create Workflow</div></div><div class="form-group"><label>Name</label><input type="text" id="wf-name" placeholder="e.g., build-and-test"></div><div class="form-group"><label>Description</label><textarea id="wf-desc" placeholder="What does this do?"></textarea></div><div class="form-group"><label>Steps (one per line)</label><textarea id="wf-steps" placeholder="Step 1: Research\nStep 2: Code\nStep 3: Test"></textarea></div><div style="display:flex;gap:8px"><button class="btn btn-hive" onclick="createWorkflow()">&#x2705; Create</button><button class="btn btn-secondary" onclick="hideCreateWorkflow()">Cancel</button></div></div>
-    </div>
-    <div class="tab-content" id="tab-monitoring">
-      <div class="section-header"><div class="section-title">&#x1F4CA; Monitoring</div><button class="btn btn-secondary btn-sm" onclick="loadMonitoring()">&#x1F504; Refresh</button></div>
-      <div class="grid-2">
-        <div class="card"><div class="card-header"><div class="card-title">&#x1F5A5; System Metrics</div></div><div id="mon-metrics"><div class="loading"><span class="spinner"></span>Loading...</div></div></div>
-        <div class="card"><div class="card-header"><div class="card-title">&#x1F514; Alerts</div></div><div id="mon-alerts"><div class="loading"><span class="spinner"></span>Loading...</div></div></div>
-      </div>
-      <div class="card"><div class="card-header"><div class="card-title">&#x1F4C8; Process Metrics</div></div><div id="mon-process"><div class="loading"><span class="spinner"></span>Loading...</div></div></div>
-    </div>
-    <div class="tab-content" id="tab-settings">
-      <div class="section-header"><div class="section-title">&#x2699; Settings</div></div>
-      <div class="card"><div class="card-header"><div class="card-title">&#x1F3DB; Hive Configuration</div></div>
-        <div class="setting-row"><div><div class="setting-label">Version</div><div class="setting-desc">Hive Nation Command Center</div></div><span class="badge badge-hive">v1.8.0</span></div>
-        <div class="setting-row"><div><div class="setting-label">API Endpoint</div><div class="setting-desc">http://localhost:3131/api</div></div><span class="badge badge-green">Connected</span></div>
-        <div class="setting-row"><div><div class="setting-label">Memory Backend</div><div class="setting-desc">SimpleDB (JSON-based)</div></div><span class="badge badge-blue">Active</span></div>
-        <div class="setting-row"><div><div class="setting-label">Senate Mode</div><div class="setting-desc">45-Senator deliberation</div></div><span class="badge badge-purple">Enabled</span></div>
-        <div class="setting-row"><div><div class="setting-label">Multi-Agent</div><div class="setting-desc">Orchestrator + Subagents</div></div><span class="badge badge-cyan">Enabled</span></div>
-      </div>
-      <div class="card"><div class="card-header"><div class="card-title">&#x1F9EA; System Info</div></div>
-        <div class="monitor-metric"><span class="monitor-label">Platform</span><span class="monitor-value" id="sys-platform">-</span></div>
-        <div class="monitor-metric"><span class="monitor-label">Node.js</span><span class="monitor-value" id="sys-node">-</span></div>
-        <div class="monitor-metric"><span class="monitor-label">Server Uptime</span><span class="monitor-value" id="sys-uptime">-</span></div>
-        <div class="monitor-metric"><span class="monitor-label">Server</span><span class="monitor-value">Express</span></div>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-<div class="toast" id="toast"></div>
-<script>
-var API="";
-var startTime=Date.now();
-var currentSenatorFilter="all";
-var currentAgentTab="all";
-var SENATOR_DATA={"leadership":["speaker","technocrat","ethicist","pragmatist","skeptic","sentinel","visionary","historian","diplomat","journalist","psychologist"],"technical":["economist","productManager","marketer","financier","riskManager","devops","securityExpert","dataScientist","perfEngineer","qa","architect","coder"],"emergency":["meteorologist","emergencyMgr","animalCare","riskAnalyst","localResident","botanist","geneticist"],"vision":["visualAnalyst","patternRecognizer","colorSpecialist","compositionExpert","contextInterpreter","detailObserver","emotionReader","symbolInterpreter","conspiracist","propagandist","moderator","techWriter"]};
-var SENATOR_COLORS={"neutral":"#6366f1","progressive":"#10b981","conservative":"#f59e0b","security":"#ef4444"};
-var SENATOR_PARTIES={"neutral":"Neutral","progressive":"Progressive","conservative":"Conservative","security":"Security"};
-var SENATOR_NAMES={"speaker":"Speaker","technocrat":"Technocrat","ethicist":"Ethicist","pragmatist":"Pragmatist","skeptic":"Skeptic","sentinel":"Sentinel","visionary":"Visionary","historian":"Historian","diplomat":"Diplomat","journalist":"Journalist","psychologist":"Psychologist","economist":"Economist","productManager":"Product Manager","marketer":"Marketing Expert","financier":"Finance Expert","riskManager":"Risk Manager","devops":"DevOps Engineer","securityExpert":"Security Expert","dataScientist":"Data Scientist","perfEngineer":"Performance Engineer","qa":"QA Engineer","architect":"Solutions Architect","coder":"Coder","meteorologist":"Meteorologist","emergencyMgr":"Emergency Manager","animalCare":"Animal Care Specialist","riskAnalyst":"Risk Analyst","localResident":"Local Resident","botanist":"Botanist","geneticist":"Geneticist","visualAnalyst":"Visual Analyst","patternRecognizer":"Pattern Recognizer","colorSpecialist":"Color Specialist","compositionExpert":"Composition Expert","contextInterpreter":"Context Interpreter","detailObserver":"Detail Observer","emotionReader":"Emotion Reader","symbolInterpreter":"Symbol Interpreter","conspiracist":"Conspiracist","propagandist":"Propagandist","moderator":"Moderator","techWriter":"Technical Writer"};
-var SENATOR_CATS={"speaker":"leadership","technocrat":"leadership","ethicist":"leadership","pragmatist":"leadership","skeptic":"leadership","sentinel":"leadership","visionary":"leadership","historian":"leadership","diplomat":"leadership","journalist":"leadership","psychologist":"leadership","economist":"technical","productManager":"technical","marketer":"technical","financier":"technical","riskManager":"technical","devops":"technical","securityExpert":"technical","dataScientist":"technical","perfEngineer":"technical","qa":"technical","architect":"technical","coder":"technical","meteorologist":"emergency","emergencyMgr":"emergency","animalCare":"emergency","riskAnalyst":"emergency","localResident":"emergency","botanist":"emergency","geneticist":"emergency","visualAnalyst":"vision","patternRecognizer":"vision","colorSpecialist":"vision","compositionExpert":"vision","contextInterpreter":"vision","detailObserver":"vision","emotionReader":"vision","symbolInterpreter":"vision","conspiracist":"vision","propagandist":"vision","moderator":"vision","techWriter":"vision"};
-var SENATOR_PARTIES2={"speaker":"neutral","technocrat":"neutral","ethicist":"neutral","pragmatist":"neutral","skeptic":"neutral","sentinel":"security","visionary":"progressive","historian":"neutral","diplomat":"neutral","journalist":"neutral","psychologist":"neutral","economist":"conservative","productManager":"neutral","marketer":"progressive","financier":"conservative","riskManager":"conservative","devops":"neutral","securityExpert":"security","dataScientist":"neutral","perfEngineer":"neutral","qa":"neutral","architect":"neutral","coder":"neutral","meteorologist":"neutral","emergencyMgr":"security","animalCare":"neutral","riskAnalyst":"conservative","localResident":"neutral","botanist":"neutral","geneticist":"neutral","visualAnalyst":"neutral","patternRecognizer":"neutral","colorSpecialist":"neutral","compositionExpert":"neutral","contextInterpreter":"neutral","detailObserver":"neutral","emotionReader":"neutral","symbolInterpreter":"neutral","conspiracist":"neutral","propagandist":"neutral","moderator":"neutral","techWriter":"neutral"};
-function showToast(msg,type){var t=document.getElementById("toast");var icons={success:"✅",error:"❌",info:"ℹ",warning:"⚠"};t.innerHTML=(icons[type]||"")+" "+msg;t.className="toast show";setTimeout(function(){t.className="toast";},3000);}
-function updateUptime(){var s=Math.floor((Date.now()-startTime)/1000);var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;document.getElementById("uptime").textContent=String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(sec).padStart(2,"0");}
-setInterval(updateUptime,1000);
-document.querySelectorAll(".nav-tab").forEach(function(t){t.addEventListener("click",function(){document.querySelectorAll(".nav-tab").forEach(function(x){x.classList.remove("active")});document.querySelectorAll(".tab-content").forEach(function(x){x.classList.remove("active")});t.classList.add("active");document.getElementById("tab-"+t.dataset.tab).classList.add("active");if(t.dataset.tab==="senate")loadSenate();else if(t.dataset.tab==="agents")loadAgents();else if(t.dataset.tab==="memory")loadMemory();else if(t.dataset.tab==="workflows")loadWorkflows();else if(t.dataset.tab==="monitoring")loadMonitoring();else if(t.dataset.tab==="overview")refreshAll();});});
-document.addEventListener("click",function(e){if(e.target.matches("[data-st]")){document.querySelectorAll("[data-st]").forEach(function(x){x.classList.remove("active")});e.target.classList.add("active");currentSenatorFilter=e.target.dataset.st;renderSenators();}if(e.target.matches("[data-at]")){document.querySelectorAll("[data-at]").forEach(function(x){x.classList.remove("active")});e.target.classList.add("active");currentAgentTab=e.target.dataset.at;loadAgents();}});
-async function apiGet(path){try{var r=await fetch(API+path);if(!r.ok)return null;return await r.json();}catch(e){return null;}}
-async function apiPost(path,body){try{var r=await fetch(API+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return await r.json().catch(function(){return{success:false};});}catch(e){return{success:false};}}
-async function refreshAll(){updateUptime();var dash=await apiGet("/api/dashboard")||{};document.getElementById("m-agents").textContent=dash.scoring?dash.scoring.length:"?";document.getElementById("m-memories").textContent=dash.memory&&dash.memory.stats?dash.memory.stats.total:"-";document.getElementById("m-decisions").textContent=dash.decisions?dash.decisions.length:"-";document.getElementById("m-workflows").textContent=dash.workflows?dash.workflows.length:"-";renderOvDecisions(dash.decisions||[]);renderOvAgents(dash.scoring||[]);renderOvHealth();renderActivityChart();document.getElementById("sys-platform").textContent=dash.platform||"-";}
-function renderOvDecisions(decs){var el=document.getElementById("ov-decisions");if(!decs.length){el.innerHTML="<div class=\"empty-state\"><div class=\"icon\">⚖</div><p>No decisions yet</p></div>";return;}el.innerHTML=decs.slice(0,5).map(function(d){return"<div class=\"decree-card\"><div class=\"decree-title\">"+(d.decision||d.context||"Decision")+"</div><div class=\"decree-meta\"><span>Agent: "+(d.agent||"System")+"</span></div></div>";}).join("");}
-function renderOvAgents(scores){var el=document.getElementById("ov-agents");if(!scores.length){el.innerHTML="<div class=\"empty-state\"><div class=\"icon\">Ἴ6</div><p>No agent scores yet</p></div>";return;}var avatars=["ᾑ6","ᾞ0","⚡","ὒ7","ὌA","ἺF","Ὂ1","ὒE"];var colors=["#6366f1","#8b5cf6","#10b981","#f59e0b","#ef4444","#3b82f6","#ec4899","#06b6d4"];el.innerHTML=scores.slice(0,5).map(function(s,i){var c=colors[i%colors.length];return"<div class=\"agent-card\"><div class=\"agent-avatar\" style=\"background:"+c+"\">"+avatars[i%8]+"</div><div class=\"agent-info\"><div class=\"agent-name\">"+(s.agentId||"Agent")+"</div><div class=\"agent-role\">Composite: "+(s.composite||0).toFixed(2)+"</div></div><div class=\"agent-score\"><div class=\"agent-score-value\" style=\"color:"+c+"\">"+(s.composite||0).toFixed(1)+"</div><div class=\"agent-score-label\">Score</div></div></div>";}).join("");}
-function renderOvHealth(){var el=document.getElementById("ov-health");var mem=performance.memory||{};var memMB=(mem.usedJSHeapSize/1048576).toFixed(0);var memTotalMB=(mem.jsHeapSizeLimit/1048576).toFixed(0);var pct=memTotalMB>0?((memMB/memTotalMB)*100).toFixed(0):0;el.innerHTML="<div class=\"monitor-metric\"><span class=\"monitor-label\">Memory</span><span class=\"monitor-value\">"+memMB+" / "+memTotalMB+" MB</span></div><div class=\"progress-bar\"><div class=\"progress-fill\" style=\"width:"+pct+"%;background:"+(pct>80?"#ef4444":pct>60?"#f59e0b":"#10b981")+"\"></div></div><div class=\"monitor-metric\"><span class=\"monitor-label\">Health</span><span class=\"monitor-value\" style=\"color:#10b981\">✅ Healthy</span></div><div class=\"monitor-metric\"><span class=\"monitor-label\">API</span><span class=\"monitor-value\" style=\"color:#10b981\">✅ Connected</span></div>";}
-function renderActivityChart(){var el=document.getElementById("activity-chart");var bars="";for(var i=0;i<24;i++){var h=Math.floor(Math.random()*80+20);bars+="<div class=\"chart-bar\" style=\"height:"+h+"%\"></div>";}el.innerHTML=bars;}
-function buildSenatorList(){var s=[];Object.keys(SENATOR_NAMES).forEach(function(id){s.push({id:id,name:SENATOR_NAMES[id],category:SENATOR_CATS[id],party:SENATOR_PARTIES2[id],vote:1});});return s;}
-async function loadSenate(){var decrees=await apiGet("/api/memory/decisions")||[];renderDecrees(decrees);renderSenators();renderVotingStatus();}
-function renderSenators(){var el=document.getElementById("senators-list");var senators=buildSenatorList();var filtered=senators;if(currentSenatorFilter!=="all"){var catSenators=SENATOR_DATA[currentSenatorFilter]||[];filtered=senators.filter(function(s){return catSenators.indexOf(s.id)!==-1;});}if(!filtered.length){el.innerHTML="<div class=\"empty-state\"><div class=\"icon\">ἽB</div><p>No senators in this category</p></div>";return;}el.innerHTML=filtered.map(function(s){var color=SENATOR_COLORS[s.party]||"#6366f1";var party=SENATOR_PARTIES[s.party]||s.party;var badgeColor=s.party==="neutral"?"blue":s.party==="progressive"?"green":s.party==="conservative"?"amber":"red";return"<div class=\"senator-row\"><div class=\"senator-avatar\" style=\"background:"+color+"\">ἽB;</div><div class=\"senator-info\"><div class=\"senator-name\">"+s.name+"</div><div class=\"senator-role\">"+party+"</div></div><span class=\"badge badge-"+badgeColor+"\">"+s.vote+" vote</span></div>";}).join("");}
-function renderDecrees(decrees){var el=document.getElementById("decrees-list");if(!decrees.length){el.innerHTML="<div class=\"empty-state\"><div class=\"icon\">ὍC</div><p>No decrees yet</p></div>";return;}el.innerHTML=decrees.slice(0,8).map(function(d){return"<div class=\"decree-card\"><div class=\"decree-title\">"+(d.decision||d.context||"Decree")+"</div><div class=\"decree-meta\"><span>Agent: "+(d.agent||"System")+"</span><span>"+(d.rationale||"")+"</span></div></div>";}).join("");}
-function renderVotingStatus(){var el=document.getElementById("voting-status");el.innerHTML="<div class=\"monitor-metric\"><span class=\"monitor-label\">Total Senators</span><span class=\"monitor-value\">45</span></div><div class=\"monitor-metric\"><span class=\"monitor-label\">Present</span><span class=\"monitor-value\" style=\"color:#10b981\">45</span></div><div class=\"monitor-metric\"><span class=\"monitor-label\">Quorum</span><span class=\"monitor-value\">30</span></div><div class=\"monitor-metric\"><span class=\"monitor-label\">Status</span><span class=\"monitor-value\" style=\"color:#10b981\">὾2 Active</span></div>";}
-function toggleCreateDecree(){var p=document.getElementById("create-decree-panel");p.style.display=p.style.display==="none"?"block":"none";}
-async function submitDecree(){var title=document.getElementById("decree-title").value;var desc=document.getElementById("decree-desc").value;var cat=document.getElementById("decree-category").value;if(!title){showToast("Please enter a title","error");return;}var r=await apiPost("/api/memory",{category:cat,content:desc||title,tags:["decree",cat]});if(r&&r.id){showToast("Decree submitted!","success");toggleCreateDecree();loadSenate();}else{showToast("Failed to submit decree","error");}}
-async function loadAgents(){var scores=await apiGet("/api/scoring")||[];var el=document.getElementById("agents-grid");if(!scores.length){el.innerHTML="<div class=\"empty-state\"><div class=\"icon\">ᾑ6</div><p>No agents registered yet</p></div>";return;}var sorted=[].concat(scores);if(currentAgentTab==="scored")sorted.sort(function(a,b){return(b.composite||0)-(a.composite||0);});var avatars=["ᾑ6","ᾞ0","⚡","ὒ7","ὌA","ἺF","Ὂ1","ὒE","⚙","Ἲ8"];var colors=["#6366f1","#8b5cf6","#10b981","#f59e0b","#ef4444","#3b82f6","#ec4899","#06b6d4"];el.innerHTML="<div class=\"grid-2\">"+sorted.map(function(s,i){var c=colors[i%colors.length];return"<div class=\"agent-card\"><div class=\"agent-avatar\" style=\"background:"+c+"\">"+avatars[i%avatars.length]+"</div><div class=\"agent-info\"><div class=\"agent-name\">"+(s.agentId||"Agent")+"</div><div class=\"agent-role\">Tasks: "+(s.totalTasks||0)+" | Quality: "+(s.quality||0).toFixed(1)+"</div></div><div class=\"agent-score\"><div class=\"agent-score-value\" style=\"color:"+c+"\">"+(s.composite||0).toFixed(1)+"</div><div class=\"agent-score-label\">Score</div></div></div>";}).join("")+"</div>";}
-async function loadMemory(){var recent=await apiGet("/api/memory")||[];renderMemRecent(recent.slice(0,20));}
-function renderMemRecent(memories){var el=document.getElementById("mem-recent");if(!memories.length){el.innerHTML="<div class=\"empty-state\"><div class=\"icon\">ᾞ0</div><p>No memories stored</p></div>";return;}el.innerHTML=memories.map(function(m){var tags="";if(m.tags&&m.tags.length){tags="<div class=\"memory-item-tags\">"+m.tags.map(function(t){return"<span class=\"memory-tag\">"+t+"</span>";}).join("")+"</div>";}var ts=m.timestamp?new Date(m.timestamp).toLocaleString():"";return"<div class=\"memory-item\"><div class=\"memory-item-header\"><span class=\"memory-item-cat\">"+(m.category||"general")+"</span><span class=\"memory-timestamp\">"+ts+"</span></div><div class=\"memory-item-content\">"+(m.content||"").substring(0,200)+"</div>"+tags+"</div>";}).join("");}
-async function searchMemory(){var q=document.getElementById("mem-search").value;var cat=document.getElementById("mem-category").value;var results=await apiGet("/api/memory/recall?q="+encodeURIComponent(q)+(cat?"&category="+cat:""))||[];renderMemRecent(results);}
-async function storeMemory(){var content=document.getElementById("new-mem-content").value;var cat=document.getElementById("new-mem-category").value;var tags=(document.getElementById("new-mem-tags").value||"").split(",").map(function(t){return t.trim();}).filter(function(t){return t;});if(!content){showToast("Please enter content","error");return;}var r=await apiPost("/api/memory",{category:cat,content:content,tags:tags});if(r&&r.id){showToast("Memory stored!","success");document.getElementById("new-mem-content").value="";document.getElementById("new-mem-tags").value="";loadMemory();}else{showToast("Failed to store memory","error");}}
-async function loadWorkflows(){var wfs=await apiGet("/api/workflows")||[];renderWorkflows(wfs.slice(0,15));}
-function renderWorkflows(wfs){var el=document.getElementById("wf-list");if(!wfs.length){el.innerHTML="<div class=\"empty-state\"><div class=\"icon\">ὐ4</div><p>No workflows yet</p></div>";return;}el.innerHTML=wfs.map(function(wf,i){return"<div class=\"workflow-step\"><div class=\"step-number\">"+(i+1)+"</div><div class=\"step-content\"><div class=\"step-name\">"+(wf.name||"Workflow")+"</div><div class=\"step-desc\">"+(wf.description||"")+"</div></div><span class=\"badge badge-blue\">"+(wf.steps&&wf.steps.length||0)+" steps</span></div>";}).join("");}
-function showCreateWorkflow(){document.getElementById("create-wf-panel").style.display="block";}
-function hideCreateWorkflow(){document.getElementById("create-wf-panel").style.display="none";}
-async function createWorkflow(){var name=document.getElementById("wf-name").value;var desc=document.getElementById("wf-desc").value;var steps=document.getElementById("wf-steps").value.split("\n").filter(function(s){return s.trim();});if(!name){showToast("Please enter a name","error");return;}var r=await apiPost("/api/workflows",{name:name,description:desc,steps:steps});if(r&&r.name){showToast("Workflow created!","success");hideCreateWorkflow();loadWorkflows();}else{showToast("Failed to create workflow","error");}}
-async function runWorkflow(){var name=document.getElementById("wf-run-name").value;if(!name){showToast("Please enter a workflow name","error");return;}var r=await apiPost("/api/workflows/run",{name:name});showToast(r.success?"Workflow started!":"Failed to run workflow",r.success?"success":"error");}
-async function loadMonitoring(){var mon=await apiGet("/api/monitoring")||{};var mem=performance.memory||{};var memMB=(mem.usedJSHeapSize/1048576).toFixed(0);var memTotalMB=(mem.jsHeapSizeLimit/1048576).toFixed(0);var memPct=memTotalMB>0?((memMB/memTotalMB)*100).toFixed(0):0;document.getElementById("mon-metrics").innerHTML="<div class=\"monitor-metric\"><span class=\"monitor-label\">CPU</span><span class=\"monitor-value\" style=\"color:#10b981\">✅ Normal</span></div><div class=\"monitor-metric\"><span class=\"monitor-label\">Memory Used</span><span class=\"monitor-value\">"+memMB+" MB</span></div><div class=\"progress-bar\"><div class=\"progress-fill\" style=\"width:"+memPct+"%;background:"+(memPct>80?"#ef4444":memPct>60?"#f59e0b":"#10b981")+"\"></div></div><div class=\"monitor-metric\"><span class=\"monitor-label\">Memory Limit</span><span class=\"monitor-value\">"+memTotalMB+" MB</span></div>";var alerts=mon.alerts||[];if(alerts.length){document.getElementById("mon-alerts").innerHTML=alerts.map(function(a){return"<div class=\"alert-item\"><span class=\"alert-icon\">"+(a.level==="critical"?"ὓ4":a.level==="warning"?"὾1":"὾2")+"</span><span class=\"alert-text\">"+(a.message||a.name||"Alert")+"</span></div>";}).join("");}else{document.getElementById("mon-alerts").innerHTML="<div class=\"empty-state\"><div class=\"icon\">✅</div><p>No alerts - all systems nominal</p></div>";}var proc=mon.process||{};document.getElementById("mon-process").innerHTML="<div class=\"monitor-metric\"><span class=\"monitor-label\">Process ID</span><span class=\"monitor-value\">"+(proc.pid||process.pid)+"</span></div><div class=\"monitor-metric\"><span class=\"monitor-label\">Uptime</span><span class=\"monitor-value\">"+(proc.uptime?Math.floor(proc.uptime)+"s":"-")+"</span></div><div class=\"monitor-metric\"><span class=\"monitor-label\">Platform</span><span class=\"monitor-value\">"+(proc.platform||"-")+"</span></div>";document.getElementById("sys-node").textContent=process.version;document.getElementById("sys-uptime").textContent=Math.floor(process.uptime())+"s";}
-refreshAll();
-setInterval(refreshAll,30000);
-</script>
+    
+    <div class="toast" id="toast"></div>
+    <div class="footer">Hive Nation v1.9.5 — Multi-Agent Government Framework | 🦆 🐝 🦞</div>
+    
+    <script>
+        // Toast
+        function showToast(msg, type = 'info') {
+            const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+            const t = document.getElementById('toast');
+            t.innerHTML = (icons[type] || '') + ' ' + msg;
+            t.className = 'toast show';
+            setTimeout(() => t.className = 'toast', 3000);
+        }
+        
+        // Uptime
+        const startTime = Date.now();
+        function updateUptime() {
+            const s = Math.floor((Date.now() - startTime) / 1000);
+            const h = String(Math.floor(s / 3600)).padStart(2, '0');
+            const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+            const sec = String(s % 60).padStart(2, '0');
+            document.getElementById('uptime').textContent = h + ':' + m + ':' + sec;
+        }
+        setInterval(updateUptime, 1000);
+        updateUptime();
+        
+        // Navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // Data
+        const agents = [
+            { name: 'Orchestrator', type: 'meta', score: 9.2, color: '#6366f1' },
+            { name: 'Meta-Agent', type: 'meta', score: 9.4, color: '#8b5cf6' },
+            { name: 'Quackford', type: 'researcher', score: 8.8, color: '#4a90d9' },
+            { name: 'Beeatrice', type: 'researcher', score: 8.7, color: '#f59e0b' },
+            { name: 'Code Quackston', type: 'coder', score: 8.6, color: '#10b981' },
+            { name: 'Clawrence', type: 'coder', score: 8.5, color: '#ef4444' },
+            { name: 'Quack Shield', type: 'security', score: 9.0, color: '#3b82f6' },
+            { name: 'Bee Careful', type: 'security', score: 8.9, color: '#ec4899' }
+        ];
+        
+        const memories = [];
+        
+        // Render
+        function renderAgents() {
+            document.getElementById('agent-list').innerHTML = agents.map(a => 
+                '<div class="agent-card">' +
+                '<div class="agent-avatar" style="background:' + a.color + '">' + a.name.charAt(0) + '</div>' +
+                '<div class="agent-info"><div class="agent-name">' + a.name + '</div><div class="agent-role">' + a.type + '</div></div>' +
+                '<div class="agent-score"><div class="agent-score-value" style="color:' + a.color + '">' + a.score.toFixed(1) + '</div><div class="agent-score-label">Score</div></div>' +
+                '</div>'
+            ).join('');
+            
+            document.getElementById('top-agents').innerHTML = agents.slice(0, 4).map(a => 
+                '<div class="agent-card">' +
+                '<div class="agent-avatar" style="background:' + a.color + '">' + a.name.charAt(0) + '</div>' +
+                '<div class="agent-info"><div class="agent-name">' + a.name + '</div><div class="agent-role">' + a.score.toFixed(1) + ' score</div></div>' +
+                '</div>'
+            ).join('');
+        }
+        
+        function renderMemory() {
+            if (memories.length === 0) {
+                document.getElementById('memory-list').innerHTML = '<div class="empty-state"><div class="icon">🧠</div><p>No memories stored</p></div>';
+            } else {
+                document.getElementById('memory-list').innerHTML = memories.map(m => 
+                    '<div class="memory-item"><div class="memory-cat">' + m.cat + '</div><div class="memory-content">' + m.content + '</div></div>'
+                ).join('');
+            }
+            document.getElementById('mem-count').textContent = memories.length;
+        }
+        
+        function refreshOverview() {
+            renderAgents();
+            renderMemory();
+            showToast('Dashboard refreshed', 'success');
+        }
+        
+        function refreshMonitoring() {
+            // Simulated memory data
+            const used = Math.floor(Math.random() * 200) + 100;
+            const total = 8192;
+            document.getElementById('mem-used').textContent = used;
+            document.getElementById('mem-total').textContent = total;
+            document.getElementById('mem-bar').style.width = (used / total * 100) + '%';
+            showToast('Monitoring refreshed', 'success');
+        }
+        
+        function addMemory() {
+            const content = prompt('Enter memory content:');
+            if (content) {
+                memories.push({ cat: 'general', content: content });
+                renderMemory();
+                showToast('Memory saved', 'success');
+            }
+        }
+        
+        // Init
+        renderAgents();
+        renderMemory();
+        refreshMonitoring();
+    </script>
 </body>
 </html>
