@@ -2,6 +2,10 @@
 
 **The ultimate multi-agent collaboration system. Get started in 5 minutes.**
 
+> 🏠 **Federation is OPTIONAL** — The full program works 100% standalone.
+> Join the federation only if you want to collaborate with other instances.
+> See [Federation](#federation-optional) below for details.
+
 ---
 
 ## ⚡ QUICK START (5 Minutes)
@@ -118,6 +122,30 @@ node scripts/dreaming-engine.js dream
 
 # DEFCON 5 - All clear
 ./scripts/hive-emergency.sh DEFCON5 "Situation resolved"
+```
+
+---
+
+## 🏠 Federation (OPTIONAL) — Expand & Collaborate
+
+**Federation is completely OPTIONAL. The full program works 100% standalone.**
+
+Federation lets you collaborate with other AgentTeams instances, but you DON'T need it.
+
+```bash
+# Start your federation (OPTIONAL)
+./scripts/hive-federation.sh 4200 start "My AI Lab"
+
+# Discover other federations
+./scripts/hive-federation.sh 4200 discover
+
+# Share your councilors with others (you choose)
+# Default shared: Botanist, Meteorologist, Economist, Security Expert
+
+# Delegate a task to another federation
+node scripts/hive-federation.js delegate "Genetics" "Breeding question..."
+
+# OR DON'T JOIN — full program works without federation!
 ```
 
 ---
