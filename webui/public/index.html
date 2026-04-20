@@ -243,6 +243,7 @@
         <div class="nav-tab" data-tab="memory"><span class="emoji">🧠</span> Memory</div>
         <div class="nav-tab" data-tab="council"><span class="emoji">🧠</span> Council</div>
         <div class="nav-tab" data-tab="live"><span class="emoji">📡</span> Live</div>
+        <div class="nav-tab" data-tab="connections"><span class="emoji">🔗</span> Connections</div>
         <div class="nav-tab" data-tab="automation"><span class="emoji">⚡</span> Automation</div>
         <div class="nav-tab" data-tab="system"><span class="emoji">📈</span> System</div>
     </div>
@@ -570,6 +571,63 @@
             </div>
         </div>
         
+        <!-- Connections -->
+        <div id="tab-connections" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><span class="icon">🔗</span> System Connections</div>
+                </div>
+                <pre style="background:var(--bg2);padding:12px;border-radius:8px;font-size:10px;overflow-x:auto;color:var(--text2);border:1px solid var(--border);margin:16px">
+┌──────────────────────────────────────────────────────────────────┐
+│                    HIVE NATION v2.1.0                            │
+├──────────────────────────────────────────────────────────────────┤
+│  ┌────────────┐    ┌─────────────────────────────────────────┐  │
+│  │  Browser   │───▶│  Hive WebUI (:3131)                    │  │
+│  └────────────┘    └──────────────┬──────────────────────────────┘  │
+│                                     │                               │
+│           ┌────────────────────────┼────────────────────────┐      │
+│           ▼                        ▼                        ▼      │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────┐ │
+│  │  Council API     │  │  Full API + MCP  │  │  OpenClaw    │ │
+│  │  (:3007)        │  │  (:3001)         │  │  (:18789)   │ │
+│  └──────────────────┘  └──────────────────┘  └──────────────┘ │
+└──────────────────────────────────────────────────────────────────┘</pre>
+            </div>
+            
+            <div class="card" style="margin-top:16px">
+                <div class="card-header"><div class="card-title"><span class="icon">🌐</span> Active Services</div></div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;padding:16px">
+                    <div style="background:var(--bg2);padding:12px;border-radius:8px;border:1px solid var(--success);text-align:center">
+                        <div style="font-size:20px">🌐</div><div style="font-weight:600">Hive WebUI</div><div style="color:var(--text2);font-size:11px">:3131</div><div style="color:var(--success);font-size:10px">● Online</div>
+                    </div>
+                    <div style="background:var(--bg2);padding:12px;border-radius:8px;border:1px solid var(--success);text-align:center">
+                        <div style="font-size:20px">⚡</div><div style="font-weight:600">Council API</div><div style="color:var(--text2);font-size:11px">:3007</div><div style="color:var(--success);font-size:10px">● Online</div>
+                    </div>
+                    <div style="background:var(--bg2);padding:12px;border-radius:8px;border:1px solid var(--success);text-align:center">
+                        <div style="font-size:20px">🛠️</div><div style="font-weight:600">Full API</div><div style="color:var(--text2);font-size:11px">:3001</div><div style="color:var(--success);font-size:10px">● Online</div>
+                    </div>
+                    <div style="background:var(--bg2);padding:12px;border-radius:8px;border:1px solid var(--warning);text-align:center">
+                        <div style="font-size:20px">🦆</div><div style="font-weight:600">OpenClaw</div><div style="color:var(--text2);font-size:11px">:18789</div><div style="color:var(--warning);font-size:10px">● Running</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top:16px">
+                <div class="card-header"><div class="card-title"><span class="icon">🤖</span> LLM Provider Chain</div></div>
+                <div style="padding:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <div style="background:linear-gradient(135deg,var(--hive),var(--hive2));padding:8px 16px;border-radius:6px;font-weight:600">1. MiniMax</div>
+                    <span style="color:var(--text3)">→</span>
+                    <div style="background:var(--bg3);padding:8px 16px;border-radius:6px;color:var(--text2)">2. LM Studio</div>
+                    <span style="color:var(--text3)">→</span>
+                    <div style="background:var(--bg3);padding:8px 16px;border-radius:6px;color:var(--text2)">3. OpenRouter</div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top:16px">
+                <div class="card-header"><div class="card-title"><span class="icon">🏛️</span> Full Council WebUI</div><a href="/council" target="_blank" class="btn btn-primary">🚀 Launch</a></div>
+            </div>
+        </div>
+
         <!-- System -->
         <div id="tab-system" class="section">
             <div class="card">
