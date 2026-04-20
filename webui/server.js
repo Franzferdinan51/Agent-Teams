@@ -233,12 +233,12 @@ const server = http.createServer(async (req, res) => {
             }
         }
         
-        // Serve index.html for /council
-        const councilIndex = path.join(COUNCIL_DIR, 'index.html');
+        // Serve NEW clean council index.html
+        const councilIndex = path.join(__dirname, 'public', 'council-new.html');
         fs.readFile(councilIndex, (err, data) => {
             if (err) {
                 res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.end('<html><body><h1>AI Council WebUI not found</h1><p>Run: cp -r ~/.openclaw/workspace/ai-council-webui-new/dist webui/public/council-dist</p></body></html>');
+                res.end('<html><body><h1>AI Council not found</h1></body></html>');
                 return;
             }
             res.writeHead(200, { 'Content-Type': 'text/html' });

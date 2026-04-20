@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Council | Deliberation Chamber</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --bg: #0a0e17;
+            --bg2: #0d1221;
+            --bg3: #111827;
+            --border: #1e2d4a;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --accent: #6366f1;
+            --accent2: #8b5cf6;
+            --accent3: #a78bfa;
+            --hive: #f59e0b;
+            --hive2: #fbbf24;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--bg2);
+            border-bottom: 2px solid var(--hive);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            font-size: 32px;
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--hive2), var(--accent3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo span {
+            font-size: 12px;
+            color: var(--text3);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .back-btn {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            background: var(--bg);
+            border-color: var(--hive);
+        }
+        
+        /* Main Layout */
+        .main {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            min-height: calc(100vh - 80px);
+        }
+        
+        /* Left - Question & Debate */
+        .debate-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--hive);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Question Input */
+        .question-card {
+            border-color: var(--accent);
+        }
+        
+        .question-input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            color: var(--text);
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .question-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--hive), var(--hive2));
+            border: none;
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 12px;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Councilors List */
+        .councilors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        
+        .councilor {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .councilor:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .councilor-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .councilor-party {
+            font-size: 12px;
+            color: var(--text2);
+        }
+        
+        .councilor-vote {
+            margin-top: 8px;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .vote-yea { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .vote-nay { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .vote-abstain { background: rgba(100, 116, 139, 0.2); color: var(--text3); }
+        
+        /* Right - Results */
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        /* Vote Tally */
+        .vote-tally {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            text-align: center;
+        }
+        
+        .tally-item {
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        
+        .tally-count {
+            font-size: 32px;
+            font-weight: 800;
+        }
+        
+        .tally-yea .tally-count { color: var(--success); }
+        .tally-nay .tally-count { color: var(--danger); }
+        .tally-abstain .tally-count { color: var(--text3); }
+        
+        .tally-label {
+            font-size: 12px;
+            color: var(--text2);
+            margin-top: 4px;
+        }
+        
+        /* Consensus Meter */
+        .consensus-bar {
+            height: 8px;
+            background: var(--bg);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        
+        .consensus-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--hive));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Debate History */
+        .debate-history {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .debate-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .debate-item:last-child {
+            border-bottom: none;
+        }
+        
+        .debate-speaker {
+            font-weight: 600;
+            color: var(--accent3);
+            font-size: 13px;
+        }
+        
+        .debate-text {
+            font-size: 14px;
+            color: var(--text2);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+        
+        .debate-time {
+            font-size: 11px;
+            color: var(--text3);
+            margin-top: 4px;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text2);
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--hive);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text3);
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        /* Mode Selector */
+        .mode-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text2);
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .mode-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        
+        .mode-btn:hover:not(.active) {
+            border-color: var(--accent);
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <span class="logo-icon">🏛️</span>
+            <div>
+                <h1>AI Council</h1>
+                <span>Deliberation Chamber</span>
+            </div>
+        </div>
+        <a href="/" class="back-btn">← Back to Hive</a>
+    </header>
+    
+    <main class="main">
+        <!-- Left Column -->
+        <div class="debate-section">
+            <!-- Question Card -->
+            <div class="card question-card">
+                <div class="card-title">💭 Submit Question for Deliberation</div>
+                
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="proposal">📋 Proposal</button>
+                    <button class="mode-btn" data-mode="consensus">🤝 Consensus</button>
+                    <button class="mode-btn" data-mode="adversarial">⚔️ Adversarial</button>
+                </div>
+                
+                <textarea id="questionInput" class="question-input" placeholder="What should we deliberate on today?"></textarea>
+                <button id="submitBtn" class="btn-primary" onclick="submitQuestion()">⚡ Begin Deliberation</button>
+            </div>
+            
+            <!-- Councilors Card -->
+            <div class="card">
+                <div class="card-title">👥 Council Members (<span id="councilorCount">0</span>)</div>
+                <div id="councilorsList" class="councilors-grid">
+                    <div class="loading"><div class="spinner"></div>Loading councilors...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="results-section">
+            <!-- Vote Tally -->
+            <div class="card">
+                <div class="card-title">🗳️ Current Vote</div>
+                <div class="vote-tally">
+                    <div class="tally-item tally-yea">
+                        <div class="tally-count" id="yeaCount">0</div>
+                        <div class="tally-label">YEA</div>
+                    </div>
+                    <div class="tally-item tally-nay">
+                        <div class="tally-count" id="nayCount">0</div>
+                        <div class="tally-label">NAY</div>
+                    </div>
+                    <div class="tally-item tally-abstain">
+                        <div class="tally-count" id="abstainCount">0</div>
+                        <div class="tally-label">ABSTAIN</div>
+                    </div>
+                </div>
+                <div class="consensus-bar">
+                    <div class="consensus-fill" id="consensusBar" style="width: 0%"></div>
+                </div>
+                <div style="text-align: center; margin-top: 8px; font-size: 12px; color: var(--text2);">
+                    Consensus: <span id="consensusPercent">0</span>%
+                </div>
+            </div>
+            
+            <!-- Debate History -->
+            <div class="card" style="flex: 1;">
+                <div class="card-title">💬 Debate Stream</div>
+                <div id="debateHistory" class="debate-history">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🏛️</div>
+                        <div>Submit a question to begin deliberation</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        const API = 'http://localhost:3007';
+        let currentMode = 'proposal';
+        let councilors = [];
+        let votes = { yea: 0, nay: 0, abstain: 0 };
+        let debateHistory = [];
+        
+        // Mode selector
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+            });
+        });
+        
+        // Load councilors on start
+        async function loadCouncilors() {
+            try {
+                const res = await fetch(`${API}/council/councilors`);
+                const data = await res.json();
+                councilors = data.councilors || [];
+                document.getElementById('councilorCount').textContent = councilors.length;
+                renderCouncilors();
+            } catch (e) {
+                document.getElementById('councilorsList').innerHTML = 
+                    '<div class="empty-state"><div>Could not load councilors</div></div>';
+            }
+        }
+        
+        function renderCouncilors() {
+            const container = document.getElementById('councilorsList');
+            if (!councilors.length) {
+                container.innerHTML = '<div class="empty-state"><div>No councilors available</div></div>';
+                return;
+            }
+            
+            container.innerHTML = councilors.slice(0, 12).map(c => `
+                <div class="councilor" onclick="selectCouncilor('${c.id}')">
+                    <div class="councilor-name">${c.name || c.id}</div>
+                    <div class="councilor-party">${c.party || c.archetype || 'Council Member'}</div>
+                </div>
+            `).join('');
+        }
+        
+        function selectCouncilor(id) {
+            alert('Councilor profile: ' + id);
+        }
+        
+        // Submit question
+        async function submitQuestion() {
+            const input = document.getElementById('questionInput');
+            const question = input.value.trim();
+            if (!question) return;
+            
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = '⚡ Deliberating...';
+            
+            document.getElementById('debateHistory').innerHTML = 
+                '<div class="loading"><div class="spinner"></div>Council is deliberating...</div>';
+            
+            try {
+                const res = await fetch(`${API}/council/deliberate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question, mode: currentMode })
+                });
+                
+                const data = await res.json();
+                
+                if (data.deliberation && data.deliberation.debate) {
+                    debateHistory = data.deliberation.debate;
+                    renderDebate();
+                }
+                
+                if (data.deliberation && data.deliberation.votes) {
+                    votes = data.deliberation.votes;
+                    updateVotes();
+                }
+            } catch (e) {
+                document.getElementById('debateHistory').innerHTML = 
+                    '<div class="empty-state"><div>Council unavailable. Try again.</div></div>';
+            }
+            
+            btn.disabled = false;
+            btn.textContent = '⚡ Begin Deliberation';
+        }
+        
+        function renderDebate() {
+            const container = document.getElementById('debateHistory');
+            if (!debateHistory.length) {
+                container.innerHTML = '<div class="empty-state"><div>No debate recorded yet</div></div>';
+                return;
+            }
+            
+            container.innerHTML = debateHistory.map(d => `
+                <div class="debate-item">
+                    <div class="debate-speaker">${d.speaker || 'Council Member'}</div>
+                    <div class="debate-text">${d.text || d}</div>
+                    ${d.time ? `<div class="debate-time">${new Date(d.time).toLocaleTimeString()}</div>` : ''}
+                </div>
+            `).join('');
+            
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function updateVotes() {
+            document.getElementById('yeaCount').textContent = votes.yea || 0;
+            document.getElementById('nayCount').textContent = votes.nay || 0;
+            document.getElementById('abstainCount').textContent = votes.abstain || 0;
+            
+            const total = votes.yea + votes.nay + votes.abstain;
+            const consensus = total > 0 ? Math.round((votes.yea / total) * 100) : 0;
+            document.getElementById('consensusPercent').textContent = consensus;
+            document.getElementById('consensusBar').style.width = consensus + '%';
+        }
+        
+        // Load councilors on page load
+        loadCouncilors();
+    </script>
+</body>
+</html>
