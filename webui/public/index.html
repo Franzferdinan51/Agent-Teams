@@ -251,6 +251,21 @@
     <div class="main">
         <!-- Overview -->
         <div id="tab-overview" class="section active">
+            
+            <!-- PROMINENT COUNCIL ACCESS -->
+            <div class="card" style="background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(139,92,246,0.2));border:2px solid var(--accent);margin-bottom:16px">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:8px">
+                    <div>
+                        <div style="font-size:20px;font-weight:700;color:var(--accent3);margin-bottom:4px">🏛️ Full AI Council WebUI Available!</div>
+                        <div style="color:var(--text2);font-size:13px">45+ councilors • Real-time deliberation • Vote tracking • Private counsel</div>
+                    </div>
+                    <div style="display:flex;gap:8px">
+                        <a href="/council" target="_blank" class="btn" style="background:var(--accent);color:white;padding:12px 24px;font-size:14px;font-weight:700;border-radius:10px;text-decoration:none">🚀 Launch Full Council</a>
+                        <button class="btn btn-secondary" onclick="showTab('connections')" style="padding:12px 20px">🔗 Connections</button>
+                    </div>
+                </div>
+            </div>
+            
             <div class="card">
                 <div class="card-header">
                     <div class="card-title"><span class="icon">📊</span> Live System Overview</div>
@@ -288,10 +303,10 @@
                         <div class="label">Spawn Team</div>
                         <div class="desc">Create agent team</div>
                     </div>
-                    <div class="quick-action" onclick="showTab('council')">
-                        <div class="icon">⚖️</div>
-                        <div class="label">Deliberate</div>
-                        <div class="desc">Council debate</div>
+                    <div class="quick-action" onclick="window.open('/council','_blank')" title="Opens Full Council WebUI">
+                        <div class="icon">🏛️</div>
+                        <div class="label">Full Council</div>
+                        <div class="desc">45+ councilors</div>
                     </div>
                     <div class="quick-action" onclick="showTab('memory');showMemoryForm()">
                         <div class="icon">🧠</div>
