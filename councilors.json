@@ -420,7 +420,7 @@
     "name": "The Cannabis Botanist",
     "role": "councilor",
     "enabled": true,
-    "model": "MiniMax-M2.5",
+    "model": "qwen3.6-35b-a3b-tq3_4s",
     "color": "from-green-600 to-emerald-900",
     "expertise": "cannabis,botanics,plant-science"
   },
@@ -429,7 +429,7 @@
     "name": "The Grow Master",
     "role": "councilor",
     "enabled": true,
-    "model": "MiniMax-M2.5",
+    "model": "qwen3.6-35b-a3b-tq3_4s",
     "color": "from-lime-500 to-green-800",
     "expertise": "cultivation,growing,indoor,outdoor,soil,nutrients"
   },
@@ -438,7 +438,7 @@
     "name": "The THC Analyst",
     "role": "councilor",
     "enabled": true,
-    "model": "MiniMax-M2.5",
+    "model": "qwen3.6-35b-a3b-tq3_4s",
     "color": "from-amber-500 to-orange-700",
     "expertise": "thc,cbd,cannabinoids,potency,lab-testing"
   },
@@ -447,7 +447,7 @@
     "name": "The Terpene Specialist",
     "role": "councilor",
     "enabled": true,
-    "model": "MiniMax-M2.5",
+    "model": "qwen3.6-35b-a3b-tq3_4s",
     "color": "from-purple-500 to-violet-800",
     "expertise": "terpenes,flavonoids,aroma,flavor"
   },
@@ -456,7 +456,7 @@
     "name": "The Medical Cannabis Advisor",
     "role": "councilor",
     "enabled": true,
-    "model": "MiniMax-M2.5",
+    "model": "qwen3.6-35b-a3b-tq3_4s",
     "color": "from-rose-500 to-pink-800",
     "expertise": "medical,medicinal,wellness,health,dosage"
   },
@@ -465,7 +465,7 @@
     "name": "The Plant Doctor",
     "role": "councilor",
     "enabled": true,
-    "model": "MiniMax-M2.5",
+    "model": "qwen3.6-35b-a3b-tq3_4s",
     "color": "from-teal-500 to-cyan-700",
     "expertise": "plant-health,pests,diseases,nutrients,deficiencies"
   },
@@ -474,7 +474,7 @@
     "name": "The Plant Analyst",
     "role": "councilor",
     "enabled": true,
-    "model": "MiniMax-M2.5",
+    "model": "qwen3.6-35b-a3b-tq3_4s",
     "color": "from-forest-500 to-green-900",
     "expertise": "plants,general,photosynthesis,watering,light"
   },
@@ -483,7 +483,7 @@
     "name": "The Harvest Master",
     "role": "councilor",
     "enabled": true,
-    "model": "MiniMax-M2.5",
+    "model": "qwen3.6-35b-a3b-tq3_4s",
     "color": "from-yellow-500 to-amber-700",
     "expertise": "harvest,curing,drying,trimming,preservation"
   },
@@ -492,7 +492,7 @@
     "name": "The Strain Breeder",
     "role": "councilor",
     "enabled": true,
-    "model": "MiniMax-M2.5",
+    "model": "qwen3.6-35b-a3b-tq3_4s",
     "color": "from-indigo-500 to-purple-800",
     "expertise": "genetics,breeding,strains,phenotypes,seeds"
   },
@@ -501,7 +501,7 @@
     "name": "The Environment Controller",
     "role": "councilor",
     "enabled": true,
-    "model": "MiniMax-M2.5",
+    "model": "qwen3.6-35b-a3b-tq3_4s",
     "color": "from-blue-500 to-cyan-700",
     "expertise": "environment,temperature,humidity,vpd,lighting,hvac"
   }
