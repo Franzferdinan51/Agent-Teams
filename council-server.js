@@ -1,818 +1,322 @@
+#!/usr/bin/env node
 /**
- * AI Council API Server v2.1
- * REST + SSE for live deliberation streaming
+ * AI Council Server — REST API for adversarial deliberation
+ * Port: 3003
+ * 
+ * Endpoints:
+ *   GET  /                   — health check
+ *   POST /api/session/start  — start deliberation {topic, mode} → {session_id}
+ *   GET  /api/session       — current session status
+ *   GET  /api/councilors    — list all 45 councilors
+ *   GET  /api/modes         — list deliberation modes
+ *   GET  /api/session/:id   — get session result
  */
 
+const http = require('http');
+const url = require('url');
 
-import express from 'express';
-import cors from 'cors';
-import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
+// ─── Configuration ───────────────────────────────────────────────
+const PORT = process.env.COUNCIL_PORT || 3003;
+const LM_STUDIO_URL = process.env.LMSTUDIO_URL || 'http://100.68.208.113:1234';
+const LM_STUDIO_KEY = process.env.LMSTUDIO_KEY || 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf';
 
-const require = createRequire(import.meta.url);
-
-const app = express();
-const __dirname = dirname(fileURLToPath(import.meta.url));
-app.use(cors({ origin: '*' }));
-app.use(express.json({ limit: '10mb' }));
-
-const PORT = parseInt(process.env.PORT || '3007');
-const SSE_CLIENTS = new Set();
-const sessions = new Map();
-
-// ─── LLM Integration (Multi-Provider: MiniMax, LM Studio, OpenRouter) ───────────────────────────────────
-
-// Provider configurations
-const PROVIDERS = {
-    minimax: {
-        name: 'MiniMax',
-        apiKey: process.env.MINIMAX_API_KEY || '',
-        apiUrl: 'https://api.minimax.chat/v1/text/chatcompletion_pro?GroupId=tuoyunbauVJxbGWRy',
-        model: 'MiniMax-M2.7',
-        default: true
-    },
-    lmstudio: {
-        name: 'LM Studio (Local)',
-        apiKey: process.env.LMSTUDIO_KEY || 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf',
-        apiUrl: process.env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1',
-        model: process.env.LMSTUDIO_MODEL || 'gemma-4-e2b-it',
-        local: true
-    },
-    openrouter: {
-        name: 'OpenRouter',
-        apiKey: process.env.OPENROUTER_API_KEY || '',
-        apiUrl: 'https://openrouter.ai/api/v1/chat/completions',
-        model: 'minimax/minimax-m2.5:free'
-    }
-};
-
-// Current provider selection (can be changed via API)
-let currentProvider = process.env.LLM_PROVIDER || 'minimax';
-
-// Get provider configuration
-function getProvider(name) {
-    return PROVIDERS[name] || PROVIDERS.minimax;
-}
-
-// List available providers
-function listProviders() {
-    return Object.entries(PROVIDERS).map(([key, p]) => ({
-        id: key,
-        name: p.name,
-        model: p.model,
-        local: p.local || false,
-        active: key === currentProvider,
-        hasKey: !!p.apiKey
-    }));
-}
-
-// Call LLM with automatic fallback
-async function callLLM(messages, options = {}) {
-    const providerName = options.provider || currentProvider;
-    const provider = getProvider(providerName);
+// ─── 45 Councilor Personas ───────────────────────────────────────
+const COUNCILORS = [
+    // Leadership & Meta
+    { id: 'speaker',      name: 'Victoria Adams',    party: 'Neutral',      role: 'Speaker of the Council', specialty: 'leadership', voteWeight: 2 },
+    { id: 'technocrat',   name: 'James Techson',     party: 'Neutral',      role: 'Chief Technologist', specialty: 'technical', voteWeight: 1 },
+    { id: 'ethicist',     name: 'Maya Ethics',        party: 'Neutral',      role: 'Chief Ethicist', specialty: 'ethics', voteWeight: 1 },
+    { id: 'pragmatist',   name: 'Sam Practical',     party: 'Neutral',      role: 'Pragmatist', specialty: 'practical', voteWeight: 1 },
+    { id: 'skeptic',      name: 'Chris Doubt',        party: 'Neutral',      role: 'Devils Advocate', specialty: 'critical', voteWeight: 1 },
     
-    // Try specified provider first
-    const result = await callProvider(providerName, messages, options);
-    if (!result.error) return result;
+    // Security & Safety
+    { id: 'sentinel',     name: 'Alex Shield',       party: 'Security',     role: 'Security Sentinel', specialty: 'security', veto: ['security'], voteWeight: 1 },
+    { id: 'security_expert', name: 'Secure Steve',   party: 'Security',     role: 'Security Expert', specialty: 'security', voteWeight: 1 },
+    { id: 'risk_manager', name: 'Risk Rachel',        party: 'Conservative', role: 'Risk Manager', specialty: 'risk', voteWeight: 1 },
+    { id: 'risk_analyst', name: 'Risk Ray',           party: 'Conservative', role: 'Risk Analyst', specialty: 'risk', voteWeight: 1 },
+    { id: 'emergency_mgr',name: 'Alert Alex',         party: 'Security',      role: 'Emergency Manager', specialty: 'emergency', voteWeight: 2 },
     
-    // Fallback chain
-    const fallbackOrder = ['minimax', 'lmstudio', 'openrouter'];
-    for (const fallback of fallbackOrder) {
-        if (fallback === providerName) continue;
-        const fp = getProvider(fallback);
-        if (fp.apiKey) {
-            console.log(`[LLM] Falling back to ${fp.name}...`);
-            const fr = await callProvider(fallback, messages, options);
-            if (!fr.error) return fr;
-        }
-    }
+    // Technical
+    { id: 'architect',    name: 'Arch Andy',         party: 'Neutral',      role: 'Software Architect', specialty: 'architecture', voteWeight: 1 },
+    { id: 'coder',        name: 'Code Carlos',        party: 'Neutral',      role: 'Senior Coder', specialty: 'coding', voteWeight: 1 },
+    { id: 'devops',       name: 'Ops Oliver',         party: 'Neutral',      role: 'DevOps Engineer', specialty: 'devops', voteWeight: 1 },
+    { id: 'perf_engineer',name: 'Fast Fiona',         party: 'Neutral',      role: 'Performance Engineer', specialty: 'performance', voteWeight: 1 },
+    { id: 'qa',           name: 'Test Tara',           party: 'Neutral',      role: 'QA Engineer', specialty: 'quality', voteWeight: 1 },
+    { id: 'data_scientist',name: 'Data Diana',        party: 'Neutral',      role: 'Data Scientist', specialty: 'data', voteWeight: 1 },
     
-    return { error: 'All LLM providers failed' };
-}
-
-// Call specific provider
-async function callProvider(providerName, messages, options = {}) {
-    const provider = getProvider(providerName);
+    // Creative & Strategy
+    { id: 'visionary',    name: 'Riley Dream',        party: 'Progressive',  role: 'Visionary', specialty: 'innovation', voteWeight: 1 },
+    { id: 'product_manager',name: 'PM Chen',          party: 'Neutral',      role: 'Product Manager', specialty: 'product', voteWeight: 1 },
+    { id: 'planner',      name: 'Plan Petra',          party: 'Neutral',      role: 'Strategic Planner', specialty: 'planning', voteWeight: 1 },
+    { id: 'economist',    name: 'Wall Street Sam',    party: 'Conservative', role: 'Economist', specialty: 'economics', voteWeight: 1 },
+    { id: 'financier',    name: 'Money Mike',         party: 'Conservative', role: 'Financier', specialty: 'finance', veto: ['budget'], voteWeight: 1 },
     
-    if (!provider.apiKey) {
-        return { error: `${provider.name}: No API key configured` };
-    }
+    // Domain Experts
+    { id: 'botanist',     name: 'Flora Green',       party: 'Neutral',      role: 'Botanist', specialty: 'plants', voteWeight: 1 },
+    { id: 'geneticist',   name: 'Gene Grey',          party: 'Neutral',      role: 'Geneticist', specialty: 'genetics', voteWeight: 1 },
+    { id: 'animal_care',  name: 'Vet Val',            party: 'Neutral',      role: 'Animal Care Specialist', specialty: 'animal-care', voteWeight: 1 },
+    { id: 'meteorologist',name: 'Storm Chris',        party: 'Neutral',      role: 'Meteorologist', specialty: 'weather', voteWeight: 1, priority: 'emergency' },
     
-    try {
-        let payload, headers, url;
-        
-        if (providerName === 'minimax') {
-            // MiniMax API
-            payload = {
-                model: provider.model,
-                tokens_to_generate: options.maxTokens || 512,
-                temperature: options.temperature || 0.7,
-                top_p: 0.95,
-                stream: false,
-                messages: messages.map(m => ({
-                    role: m.role || 'user',
-                    name: m.name || m.councilor || 'assistant',
-                    content: m.content
-                }))
-            };
-            headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` };
-            url = provider.apiUrl;
-        } else if (providerName === 'lmstudio') {
-            // LM Studio API (OpenAI compatible)
-            payload = {
-                model: options.model || provider.model,
-                messages: messages.map(m => ({ role: m.role || 'user', content: m.content })),
-                temperature: options.temperature || 0.7,
-                max_tokens: options.maxTokens || 512
-            };
-            headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` };
-            url = `${provider.apiUrl}/chat/completions`;
-        } else if (providerName === 'openrouter') {
-            // OpenRouter API
-            payload = {
-                model: options.model || provider.model,
-                messages: messages.map(m => ({ role: m.role || 'user', content: m.content })),
-                temperature: options.temperature || 0.7,
-                max_tokens: options.maxTokens || 512
-            };
-            headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` };
-            url = provider.apiUrl;
-        }
-        
-        const response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
-        
-        if (!response.ok) {
-            const err = await response.text();
-            return { error: `${provider.name} error ${response.status}: ${err.substring(0, 100)}` };
-        }
-        
-        const data = await response.json();
-        
-        // Parse response based on provider
-        let content = '';
-        if (providerName === 'minimax') {
-            content = data?.choices?.[0]?.messages?.[0]?.text || data?.choices?.[0]?.message?.content || '';
-        } else {
-            // LM Studio / OpenAI compatible - check reasoning_content first (Qwen puts reasoning there)
-            content = data?.choices?.[0]?.message?.content || data?.choices?.[0]?.message?.reasoning_content || '';
-            // Clean up reasoning markers if present
-            content = content.replace(/Thinking Process:\s*/gi, '').trim();
-        }
-        
-        return { content, provider: providerName, model: provider.model };
-    } catch (e) {
-        return { error: `${provider.name}: ${e.message}` };
-    }
-}
-
-// ─── SSE BROADCAST ───────────────────────────────────────────
-function sseBroadcast(eventType, data) {
-    const payload = `event: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`;
-    SSE_CLIENTS.forEach(res => res.write(payload));
-}
-
-// Health check
-app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
-        timestamp: new Date().toISOString(),
-        viewers: SSE_CLIENTS.size,
-        providers: listProviders().map(p => ({ id: p.id, name: p.name, local: p.local, active: p.active }))
-    });
-});
-
-// ─── LLM Provider Status & Control ────────────────────────────
-app.get('/api/llm/providers', (req, res) => {
-    res.json({ providers: listProviders() });
-});
-
-app.get('/api/llm/status', (req, res) => {
-    const providers = listProviders();
-    res.json({
-        current: currentProvider,
-        providers,
-        lmStudio: {
-            url: PROVIDERS.lmstudio.apiUrl,
-            model: PROVIDERS.lmstudio.model,
-            modelsAvailable: providers.find(p => p.id === 'lmstudio')?.hasKey ? 'check /api/llm/models' : 'no key'
-        }
-    });
-});
-
-app.get('/api/llm/models', async (req, res) => {
-    if (!PROVIDERS.lmstudio.apiKey) {
-        return res.json({ error: 'LM Studio not configured' });
-    }
-    try {
-        const response = await fetch(`${PROVIDERS.lmstudio.apiUrl}/models`, {
-            headers: { 'Authorization': `Bearer ${PROVIDERS.lmstudio.apiKey}` }
-        });
-        const data = await response.json();
-        res.json({ models: data.data || [] });
-    } catch (e) {
-        res.json({ error: e.message });
-    }
-});
-
-app.post('/api/llm/provider', (req, res) => {
-    const { provider } = req.body;
-    if (!PROVIDERS[provider]) {
-        return res.json({ error: 'Unknown provider' });
-    }
-    currentProvider = provider;
-    res.json({ ok: true, provider, name: PROVIDERS[provider].name });
-});
-
-app.post('/api/llm/test', async (req, res) => {
-    const result = await callLLM([
-        { role: 'user', content: 'Say hello in 3 words.' }
-    ]);
-    res.json(result);
-});
-
-// ─── SSE ENDPOINT — live deliberation stream ──────────────────
-app.get('/api/events', (req, res) => {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
-    res.flushHeaders();
-
-    // Send initial connection event
-    res.write(`event: connected\ndata: ${JSON.stringify({ viewerId: Date.now(), viewers: SSE_CLIENTS.size + 1 })}\n\n`);
-
-    SSE_CLIENTS.add(res);
-    sseBroadcast('viewer_count', { count: SSE_CLIENTS.size });
-
-    req.on('close', () => {
-        SSE_CLIENTS.delete(res);
-        sseBroadcast('viewer_count', { count: SSE_CLIENTS.size });
-    });
-});
-
-// ─── SESSION EVENTS — frontend pushes events here ────────────
-let liveSession = {
-    id: null,
-    topic: null,
-    mode: null,
-    phase: 'idle',
-    startedAt: null,
-    messages: [],
-    councilors: [],
-    voteData: null,
-    stats: { messages: 0, yeas: 0, nays: 0 }
-};
-
-// Start a new deliberation session
-// Auto-deliberation settings
-const AUTO_DELIBERATION = process.env.AUTO_DELIBERATION !== 'false'; // Default enabled
-const DELIBERATION_DELAY_MS = 2000; // 2 seconds between messages
-
-app.post('/api/session/start', (req, res) => {
-    const { topic, mode, councilors } = req.body;
+    // Communication & Review
+    { id: 'journalist',   name: 'Dana Press',         party: 'Neutral',      role: 'Journalist', specialty: 'communication', voteWeight: 1 },
+    { id: 'diplomat',     name: 'Lee Harmony',         party: 'Neutral',      role: 'Diplomat', specialty: 'diplomacy', voteWeight: 1 },
+    { id: 'marketer',     name: 'Brand Kate',          party: 'Progressive',  role: 'Marketer', specialty: 'marketing', voteWeight: 1 },
+    { id: 'historian',    name: 'Pat Past',            party: 'Neutral',      role: 'Historian', specialty: 'history', voteWeight: 1 },
+    { id: 'psychologist', name: 'Dr. Mind',            party: 'Neutral',      role: 'Psychologist', specialty: 'human-factors', voteWeight: 1 },
     
-    // Load councilors from file
-    let availableCouncilors = [];
-    try {
-        const councilorsData = JSON.parse(readFileSync(join(__dirname, 'councilors.json'), 'utf-8'));
-        availableCouncilors = councilorsData.filter(c => c.enabled).slice(0, 5); // Use first 5 for demo
-    } catch (e) {}
+    // Analysts
+    { id: 'visual_analyst',    name: 'See Sally',    party: 'Neutral',      role: 'Visual Analyst', specialty: 'vision', voteWeight: 1 },
+    { id: 'pattern_recognizer', name: 'Pattern Pete', party: 'Neutral',      role: 'Pattern Recognizer', specialty: 'patterns', voteWeight: 1 },
+    { id: 'color_specialist',   name: 'Color Carol',  party: 'Neutral',      role: 'Color Specialist', specialty: 'color', voteWeight: 1 },
+    { id: 'composition_expert', name: 'Frame Frank',  party: 'Neutral',      role: 'Composition Expert', specialty: 'composition', voteWeight: 1 },
+    { id: 'context_interpreter',name: 'Context Chloe',party: 'Neutral',      role: 'Context Interpreter', specialty: 'context', voteWeight: 1 },
+    { id: 'detail_observer',   name: 'Detail Dan',   party: 'Neutral',      role: 'Detail Observer', specialty: 'details', voteWeight: 1 },
+    { id: 'emotion_reader',    name: 'Feel Fran',    party: 'Neutral',      role: 'Emotion Reader', specialty: 'emotion', voteWeight: 1 },
+    { id: 'symbol_interpreter', name: 'Symbol Sam',   party: 'Neutral',      role: 'Symbol Interpreter', specialty: 'symbols', voteWeight: 1 },
     
-    liveSession = {
-        id: `session-${Date.now()}`,
-        topic,
-        mode: mode || 'proposal',
-        phase: 'opening',
-        startedAt: Date.now(),
-        messages: [],
-        councilors: availableCouncilors.map(c => ({ ...c, status: 'waiting', speaking: false })),
-        voteData: null,
-        stats: { messages: 0, yeas: 0, nays: 0 }
-    };
-    sseBroadcast('session_start', liveSession);
-    res.json({ ok: true, sessionId: liveSession.id });
-    
-    // Auto-start deliberation if enabled (async)
-    if (AUTO_DELIBERATION && topic) {
-        setTimeout(() => startLLMDeliberation(topic, mode), 1000);
-    }
-});
-
-// Auto-deliberation with REAL LLM calls
-async function startLLMDeliberation(topic, mode) {
-    if (!liveSession || liveSession.phase === 'ended') return;
-    
-    // Get first 5 enabled councilors from file
-    let councilors = [];
-    try {
-        const councilorsData = JSON.parse(readFileSync(join(__dirname, 'councilors.json'), 'utf-8'));
-        councilors = councilorsData.filter(c => c.enabled).slice(0, 5);
-    } catch (e) {}
-    
-    const numCouncilors = councilors.length;
-    
-    // Build context
-    const contextMessages = [
-        { role: 'system', content: `You are facilitating an AI Council deliberation on the topic: "${topic}".
-
-Council roles:
-${councilors.map((c, i) => `${i+1}. ${c.name} (${c.role}): ${c.description || 'A wise councilor'}`).join('\n')}
-
-Rules:
-- Each councilor speaks from their unique perspective
-- Be concise but thoughtful (100-200 words)
-- Stay in character as your assigned role
-- Address the topic directly with unique insights
-- When High Speaker, summarize and call for vote` },
-        { role: 'user', content: `Topic: "${topic}"
-
-Please have each councilor speak in order. Start with ${councilors[0]?.name || 'The Technocrat'}.` }
-    ];
-    
-    // Get opening from first councilor
-    const openingMsg = await callLLM([
-        ...contextMessages,
-        { role: 'user', content: `As ${councilors[0]?.name || 'The Technocrat'}, give your opening statement on: "${topic}". Be concise and speak from your role's perspective.` }
-    ]);
-    
-    if (!openingMsg.error) {
-        const msg = {
-            id: `msg-${Date.now()}`,
-            councilor: councilors[0]?.name || 'The Technocrat',
-            role: councilors[0]?.role || 'councilor',
-            content: openingMsg.content,
-            timestamp: new Date().toISOString(),
-            vote: null
-        };
-        liveSession.messages.push(msg);
-        liveSession.stats.messages++;
-        sseBroadcast('message', msg);
-    }
-    
-    // Debate rounds
-    await new Promise(r => setTimeout(r, 3000));
-    
-    // Second councilor
-    if (liveSession.phase === 'ended') return;
-    const msg2 = await callLLM([
-        ...contextMessages,
-        { role: 'assistant', content: `Opening from ${councilors[0]?.name || 'The Technocrat'}` },
-        { role: 'user', content: `As ${councilors[1]?.name || 'The Ethicist'}, respond to the topic: "${topic}". What ethical considerations apply?` }
-    ]);
-    
-    if (!msg2.error) {
-        const msg = {
-            id: `msg-${Date.now()}`,
-            councilor: councilors[1]?.name || 'The Ethicist',
-            role: councilors[1]?.role || 'councilor',
-            content: msg2.content,
-            timestamp: new Date().toISOString(),
-            vote: null
-        };
-        liveSession.messages.push(msg);
-        liveSession.stats.messages++;
-        sseBroadcast('message', msg);
-    }
-    
-    await new Promise(r => setTimeout(r, 3000));
-    
-    // Third councilor
-    if (liveSession.phase === 'ended') return;
-    const msg3 = await callLLM([
-        ...contextMessages,
-        { role: 'user', content: `As ${councilors[2]?.name || 'The Pragmatist'}, address: "${topic}" from a practical standpoint. What are the real-world implications?` }
-    ]);
-    
-    if (!msg3.error) {
-        const msg = {
-            id: `msg-${Date.now()}`,
-            councilor: councilors[2]?.name || 'The Pragmatist',
-            role: councilors[2]?.role || 'councilor',
-            content: msg3.content,
-            timestamp: new Date().toISOString(),
-            vote: null
-        };
-        liveSession.messages.push(msg);
-        liveSession.stats.messages++;
-        sseBroadcast('message', msg);
-    }
-    
-    await new Promise(r => setTimeout(r, 3000));
-    
-    // Fourth councilor (Visionary)
-    if (liveSession.phase === 'ended') return;
-    const msg4 = await callLLM([
-        ...contextMessages,
-        { role: 'user', content: `As ${councilors[3]?.name || 'The Visionary'}, look ahead: What future implications does "${topic}" have?` }
-    ]);
-    
-    if (!msg4.error) {
-        const msg = {
-            id: `msg-${Date.now()}`,
-            councilor: councilors[3]?.name || 'The Visionary',
-            role: councilors[3]?.role || 'councilor',
-            content: msg4.content,
-            timestamp: new Date().toISOString(),
-            vote: null
-        };
-        liveSession.messages.push(msg);
-        liveSession.stats.messages++;
-        sseBroadcast('message', msg);
-    }
-    
-    await new Promise(r => setTimeout(r, 3000));
-    
-    // High Speaker (summary + call for vote)
-    if (liveSession.phase === 'ended') return;
-    const summary = await callLLM([
-        ...contextMessages,
-        { role: 'user', content: `As the High Speaker, summarize the debate on "${topic}" and call for a vote. Be authoritative and clear.` }
-    ]);
-    
-    if (!summary.error) {
-        const msg = {
-            id: `msg-${Date.now()}`,
-            councilor: councilors[4]?.name || 'High Speaker',
-            role: 'speaker',
-            content: summary.content,
-            timestamp: new Date().toISOString(),
-            vote: null
-        };
-        liveSession.messages.push(msg);
-        liveSession.stats.messages++;
-        sseBroadcast('message', msg);
-    }
-    
-    await new Promise(r => setTimeout(r, 3000));
-    
-    // Move to voting phase
-    if (liveSession.phase !== 'ended') {
-        liveSession.phase = 'voting';
-        sseBroadcast('phase', { phase: 'voting' });
-        
-        // Call LLM to get actual vote counts based on deliberation
-        await new Promise(r => setTimeout(r, 2000));
-        await runActualVoting(topic);
-    }
-}
-
-// Real voting using LLM to determine votes
-async function runActualVoting(topic) {
-    if (!liveSession || liveSession.phase === 'ended') return;
-    
-    // Ask LLM how the council would vote based on the deliberation
-    const voteAnalysis = await callLLM([
-        { role: 'system', content: 'You are analyzing council voting patterns. Given the deliberation, determine how many yeas and nays there would be. Return ONLY a JSON object: {"yeas": number, "nays": number, "reasoning": "brief explanation"}' },
-        { role: 'user', content: `Based on the deliberation about "${topic}" where councilors debated various perspectives, how would the full council vote?
-
-Council summary: ${liveSession.messages.map(m => `${m.councilor}: ${m.content?.substring(0, 100)}...`).join('\n')}
-
-Determine the vote distribution. Consider:
-- Technical arguments may favor yeas
-- Ethical concerns may create nays
-- Pragmatic considerations split the vote
-- Visionary perspectives often favor progress
-
-Return JSON with yeas (25-45) and nays (10-30) based on the debate quality.` }
-    ]);
-    
-    let yeas = 32, nays = 18;
-    
-    // Parse LLM response
-    if (!voteAnalysis.error && voteAnalysis.content) {
-        try {
-            // Try to extract JSON from response
-            const jsonMatch = voteAnalysis.content.match(/\{[^{}]*\}/);
-            if (jsonMatch) {
-                const voteData = JSON.parse(jsonMatch[0]);
-                yeas = Math.max(15, Math.min(50, voteData.yeas || 32));
-                nays = Math.max(5, Math.min(40, voteData.nays || 18));
-            }
-        } catch (e) {}
-    }
-    
-    liveSession.stats.yeas = yeas;
-    liveSession.stats.nays = nays;
-    liveSession.voteData = { yeas, nays, quorum: true, reasoning: voteAnalysis.content?.substring(0, 200) || 'Council majority' };
-    
-    sseBroadcast('vote', { yeas, nays, total: yeas + nays, reasoning: liveSession.voteData.reasoning });
-    
-    // End session
-    setTimeout(() => {
-        if (liveSession) {
-            liveSession.phase = 'ended';
-            sseBroadcast('phase', { phase: 'ended' });
-        }
-    }, 5000);
-}
-
-// Push a deliberation event (message, status, vote, etc.)
-app.post('/api/session/event', (req, res) => {
-    const { type, data } = req.body;
-    
-    switch (type) {
-        case 'message':
-            liveSession.messages.push(data);
-            liveSession.stats.messages++;
-            sseBroadcast('message', data);
-            break;
-            
-        case 'phase':
-            liveSession.phase = data.phase;
-            sseBroadcast('phase', data);
-            break;
-            
-        case 'thinking':
-            liveSession.councilors = liveSession.councilors.map(c => 
-                c.id === data.id ? { ...c, thinking: data.thinking } : c
-            );
-            sseBroadcast('thinking', data);
-            break;
-            
-        case 'councilor_start':
-            liveSession.councilors = liveSession.councilors.map(c => 
-                c.id === data.id ? { ...c, status: 'speaking', speaking: true } : c
-            );
-            sseBroadcast('councilor_start', data);
-            break;
-            
-        case 'councilor_end':
-            liveSession.councilors = liveSession.councilors.map(c => 
-                c.id === data.id ? { ...c, status: 'done', speaking: false } : c
-            );
-            sseBroadcast('councilor_end', data);
-            break;
-            
-        case 'vote':
-            liveSession.voteData = data;
-            liveSession.stats.yeas = data.yeas || 0;
-            liveSession.stats.nays = data.nays || 0;
-            sseBroadcast('vote', data);
-            break;
-            
-        case 'prediction':
-            sseBroadcast('prediction', data);
-            break;
-            
-        case 'end':
-            liveSession.phase = 'adjourned';
-            sseBroadcast('session_end', { sessionId: liveSession.id });
-            break;
-    }
-    
-    res.json({ ok: true });
-});
-
-// Get current session state (for late joiners)
-app.get('/api/session', (req, res) => {
-    const elapsed = liveSession.startedAt ? Date.now() - liveSession.startedAt : 0;
-    res.json({ 
-        ...liveSession, 
-        elapsed,
-        viewerCount: SSE_CLIENTS.size 
-    });
-});
-
-// Get messages so far
-app.get('/api/session/messages', (req, res) => {
-    res.json({ messages: liveSession.messages });
-});
-
-// Get councilors status
-app.get('/api/session/councilors', (req, res) => {
-    res.json({ councilors: liveSession.councilors });
-});
-
-// Clear session
-app.post('/api/session/clear', (req, res) => {
-    liveSession = {
-        id: null,
-        topic: null,
-        mode: null,
-        phase: 'idle',
-        startedAt: null,
-        messages: [],
-        councilors: [],
-        voteData: null,
-        stats: { messages: 0, yeas: 0, nays: 0 }
-    };
-    sseBroadcast('session_clear', {});
-    res.json({ ok: true });
-});
-
-// ─── Get councilors list ─────────────────────────────────────
-app.get('/api/councilors', (req, res) => {
-    try {
-        const settings = JSON.parse(readFileSync(join(__dirname, 'councilors.json'), 'utf-8'));
-        res.json(settings.map(b => ({
-            id: b.id,
-            name: b.name,
-            role: b.role,
-            enabled: b.enabled,
-            model: b.model,
-            color: b.color
-        })));
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// ─── LEGACY endpoints (for CLI) ──────────────────────────────
-app.get('/api/status', (req, res) => {
-    res.json({
-        mode: liveSession.mode,
-        activeCouncilors: liveSession.councilors.length,
-        messageCount: liveSession.messages.length
-    });
-});
-
-
-// ── MODES LIST ───────────────────────────────────────────────────────────────
-app.get('/api/modes', (req, res) => {
-    res.json({
-        modes: [
-            { id: 'proposal', label: 'Legislate', icon: '⚖️', description: 'Debate + vote on proposals' },
-            { id: 'deliberation', label: 'Deliberate', icon: '⚖️', description: 'Deep roundtable discussion' },
-            { id: 'inquiry', label: 'Inquiry', icon: '🔍', description: 'Rapid-fire Q&A' },
-            { id: 'research', label: 'Deep Research', icon: '📊', description: 'Recursive multi-round investigation' },
-            { id: 'swarm', label: 'Swarm Hive', icon: '🐝', description: 'Parallel task decomposition' },
-            { id: 'swarm_coding', label: 'Swarm Coding', icon: '⚡', description: 'Full software engineering workflow' },
-            { id: 'prediction', label: 'Prediction', icon: '🎯', description: 'Superforecasting with probability' },
-            { id: 'government', label: 'Legislature', icon: '🏛️', description: 'Full legislative process (5 phases)' },
-            { id: 'inspector', label: 'Inspector', icon: '🔬', description: 'Deep visual + data analysis' },
-        ],
-        total: 9,
-        version: '3.0.0'
-    });
-});
-
-// ── ASK (ONE-SHOT) ──────────────────────────────────────────────────────────
-app.post('/api/ask', (req, res) => {
-    const { question, mode, councilors } = req.body;
-    if (!question) return res.status(400).json({ error: 'question is required' });
-    // Start session and respond immediately with session ID
-    const sessionId = `ask-${Date.now()}`;
-    sessions.set(sessionId, {
-        id: sessionId,
-        topic: question,
-        mode: mode || 'deliberation',
-        councilors: councilors || [],
-        status: 'starting',
-        messages: [],
-        createdAt: new Date().toISOString()
-    });
-    // TODO: wire to actual deliberation engine via SSE push
-    res.json({ sessionId, status: 'started', topic: question, mode: mode || 'deliberation' });
-});
-
-// ── INSPECTOR MODE ──────────────────────────────────────────────────────────
-app.post('/api/vision/inspect', async (req, res) => {
-    const { image, topic, mode } = req.body;
-    if (!image && !topic) return res.status(400).json({ error: 'image or topic required' });
-    // Forward to React app's deliberation engine
-    // The React app handles the actual vision processing via SSE + Gemini API
-    res.json({
-        sessionId: `insp-${Date.now()}`,
-        status: 'started',
-        topic: topic || 'Inspect attached image',
-        mode: 'inspector',
-        note: 'Inspector mode runs through the React app UI. Open http://localhost:3002 and select Inspector mode.'
-    });
-});
-
-// ── GOVERNMENT / LEGISLATURE MODE ─────────────────────────────────────────
-app.post('/api/session/government', (req, res) => {
-    res.json({
-        sessionId: `gov-${Date.now()}`,
-        status: 'started',
-        mode: 'government',
-        note: 'Government mode runs through the React app UI. Open http://localhost:3002 and select Legislature mode.'
-    });
-});
-
-// ── PREDICTION MODE ─────────────────────────────────────────────────────────
-app.post('/api/session/prediction', (req, res) => {
-    res.json({
-        sessionId: `pred-${Date.now()}`,
-        status: 'started',
-        mode: 'prediction',
-        note: 'Prediction mode runs through the React app UI. Open http://localhost:3002 and select Prediction mode.'
-    });
-});
-
-// ── SWARM DECOMPOSITION ───────────────────────────────────────────────────
-app.post('/api/session/swarm', (req, res) => {
-    res.json({
-        sessionId: `swarm-${Date.now()}`,
-        status: 'started',
-        mode: 'swarm',
-        note: 'Swarm mode runs through the React app UI. Open http://localhost:3002 and select Swarm Hive mode.'
-    });
-});
-
-app.listen(PORT, () => {
-    console.log(`🤖 AI Council API v2.1 running on port ${PORT}`);
-    console.log(`   SSE: http://localhost:${PORT}/api/events`);
-    console.log(`   REST: http://localhost:${PORT}/api/session/*`);
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// MCP TOOLS (for Agent Control) — Added from merged code
-// ═══════════════════════════════════════════════════════════════════
-
-const mcpTools = [
-    {
-        name: 'council_status',
-        description: 'Get Council health and provider status',
-        inputSchema: { type: 'object', properties: {} }
-    },
-    {
-        name: 'council_deliberate',
-        description: 'Start a new deliberation session',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                topic: { type: 'string', description: 'Topic to deliberate' },
-                mode: { type: 'string', description: 'Mode: proposal, deliberation, etc.' }
-            },
-            required: ['topic']
-        }
-    },
-    {
-        name: 'council_messages',
-        description: 'Get current session messages',
-        inputSchema: { type: 'object', properties: {} }
-    },
-    {
-        name: 'council_vote',
-        description: 'Get current vote results',
-        inputSchema: { type: 'object', properties: {} }
-    },
-    {
-        name: 'council_councilors',
-        description: 'List all available councilors',
-        inputSchema: { type: 'object', properties: {} }
-    },
-    {
-        name: 'council_llm_test',
-        description: 'Test LLM provider connection',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                provider: { type: 'string', description: 'Provider: minimax, lmstudio, openrouter' }
-            }
-        }
-    }
+    // Special
+    { id: 'moderator',    name: 'Mod Maria',          party: 'Neutral',      role: 'Moderator', specialty: 'moderation', voteWeight: 1 },
+    { id: 'tech_writer',  name: 'Write Wendy',        party: 'Neutral',      role: 'Technical Writer', specialty: 'documentation', voteWeight: 1 },
+    { id: 'conspiracist', name: 'Quest Quinn',        party: 'Neutral',      role: 'Outsider Analyst', specialty: 'alternative', voteWeight: 1 },
+    { id: 'propagandist', name: 'Spin Steve',         party: 'Neutral',      role: 'Spin Doctor', specialty: 'persuasion', voteWeight: 1 },
+    { id: 'local_resident', name: 'Local Lisa',       party: 'Neutral',      role: 'Local Resident', specialty: 'local', voteWeight: 1 },
 ];
 
-// MCP JSON-RPC endpoint
-app.post('/mcp', async (req, res) => {
-    try {
-        const { method, params } = req.body;
-        
-        if (method === 'tools/list') {
-            return res.json({ jsonrpc: '2.0', id: req.body.id, result: { tools: mcpTools } });
-        }
-        
-        if (method === 'tools/call') {
-            const { name, arguments: args = {} } = params;
-            
-            let result;
-            switch (name) {
-                case 'council_status':
-                    result = await apiGet('/health');
-                    break;
-                case 'council_deliberate':
-                    result = await apiPost('/session/start', args);
-                    break;
-                case 'council_messages':
-                    result = await apiGet('/session/messages');
-                    break;
-                case 'council_vote':
-                    result = await apiGet('/session');
-                    break;
-                case 'council_councilors':
-                    result = await apiGet('/councilors');
-                    break;
-                case 'council_llm_test':
-                    result = await apiPost('/llm/test', args);
-                    break;
-                default:
-                    throw new Error(`Unknown tool: ${name}`);
+// ─── Deliberation Modes ───────────────────────────────────────────
+const MODES = {
+    adversarial:  { name: 'Adversarial', description: 'Competing viewpoints debate until verdict', color: '🔴' },
+    standard:     { name: 'Standard',    description: 'Collaborative deliberation toward consensus', color: '🟢' },
+    consensus:    { name: 'Consensus',   description: 'Find common ground across all perspectives', color: '🔵' },
+    socratic:     { name: 'Socratic',   description: 'Deep questioning to expose assumptions', color: '🟡' },
+    creative:     { name: 'Creative',   description: 'Brainstorm innovative solutions', color: '🟣' },
+    analytical:   { name: 'Analytical',  description: 'Data-driven logical analysis', color: '⚪' },
+    emergency:    { name: 'Emergency',   description: 'Rapid decision under time pressure', color: '🔺' },
+    vision:       { name: 'Vision',      description: 'Analyze images and visual data', color: '👁️' },
+    swarm_coding: { name: 'Swarm Coding',description: 'Multi-agent code review and generation', color: '🐝' },
+    strategic:    { name: 'Strategic',   description: 'Long-term strategic planning', color: '♟️' },
+};
+
+// ─── Sessions Store ───────────────────────────────────────────────
+const sessions = new Map();
+let sessionCounter = 0;
+
+// ─── LM Studio Call ──────────────────────────────────────────────
+function lmChat(messages, model = 'google/gemma-4-26b-a4b', maxTokens = 1024) {
+    return new Promise((resolve, reject) => {
+        const body = JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: 0.7 });
+        const req = http.request(`${LM_STUDIO_URL}/v1/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${LM_STUDIO_KEY}`,
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(body),
             }
-            
-            return res.json({ jsonrpc: '2.0', id: req.body.id, result });
-        }
+        }, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    const parsed = JSON.parse(data);
+                    resolve(parsed);
+                } catch (e) {
+                    reject(new Error(`Parse error: ${data.slice(0, 200)}`));
+                }
+            });
+        });
+        req.on('error', reject);
+        req.write(body);
+        req.end();
+    });
+}
+
+// ─── Build Council System Prompt ──────────────────────────────────
+function buildCouncilPrompt(topic, mode) {
+    const modeInfo = MODES[mode] || MODES.standard;
+    return `You are the AI COUNCIL — an adversarial deliberation body with 45 specialized councilors.
+    
+TOPIC: ${topic}
+MODE: ${modeInfo.name} (${modeInfo.description})
+
+You must deliberate as if all 45 councilors are present. Each councilor will speak in sequence, then you will synthesize a VERDICT.
+
+Councilors (speak as yourself, channeling each persona):
+
+LEADERSHIP: Victoria Adams (Speaker) — fair, balanced, seeks truth; James Techson (Technocrat) — technical depth; Maya Ethics — ethical implications; Sam Practical — pragmatic feasibility; Chris Doubt — critical skeptic.
+
+SECURITY: Alex Shield (Sentinel) — security implications; Secure Steve — vulnerability analysis; Risk Rachel — risk assessment; Risk Ray — threat modeling; Alert Alex — emergency protocols.
+
+TECHNICAL: Arch Andy — system architecture; Code Carlos — implementation; Ops Oliver — DevOps; Fast Fiona — performance; Test Tara — quality; Data Diana — data analysis.
+
+STRATEGY: Riley Dream (Visionary) — innovation; PM Chen — product strategy; Plan Petra — roadmapping; Wall Street Sam — economics; Money Mike — budget constraints.
+
+DOMAIN: Flora Green — plants/botany; Gene Grey — genetics; Vet Val — animal care; Storm Chris — weather; Dana Press — communications; Lee Harmony — diplomacy.
+
+ANALYSTS: See Sally — visual analysis; Pattern Pete — patterns; Color Carol — aesthetics; Frame Frank — composition; Context Chloe — context; Detail Dan — thoroughness; Feel Fran — emotional impact; Symbol Sam — symbolism.
+
+SPECIAL: Mod Maria — moderation; Write Wendy — documentation; Quest Quinn — outside perspective; Spin Steve — persuasion; Local Lisa — local knowledge.
+
+DELIBERATION RULES:
+- Address the topic from ALL major angles (pros, cons, risks, alternatives)
+- ${mode === 'adversarial' ? 'Force competing viewpoints to clash. Each councilor must argue their position strongly.' : 'Seek balanced perspective across all viewpoints.'}
+- ${mode === 'socratic' ? 'Question every assumption. Ask "but what if we\'re wrong?" repeatedly.' : ''}
+- ${mode === 'consensus' ? 'Find the common ground all councilors can agree on.' : ''}
+- ${mode === 'emergency' ? 'Decide RAPIDLY. Prioritize speed over completeness. State action immediately.' : ''}
+- ${mode === 'creative' ? 'Brainstorm WILD ideas. Break assumptions. Innovate.' : ''}
+
+FORMAT YOUR RESPONSE AS:
+---
+COUNCILOR DEBATES:
+[3-5 key councilor viewpoints, named]
+
+SYNTHESIS:
+[How the arguments connect and what the council concludes]
+
+VERDICT:
+[Clear recommendation or decision — what should be done]
+
+DISSENT:
+[Any significant minority viewpoints that disagreement with the verdict]
+---`;
+}
+
+// ─── Run Deliberation ─────────────────────────────────────────────
+async function runDeliberation(topic, mode) {
+    const sessionId = `council-${++sessionCounter}-${Date.now()}`;
+    const prompt = buildCouncilPrompt(topic, mode);
+    
+    const messages = [
+        { role: 'system', content: 'You are the AI Council deliberation lead. You channel 45 specialist councilors in structured adversarial deliberation.' },
+        { role: 'user', content: prompt }
+    ];
+    
+    try {
+        const result = await lmChat(messages, 'qwen3.6-35b-a3b', 1536);
+        const reply = result.choices?.[0]?.message?.content || result.choices?.[0]?.message?.reasoning_content || 'No response';
         
-        res.json({ jsonrpc: '2.0', id: req.body.id, error: { code: -32601, message: 'Method not found' } });
-    } catch (e) {
-        res.json({ jsonrpc: '2.0', id: req.body.id, error: { code: -32603, message: e.message } });
+        sessions.set(sessionId, {
+            id: sessionId,
+            topic,
+            mode,
+            status: 'complete',
+            result: reply,
+            created: new Date().toISOString(),
+            completed: new Date().toISOString(),
+        });
+        
+        return sessions.get(sessionId);
+    } catch (err) {
+        sessions.set(sessionId, {
+            id: sessionId,
+            topic,
+            mode,
+            status: 'error',
+            error: err.message,
+            created: new Date().toISOString(),
+        });
+        throw err;
     }
+}
+
+// ─── HTTP Server ─────────────────────────────────────────────────
+const server = http.createServer(async (req, res) => {
+    const parsedUrl = url.parse(req.url, true);
+    const pathname = parsedUrl.pathname;
+    
+    // CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    if (req.method === 'OPTIONS') {
+        res.writeHead(204);
+        res.end();
+        return;
+    }
+    
+    // Helper
+    const json = (code, data) => {
+        res.writeHead(code, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data, null, 2));
+    };
+    
+    // GET / — Health
+    if (pathname === '/' && req.method === 'GET') {
+        json(200, { status: 'ok', service: 'ai-council', version: '1.0.0', port: PORT });
+        return;
+    }
+    
+    // GET /api/health — Health check (for hive-workflow.js compatibility)
+    if (pathname === '/api/health' && req.method === 'GET') {
+        json(200, { status: 'ok', service: 'ai-council', version: '1.0.0', port: PORT, mode: 'standalone' });
+        return;
+    }
+    
+    // POST /api/session/start — Start deliberation
+    if (pathname === '/api/session/start' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const { topic, mode = 'standard', councilors } = JSON.parse(body);
+                if (!topic) return json(400, { error: 'topic required' });
+                
+                const session = await runDeliberation(topic, mode);
+                json(200, { session_id: session.id, status: session.status, topic, mode });
+            } catch (err) {
+                json(500, { error: err.message });
+            }
+        });
+        return;
+    }
+    
+    // GET /api/session — Current/last session
+    if (pathname === '/api/session' && req.method === 'GET') {
+        const sessionsArr = Array.from(sessions.values()).slice(-5);
+        json(200, { sessions: sessionsArr });
+        return;
+    }
+    
+    // GET /api/session/:id — Specific session
+    if (pathname.startsWith('/api/session/') && req.method === 'GET') {
+        const id = pathname.split('/')[3];
+        const session = sessions.get(id);
+        if (!session) return json(404, { error: 'session not found' });
+        json(200, session);
+        return;
+    }
+    
+    // GET /api/councilors — List councilors
+    if (pathname === '/api/councilors' && req.method === 'GET') {
+        json(200, { councilors: COUNCILORS, count: COUNCILORS.length });
+        return;
+    }
+    
+    // GET /api/modes — List modes
+    if (pathname === '/api/modes' && req.method === 'GET') {
+        json(200, { modes: MODES });
+        return;
+    }
+    
+    // 404
+    json(404, { error: 'not found', path: pathname });
 });
 
-// MCP tools list endpoint
-app.get('/mcp/tools', (req, res) => {
-    res.json({ tools: mcpTools, count: mcpTools.length });
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`🏛️  AI Council server running on port ${PORT}`);
+    console.log(`   LM Studio: ${LM_STUDIO_URL}`);
+    console.log(`   Endpoints:`);
+    console.log(`     GET  /               — health`);
+    console.log(`     POST /api/session/start — start deliberation`);
+    console.log(`     GET  /api/session    — list recent sessions`);
+    console.log(`     GET  /api/session/:id — get session result`);
+    console.log(`     GET  /api/councilors — list 45 councilors`);
+    console.log(`     GET  /api/modes      — list deliberation modes`);
+});
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.log(`⚠️  Port ${PORT} already in use — is council already running?`);
+    } else {
+        console.error(`Server error: ${err.message}`);
+    }
 });
