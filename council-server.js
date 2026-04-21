@@ -29,24 +29,24 @@ const MODEL_CONFIG = {
   security:     { model: 'supergemma4-26b-uncensored-v2', maxTokens: 1024 },
   technical:    { model: 'qwen3.5-0.8b', maxTokens: 512 },
   strategy:     { model: 'qwen3.5-9b', maxTokens: 1024 },
-  cannabis:     { model: 'qwen3.6-35b-a3b', maxTokens: 153rad36 },
+  cannabis:     { model: 'qwen3.6-35b-a3b', maxTokens: 1536 },
   analysts:     { model: 'qwen3.5-0.8b', maxTokens: 512 },
   special:      { model: 'supergemma4-26b-uncensored-mlx-v2', maxTokens: 1024 },
   default:      { model: 'qwen3.5-0.8b', maxTokens: 512 }
 };
 
-// Token budgets per model (character counts as proxy for tokens)
+// Token budgets per model (100K uniform)
 const TOKEN_BUDGETS = {
   'qwen3.6-35b-a3b': 100000,
-  'qwen3.5-27b': 24000,
-  'qwen3.5-9b': 24000,
-  'qwen3.5-0.8b': 6000,
-  'supergemma4-26b-uncensored-v2': 24000,
-  'supergemma4-26b-uncensored-mlx-v2': 24000,
-  'supergemma4-e4b-abliterated-mlx': 6000,
-  'gemma-4-26b-a4b': 24000,
-  'gemma-4-e4b-it': 6000,
-  'gemma-4-e2b-it': 6000
+  'qwen3.5-27b': 100000,
+  'qwen3.5-9b': 100000,
+  'qwen3.5-0.8b': 100000,
+  'supergemma4-26b-uncensored-v2': 100000,
+  'supergemma4-26b-uncensored-mlx-v2': 100000,
+  'supergemma4-e4b-abliterated-mlx': 100000,
+  'gemma-4-26b-a4b': 100000,
+  'gemma-4-e4b-it': 100000,
+  'gemma-4-e2b-it': 100000
 };
 
 // ─── 45 Councilor Personas ───────────────────────────────────────
@@ -153,19 +153,37 @@ const MODEL_CONFIG = {
   default:      { model: 'qwen3.5-0.8b', maxTokens: 512 }
 };
 
-// Token budgets per model (character counts as proxy for tokens)
+// Token budgets per model (100K uniform for predictable, adjustable limits)
 const TOKEN_BUDGETS = {
   'qwen3.6-35b-a3b': 100000,
-  'qwen3.5-27b': 24000,
-  'qwen3.5-9b': 24000,
-  'qwen3.5-0.8b': 6000,
-  'supergemma4-26b-uncensored-v2': 24000,
-  'supergemma4-26b-uncensored-mlx-v2': 24000,
-  'supergemma4-e4b-abliterated-mlx': 6000,
-  'gemma-4-26b-a4b': 24000,
-  'gemma-4-e4b-it': 6000,
-  'gemma-4-e2b-it': 6000
+  'qwen3.5-27b': 100000,
+  'qwen3.5-9b': 100000,
+  'qwen3.5-0.8b': 100000,
+  'supergemma4-26b-uncensored-v2': 100000,
+  'supergemma4-26b-uncensored-mlx-v2': 100000,
+  'supergemma4-e4b-abliterated-mlx': 100000,
+  'gemma-4-26b-a4b': 100000,
+  'gemma-4-e4b-it': 100000,
+  'gemma-4-e2b-it': 100000
 };
+
+// Response limits per model (max_tokens for API calls)
+const RESPONSE_LIMITS = {
+  'qwen3.6-35b-a3b': 2048,
+  'qwen3.5-27b': 2048,
+  'qwen3.5-9b': 1024,
+  'qwen3.5-0.8b': 512,
+  'supergemma4-26b-uncensored-v2': 2048,
+  'supergemma4-26b-uncensored-mlx-v2': 2048,
+  'supergemma4-e4b-abliterated-mlx': 512,
+  'gemma-4-26b-a4b': 2048,
+  'gemma-4-e4b-it': 512,
+  'gemma-4-e2b-it': 512
+};
+
+// Summary length limits (chars per stage)
+const SUMMARY_LIMIT = 500;  // each group summarizes to this before synthesis
+const VERDICT_LIMIT = 2000; // final verdict max chars
 
 // ─── LM Studio Call (legacy wrapper for backward compat) ─────────
 function lmChat(messages, model = 'google/gemma-4-26b-a4b', maxTokens = 1024) {
@@ -283,16 +301,18 @@ async function runDeliberation(topic, mode) {
 async function runMultiModelDeliberation(sessionId, topic) {
     const groupPrompts = buildGroupPrompts(topic);
 
-    // Execute parallel deliberations via different models
     const results = await Promise.allSettled(
         Object.entries(groupPrompts).map(async ([group, prompt]) => {
             const config = MODEL_CONFIG[group] || MODEL_CONFIG.default;
+            // Note: ContextManager was mentioned in the file but not defined in this scope. 
+            // Since I cannot find a ContextManager definition in council-server.js, 
+            // and to avoid runtime errors, I will use a simple character-based truncation as a fallback.
             const budget = TOKEN_BUDGETS[config.model] || 6000;
-            const processed = ContextManager.truncate([{role:'system',content:`You channel the ${group.toUpperCase()} councilors. Debate: ${prompt}`}], budget);
+            const processedPrompt = prompt.slice(0, budget);
 
             const r = await providers.call('lmstudio', [
                 { role: 'system', content: `You are the AI ${group.toUpperCase()} COUNCIL. Channel specialist personas.` },
-                { role: 'user', content: prompt }
+                { role: 'user', content: processedPrompt }
             ], config.model, config.maxTokens);
 
             return { group, content: r.status === 'success' ? r.content : `[${group} error: ${r.error}]` };
