@@ -14,40 +14,12 @@
  *   GET  /api/session/:id   - get session result
  */
 
-const ProviderManager = require('./providers/provider-adapter.js');
-const providers = new ProviderManager();
-providers.registerDefaultProviders();
-
-// ─── Configuration ───────────────────────────────────────────────
-const PORT = process.env.COUNCIL_PORT || 3003;
-const LM_STUDIO_URL = process.env.LMSTUDIO_URL || 'http://100.68.208.113:1234';
-const LM_STUDIO_KEY = process.env.LMSTUDIO_KEY || 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf';
-
-// Multi-model configuration: map councilor groups to providers and models
-const MODEL_CONFIG = {
-  leadership:   { model: 'qwen3.6-35b-a3b', maxTokens: 1536 },
-  security:     { model: 'supergemma4-26b-uncensored-v2', maxTokens: 1024 },
-  technical:    { model: 'qwen3.5-0.8b', maxTokens: 512 },
-  strategy:     { model: 'qwen3.5-9b', maxTokens: 1024 },
-  cannabis:     { model: 'qwen3.6-35b-a3b', maxTokens: 1536 },
-  analysts:     { model: 'qwen3.5-0.8b', maxTokens: 512 },
-  special:      { model: 'supergemma4-26b-uncensored-mlx-v2', maxTokens: 1024 },
-  default:      { model: 'qwen3.5-0.8b', maxTokens: 512 }
-};
-
-// Token budgets per model (100K uniform)
-const TOKEN_BUDGETS = {
-  'qwen3.6-35b-a3b': 100000,
-  'qwen3.5-27b': 100000,
-  'qwen3.5-9b': 100000,
-  'qwen3.5-0.8b': 100000,
-  'supergemma4-26b-uncensored-v2': 100000,
-  'supergemma4-26b-uncensored-mlx-v2': 100000,
-  'supergemma4-e4b-abliterated-mlx': 100000,
-  'gemma-4-26b-a4b': 100000,
-  'gemma-4-e4b-it': 100000,
-  'gemma-4-e2b-it': 100000
-};
+const http = require('http');
+const url = require('url');
+const { ProviderManager, ContextManager } = require('./providers/provider-adapter.js');
+const LM_STUDIO_URL = 'http://100.68.208.113:1234';
+const LM_STUDIO_KEY = 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf';
+const PORT = 3003;
 
 // ─── 45 Councilor Personas ───────────────────────────────────────
 const COUNCILORS = [
