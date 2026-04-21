@@ -152,7 +152,7 @@ const RESOURCE_LIMITS = {
   maxConcurrentCalls: 2,     // max parallel model calls (prevents RAM exhaustion)
   maxContextChars: 8000,     // max input context chars per call
   maxResponseTokens: 512,    // max tokens per response (safety cap)
-  callTimeoutMs: 60000,      // 60s timeout per call
+  callTimeoutMs: 300000,  // 5 min timeout per call (big models need time)
   maxRetries: 1,             // retry failed calls once
   smallModelMaxTokens: 256,  // 0.8b/e2b/e4b capped at 256 tokens
   mediumModelMaxTokens: 512, // 9b/26b capped at 512 tokens
@@ -223,7 +223,7 @@ function lmChat(messages, model = 'google/gemma-4-26b-a4b', maxTokens = 1024) {
             });
         });
         req.on('error', reject);
-        req.setTimeout(60000, () => { req.destroy(); reject(new Error('Timeout after 60s')); });
+        req.setTimeout(RESOURCE_LIMITS.callTimeoutMs, () => { req.destroy(); reject(new Error('Timeout after 5min')); });
         req.write(body);
         req.end();
     });
