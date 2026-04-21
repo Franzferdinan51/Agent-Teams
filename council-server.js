@@ -21,6 +21,27 @@ const LM_STUDIO_URL = 'http://100.68.208.113:1234';
 const LM_STUDIO_KEY = 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf';
 const PORT = 3003;
 
+// ─── Concurrency Limiter (prevent RAM exhaustion on constrained devices) ───
+const MAX_CONCURRENT = 2;
+let activeCalls = 0;
+const callQueue = [];
+
+function scheduleCall(fn) {
+    return new Promise((resolve, reject) => {
+        const run = () => {
+            activeCalls++;
+            Promise.resolve(fn())
+                .then(resolve, reject)
+                .finally(() => {
+                    activeCalls--;
+                    if (callQueue.length > 0) callQueue.shift()();
+                });
+        };
+        if (activeCalls < MAX_CONCURRENT) run();
+        else callQueue.push(run);
+    });
+}
+
 // ─── 45 Councilor Personas ───────────────────────────────────────
 const COUNCILORS = [
     // Leadership & Meta
@@ -125,42 +146,63 @@ const MODEL_CONFIG = {
   default:      { model: 'qwen3.5-0.8b', maxTokens: 512 }
 };
 
-// Token budgets per model (100K uniform for predictable, adjustable limits)
+// ─── Memory-Safe Resource Limits ────────────────────────────────
+// Hard caps to prevent OOM on constrained devices (256MB RAM free)
+const RESOURCE_LIMITS = {
+  maxConcurrentCalls: 2,     // max parallel model calls (prevents RAM exhaustion)
+  maxContextChars: 8000,     // max input context chars per call
+  maxResponseTokens: 512,    // max tokens per response (safety cap)
+  callTimeoutMs: 60000,      // 60s timeout per call
+  maxRetries: 1,             // retry failed calls once
+  smallModelMaxTokens: 256,  // 0.8b/e2b/e4b capped at 256 tokens
+  mediumModelMaxTokens: 512, // 9b/26b capped at 512 tokens
+  largeModelMaxTokens: 1024, // 35b capped at 1024 tokens
+};
+
+// Token budgets per model (memory-safe: small input, capped output)
 const TOKEN_BUDGETS = {
-  'qwen3.6-35b-a3b': 100000,
-  'qwen3.5-27b': 100000,
-  'qwen3.5-9b': 100000,
-  'qwen3.5-0.8b': 100000,
-  'supergemma4-26b-uncensored-v2': 100000,
-  'supergemma4-26b-uncensored-mlx-v2': 100000,
-  'supergemma4-e4b-abliterated-mlx': 100000,
-  'gemma-4-26b-a4b': 100000,
-  'gemma-4-e4b-it': 100000,
-  'gemma-4-e2b-it': 100000
+  'qwen3.6-35b-a3b': 8000,   // 8K input max
+  'qwen3.5-27b': 8000,
+  'qwen3.5-9b': 6000,        // 6K input max
+  'qwen3.5-0.8b': 4000,      // 4K input max
+  'supergemma4-26b-uncensored-v2': 8000,
+  'supergemma4-26b-uncensored-mlx-v2': 8000,
+  'supergemma4-e4b-abliterated-mlx': 4000,
+  'gemma-4-26b-a4b': 6000,
+  'gemma-4-e4b-it': 4000,
+  'gemma-4-e2b-it': 3000,   // 3K input max
 };
 
-// Response limits per model (max_tokens for API calls)
+// Response limits per model (max_tokens for API calls — memory-safe)
 const RESPONSE_LIMITS = {
-  'qwen3.6-35b-a3b': 2048,
-  'qwen3.5-27b': 2048,
-  'qwen3.5-9b': 1024,
-  'qwen3.5-0.8b': 512,
-  'supergemma4-26b-uncensored-v2': 2048,
-  'supergemma4-26b-uncensored-mlx-v2': 2048,
-  'supergemma4-e4b-abliterated-mlx': 512,
-  'gemma-4-26b-a4b': 2048,
-  'gemma-4-e4b-it': 512,
-  'gemma-4-e2b-it': 512
+  'qwen3.6-35b-a3b': 1024,   // 35b: 1K response max
+  'qwen3.5-27b': 1024,
+  'qwen3.5-9b': 512,         // 9b: 512 response max
+  'qwen3.5-0.8b': 256,       // 0.8b: 256 response max
+  'supergemma4-26b-uncensored-v2': 1024,
+  'supergemma4-26b-uncensored-mlx-v2': 1024,
+  'supergemma4-e4b-abliterated-mlx': 256,
+  'gemma-4-26b-a4b': 512,
+  'gemma-4-e4b-it': 256,
+  'gemma-4-e2b-it': 256
 };
 
-// Summary length limits (chars per stage)
-const SUMMARY_LIMIT = 500;  // each group summarizes to this before synthesis
-const VERDICT_LIMIT = 2000; // final verdict max chars
+// Summary and verdict length limits (memory-safe)
+const SUMMARY_LIMIT = 400;   // each group summary capped at 400 chars
+const VERDICT_LIMIT = 1200;  // final verdict capped at 1200 chars
 
 // ─── LM Studio Call (legacy wrapper for backward compat) ─────────
 function lmChat(messages, model = 'google/gemma-4-26b-a4b', maxTokens = 1024) {
+    // Cap tokens to memory-safe RESPONSE_LIMITS
+    const cappedTokens = Math.min(maxTokens, RESPONSE_LIMITS[model] || 256);
+    // Cap input context to TOKEN_BUDGETS
+    const budget = TOKEN_BUDGETS[model] || 4000;
+    const cappedMessages = messages.map(m => ({
+        ...m,
+        content: m.content?.slice(0, budget) || m.content
+    }));
     return new Promise((resolve, reject) => {
-        const body = JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: 0.7 });
+        const body = JSON.stringify({ model, messages: cappedMessages, max_tokens: cappedTokens, temperature: 0.7 });
         const req = http.request(`${LM_STUDIO_URL}/v1/chat/completions`, {
             method: 'POST',
             headers: {
@@ -181,6 +223,7 @@ function lmChat(messages, model = 'google/gemma-4-26b-a4b', maxTokens = 1024) {
             });
         });
         req.on('error', reject);
+        req.setTimeout(60000, () => { req.destroy(); reject(new Error('Timeout after 60s')); });
         req.write(body);
         req.end();
     });
@@ -275,37 +318,36 @@ async function runMultiModelDeliberation(sessionId, topic) {
 
     const results = await Promise.allSettled(
         Object.entries(groupPrompts).map(async ([group, prompt]) => {
-            const config = MODEL_CONFIG[group] || MODEL_CONFIG.default;
-            // Note: ContextManager was mentioned in the file but not defined in this scope. 
-            // Since I cannot find a ContextManager definition in council-server.js, 
-            // and to avoid runtime errors, I will use a simple character-based truncation as a fallback.
-            const budget = TOKEN_BUDGETS[config.model] || 6000;
-            const processedPrompt = prompt.slice(0, budget);
+            return scheduleCall(async () => {
+                const config = MODEL_CONFIG[group] || MODEL_CONFIG.default;
+                const budget = TOKEN_BUDGETS[config.model] || 4000;
+                const processedPrompt = prompt.slice(0, budget);
 
-            const r = await providers.call('lmstudio', [
-                { role: 'system', content: `You are the AI ${group.toUpperCase()} COUNCIL. Channel specialist personas.` },
-                { role: 'user', content: processedPrompt }
-            ], config.model, config.maxTokens);
+                const r = await providers.call('lmstudio', [
+                    { role: 'system', content: `You are the AI ${group.toUpperCase()} COUNCIL. Be concise (under 400 chars total).` },
+                    { role: 'user', content: processedPrompt }
+                ], config.model, RESPONSE_LIMITS[config.model] || 256);
 
-            return { group, content: r.status === 'success' ? r.content : `[${group} error: ${r.error}]` };
+                return { group, content: r.status === 'success' ? r.content.slice(0, 400) : `[${group} error]` };
+            });
         })
     );
 
-    // Stage 1: Each group summarizes to ~500 chars
+    // Stage 1: Each group summarizes (capped at SUMMARY_LIMIT chars)
     const summaries = results
         .filter(r => r.status === 'fulfilled')
-        .map(r => `### ${r.value.group.toUpperCase()}\n${r.value.content.slice(0, 500)}`)
+        .map(r => `### ${r.value.group.toUpperCase()}\n${r.value.content.slice(0, 400)}`)
         .join('\n\n');
 
     // Stage 2: Synthesize final verdict via large model
-    const synthesisPrompt = `AGGREGATED COUNCIL DEBATES:\n${summaries}\n\nSYNTHESIZE INTO FINAL VERDICT for: ${topic}\n\nFormat:\n---\nCOUNCILOR DEBATES:\n[Summarized positions]\n\nSYNTHESIS:\n[How arguments connect]\n\nVERDICT:\n[Clear decision + specific action]\n\nDISSENT:\n[Minority viewpoints]\n---`;
+    const synthesisPrompt = `COUNCIL DEBATES:\n${summaries.slice(0, 1000)}\n\nVERDICT for: ${topic.slice(0, 200)}\n\nSynthesize into a concise verdict with a specific action.`;
 
-    const synthesis = await providers.call('lmstudio', [
-        { role: 'system', content: 'You are the AI Council synthesis lead. Create a coherent verdict from multiple council deliberations. Be concise.' },
+    const synthesis = await scheduleCall(async () => providers.call('lmstudio', [
+        { role: 'system', content: 'You are the AI Council synthesis lead. Create a concise verdict. Under 800 chars total output.' },
         { role: 'user', content: synthesisPrompt }
-    ], 'qwen3.6-35b-a3b', 2048);
+    ], 'qwen3.6-35b-a3b', 800));
 
-    const finalResult = synthesis.status === 'success' ? synthesis.content : `Stage 1 summaries:\n${summaries}\n\n[Synthesis failed: ${synthesis.error}]`;
+    const finalResult = synthesis.status === 'success' ? synthesis.content.slice(0, 1200) : `Summaries:\n${summaries.slice(0, 1000)}\n\n[Synthesis: ${synthesis.error || "failed"}]`;
 
     sessions.set(sessionId, {
         id: sessionId, topic, mode: 'multi',
