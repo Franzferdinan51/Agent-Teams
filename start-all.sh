@@ -16,7 +16,7 @@ cd ~/Desktop/AgentTeam-GitHub
 
 # Kill existing services
 echo -e "\n${YELLOW}Stopping existing services...${NC}"
-pkill -f "council-server\|webui/server\|agent-api" 2>/dev/null
+pkill -f "council-server|webui/server|agent-api|agent-mesh-api|server.js" 2>/dev/null
 sleep 2
 
 # Set environment
@@ -35,6 +35,17 @@ COUNCIL_PID=$!
 echo "   Council PID: $COUNCIL_PID"
 
 sleep 3
+
+echo -e "\n${GREEN}Starting Agent Mesh API (port 4000)...${NC}"
+cd ~/Desktop/AgentTeam-GitHub/agent-mesh-api
+AGENT_MESH_API_KEY="${AGENT_MESH_API_KEY:-openclaw-mesh-default-key}" \
+PORT=4000 \
+node server.js > /tmp/mesh-api.log 2>&1 &
+MESH_PID=$!
+echo "   Mesh API PID: $MESH_PID"
+sleep 3
+
+cd ~/Desktop/AgentTeam-GitHub
 
 echo -e "\n${GREEN}Starting Hive WebUI (port 3131)...${NC}"
 node webui/server.js > /tmp/webui.log 2>&1 &
@@ -56,17 +67,19 @@ echo "║              ✅ Agent-Teams v2.1.0 Started!                ║"
 echo "╠═══════════════════════════════════════════════════════════════╣"
 echo "║  Service              Port   PID    URL                     ║"
 echo "╠═══════════════════════════════════════════════════════════════╣"
-echo "║  Council API          3007   $COUNCIL_PID   localhost:3007    ║"
-echo "║  Hive WebUI           3131   $WEBUI_PID   localhost:3131     ║"
-echo "║  Council API+MCP       3001   $API_PID    localhost:3001      ║"
+printf "║  Council Server       3007   %-5s  localhost:3007           ║\n" "$COUNCIL_PID"
+printf "║  Agent Mesh API       4000   %-5s  localhost:4000           ║\n" "$MESH_PID"
+printf "║  Hive WebUI           3131   %-5s  localhost:3131          ║\n" "$WEBUI_PID"
+printf "║  Council API+MCP      3001   %-5s  localhost:3001           ║\n" "$API_PID"
 echo "╠═══════════════════════════════════════════════════════════════╣"
 echo "║  MCP Tools:           /mcp   (JSON-RPC)                     ║"
 echo "║  CLI:                 ./council-cli.js                      ║"
 echo "╠═══════════════════════════════════════════════════════════════╣"
 echo "║  WebUI:               http://localhost:3131                 ║"
+echo "║  Mesh API:            http://localhost:4000                 ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo ""
-echo "📝 Logs: /tmp/council.log, /tmp/webui.log, /tmp/council-api.log"
+echo "📝 Logs: /tmp/council.log, /tmp/mesh-api.log, /tmp/webui.log, /tmp/council-api.log"
 echo ""
 echo "Quick Commands:"
 echo "  npm run council:status    # Check Council"
@@ -74,7 +87,7 @@ echo "  npm run council:test      # Test LLM"
 echo "  npm run council:mcp-tools # List MCP tools"
 echo "  node council-cli.js       # CLI interface"
 echo ""
-echo "Stop: pkill -f 'council-server|webui/server|agent-api'"
+echo "Stop: pkill -f 'council-server|webui/server|agent-api|agent-mesh-api|server.js'"
 
 # Save PIDs
-echo "$COUNCIL_PID $WEBUI_PID $API_PID" > /tmp/agent-teams.pids
+echo "$COUNCIL_PID $MESH_PID $WEBUI_PID $API_PID" > /tmp/agent-teams.pids
