@@ -414,5 +414,95 @@
     "enabled": true,
     "model": "MiniMax-M2.5",
     "color": "from-slate-500 to-gray-700"
+  },
+  {
+    "id": "cannabis-botanist",
+    "name": "The Cannabis Botanist",
+    "role": "councilor",
+    "enabled": true,
+    "model": "MiniMax-M2.5",
+    "color": "from-green-600 to-emerald-900",
+    "expertise": "cannabis,botanics,plant-science"
+  },
+  {
+    "id": "cultivation-expert",
+    "name": "The Grow Master",
+    "role": "councilor",
+    "enabled": true,
+    "model": "MiniMax-M2.5",
+    "color": "from-lime-500 to-green-800",
+    "expertise": "cultivation,growing,indoor,outdoor,soil,nutrients"
+  },
+  {
+    "id": "thc-analyst",
+    "name": "The THC Analyst",
+    "role": "councilor",
+    "enabled": true,
+    "model": "MiniMax-M2.5",
+    "color": "from-amber-500 to-orange-700",
+    "expertise": "thc,cbd,cannabinoids,potency,lab-testing"
+  },
+  {
+    "id": "terpene-specialist",
+    "name": "The Terpene Specialist",
+    "role": "councilor",
+    "enabled": true,
+    "model": "MiniMax-M2.5",
+    "color": "from-purple-500 to-violet-800",
+    "expertise": "terpenes,flavonoids,aroma,flavor"
+  },
+  {
+    "id": "medical-cannabis",
+    "name": "The Medical Cannabis Advisor",
+    "role": "councilor",
+    "enabled": true,
+    "model": "MiniMax-M2.5",
+    "color": "from-rose-500 to-pink-800",
+    "expertise": "medical,medicinal,wellness,health,dosage"
+  },
+  {
+    "id": "plant-health-expert",
+    "name": "The Plant Doctor",
+    "role": "councilor",
+    "enabled": true,
+    "model": "MiniMax-M2.5",
+    "color": "from-teal-500 to-cyan-700",
+    "expertise": "plant-health,pests,diseases,nutrients,deficiencies"
+  },
+  {
+    "id": "general-plant-analyst",
+    "name": "The Plant Analyst",
+    "role": "councilor",
+    "enabled": true,
+    "model": "MiniMax-M2.5",
+    "color": "from-forest-500 to-green-900",
+    "expertise": "plants,general,photosynthesis,watering,light"
+  },
+  {
+    "id": "harvest-master",
+    "name": "The Harvest Master",
+    "role": "councilor",
+    "enabled": true,
+    "model": "MiniMax-M2.5",
+    "color": "from-yellow-500 to-amber-700",
+    "expertise": "harvest,curing,drying,trimming,preservation"
+  },
+  {
+    "id": "strain-breeder",
+    "name": "The Strain Breeder",
+    "role": "councilor",
+    "enabled": true,
+    "model": "MiniMax-M2.5",
+    "color": "from-indigo-500 to-purple-800",
+    "expertise": "genetics,breeding,strains,phenotypes,seeds"
+  },
+  {
+    "id": "environment-control",
+    "name": "The Environment Controller",
+    "role": "councilor",
+    "enabled": true,
+    "model": "MiniMax-M2.5",
+    "color": "from-blue-500 to-cyan-700",
+    "expertise": "environment,temperature,humidity,vpd,lighting,hvac"
   }
 ]
