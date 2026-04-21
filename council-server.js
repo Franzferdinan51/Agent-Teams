@@ -21,6 +21,14 @@ const LM_STUDIO_URL = 'http://100.68.208.113:1234';
 const LM_STUDIO_KEY = 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf';
 const PORT = 3003;
 
+// ─── LM Studio Provider Setup ─────────────────────────────────────
+const providers = new ProviderManager();
+providers.registerProvider('lmstudio', {
+  baseUrl: LM_STUDIO_URL + '/v1',
+  apiKey: LM_STUDIO_KEY,
+  models: ['qwen3.6-35b-a3b', 'qwen3.5-27b', 'qwen3.5-9b', 'qwen3.5-0.8b', 'supergemma4-26b-uncensored-v2', 'supergemma4-26b-uncensored-mlx-v2', 'supergemma4-e4b-abliterated-mlx', 'gemma-4-26b-a4b', 'gemma-4-e4b-it', 'gemma-4-e2b-it']
+});
+
 // ─── Concurrency Limiter (prevent RAM exhaustion on constrained devices) ───
 const MAX_CONCURRENT = 2;
 let activeCalls = 0;
