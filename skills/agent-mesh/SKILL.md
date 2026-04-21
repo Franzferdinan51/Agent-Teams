@@ -1,6 +1,8 @@
 # Agent Mesh API Skill
 
-**Version:** v3.1.0
+**Version:** v4.0.0
+**v4.0 NEW (2026-04-21):** Presence routing, conversation threads, semantic reactions, task handoffs, group invitations, scheduled messages, decision tracking, meta-agent orchestrator, capability directory.
+
 **Repo:** https://github.com/Franzferdinan51/agent-mesh-api
 **Auto-Start:** Integrated into `~/Desktop/AgentTeam-GitHub/start-all.sh` (starts after Council Server, before WebUI)
 
