@@ -2,15 +2,14 @@
  * @file provider-adapter.js
  * @description Multi-provider abstraction layer for the AI Council Server.
  * Supports hierarchical context management and token budget enforcement.
+ * Uses Node.js http.request (not fetch) for compatibility.
  */
 
-const fs = require('fs');
-const path = require('path');
+const http = require('http');
 
 class ContextManager {
   /**
    * Truncates messages to fit within a specific token/character budget.
-   * Note: For simplicity in this lightweight implementation, we use character count as a proxy for tokens.
    * @param {Array} messages - Array of message objects {role, content}
    * @param {number} maxChars - Maximum allowed characters
    * @returns {Array} Truncated messages
@@ -18,11 +17,9 @@ class ContextManager {
   static truncate(messages, maxChars) {
     let totalChars = 0;
     const truncatedMessages = [];
-
-    // Process from newest to oldest to preserve most recent context
     for (let i = messages.length - 1; i >= 0; i--) {
       const msg = messages[i];
-      const msgSize = msg.content.length + msg.role.length;
+      const msgSize = (msg.content?.length || 0) + (msg.role?.length || 0);
       if (totalChars + msgSize <= maxChars) {
         truncatedMessages.unshift(msg);
         totalChars += msgSize;
@@ -30,26 +27,11 @@ class ContextManager {
         break;
       }
     }
-    return truncatedMessages;
-  }
-
-  /**
-   * Summarizes messages if they exceed the budget.
-   * @param {Array} messages 
-   * @param {number} maxChars 
-   * @returns {Array} A single summary message if truncation was needed.
-   */
-  static summarize(messages, maxChars) {
-    if (this.countChars(messages) <= maxChars) return messages;
-    
-    return [{
-      role: 'system',
-      content: `[Summary of previous conversation context truncated to fit budget of ${maxChars} chars]`
-    }];
+    return truncatedMessages.length > 0 ? truncatedMessages : [messages[messages.length - 1]];
   }
 
   static countChars(messages) {
-    return messages.reduce((sum, m) => sum + m.content.length + m.role.length, 0);
+    return messages.reduce((sum, m) => sum + (m.content?.length || 0) + (m.role?.length || 0), 0);
   }
 }
 
@@ -58,59 +40,72 @@ class ProviderManager {
     this.providers = new Map();
   }
 
-  /**
-   * @param {string} name - Unique provider name (e.g., 'lmstudio')
-   * @param {Object} config - Configuration object {baseUrl, apiKey, models: []}
-   */
   registerProvider(name, config) {
     this.providers.set(name, config);
   }
 
-  async call(providerName, messages, model, maxTokens = 3072) {
-    const config = this.providers.get(providerName);
-    if (!config) throw new Error(`Provider ${providerName} not registered.`);
+  call(providerName, messages, model, maxTokens = 1024) {
+    return new Promise((resolve, reject) => {
+      const config = this.providers.get(providerName);
+      if (!config) {
+        resolve({ status: 'error', error: `Provider ${providerName} not registered.` });
+        return;
+      }
 
-    // Find the specific budget for the requested model if defined in config
-    // Otherwise use a safe default based on common LM Studio profiles
-    let maxChars = 20000; // Default safety limit (approx 5k tokens)
-    if (model.includes('35b')) maxChars = 100000;
-    else if (model.includes('9b') || model.includes('26b')) maxChars = 24000;
-    else if (model.includes('0.8b')) maxChars = 6000;
+      // Find budget for model
+      let maxChars = 20000;
+      if (model.includes('35b')) maxChars = 100000;
+      else if (model.includes('9b') || model.includes('26b')) maxChars = 24000;
+      else if (model.includes('0.8b') || model.includes('e4b') || model.includes('e2b')) maxChars = 6000;
 
-    const processedMessages = ContextManager.truncate(messages, maxChars);
+      const processedMessages = ContextManager.truncate(messages, maxChars);
+      const body = JSON.stringify({
+        model: model,
+        messages: processedMessages,
+        max_tokens: maxTokens,
+        temperature: 0.7
+      });
 
-    try {
-      const response = await fetch(`${config.baseUrl}/chat/completions`, {
+      const urlObj = new URL(config.baseUrl + '/chat/completions');
+      const options = {
+        hostname: urlObj.hostname,
+        port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
+        path: urlObj.pathname,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': config.apiKey ? `Bearer ${config.apiKey}` : ''
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: processedMessages,
-          max_tokens: maxTokens
-        })
+          'Authorization': config.apiKey ? `Bearer ${config.apiKey}` : '',
+          'Content-Length': Buffer.byteLength(body)
+        }
+      };
+
+      const protocol = urlObj.protocol === 'https:' ? require('https') : http;
+      const req = protocol.request(options, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.error) {
+              resolve({ status: 'error', error: parsed.error.message || JSON.stringify(parsed.error) });
+            } else {
+              resolve({
+                status: 'success',
+                content: parsed.choices?.[0]?.message?.content || parsed.choices?.[0]?.message?.reasoning_content || '',
+                usage: parsed.usage
+              });
+            }
+          } catch (e) {
+            resolve({ status: 'error', error: `Parse error: ${data.slice(0, 200)}` });
+          }
+        });
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Provider ${providerName} error (${response.status}): ${errorText}`);
-      }
-
-      const data = await response.json();
-      return {
-        status: 'success',
-        content: data.choices[0].message.content,
-        usage: data.usage
-      };
-    } catch (error) {
-      console.error(`[ProviderManager] Call to ${providerName} failed:`, error.message);
-      return {
-        status: 'error',
-        error: error.message
-      };
-    }
+      req.on('error', (err) => resolve({ status: 'error', error: err.message }));
+      req.setTimeout(300000, () => { req.destroy(); resolve({ status: 'error', error: 'Timeout after 300s' }); });
+      req.write(body);
+      req.end();
+    });
   }
 
   listProviders() {
@@ -119,7 +114,7 @@ class ProviderManager {
 
   getModels(providerName) {
     const config = this.providers.get(providerName);
-    return config ? config.models : [];
+    return config ? (config.models || []) : [];
   }
 }
 
