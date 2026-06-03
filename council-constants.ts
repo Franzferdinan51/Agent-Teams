@@ -886,7 +886,7 @@ export const DEFAULT_SETTINGS: Settings = {
         moonshotApiKey: "",
         moonshotEndpoint: "https://api.moonshot.cn/v1/chat/completions",
         minimaxApiKey: "",
-        minimaxEndpoint: "https://api.minimax.chat/v1/text/chatcompletion_v2"
+        minimaxEndpoint: "https://api.minimax.io/v1/chat/completions"
     },
     audio: {
         enabled: false,

@@ -12,10 +12,10 @@ server:
 # AI Providers
 providers:
   minimax:
-    api_key: "${MINIMAX_API_KEY}"
-    endpoint: "https://api.minimax.chat/v1/text/chatcompletion_v2"
-    model: "MiniMax-M2.7"
-    timeout_ms: 30000
+      api_key: "${MINIMAX_API_KEY}"
+      endpoint: "https://api.minimax.io/v1/chat/completions"
+      model: "MiniMax-M2.7"
+      timeout_ms: 30000
   
   openrouter:
     api_key: "${OPENROUTER_API_KEY}"
@@ -28,10 +28,10 @@ providers:
     timeout_ms: 60000
     default_model: "qwen3.5-9b"
 
-# Council Server
+# Council Server (Duckets' live AI Council on port 3001)
 council:
   host: "localhost"
-  port: 3006
+  port: 3001
   poll_interval_ms: 3000
 
 # Data persistence

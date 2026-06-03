@@ -37,7 +37,7 @@ const VISION_MODELS = {
     },
     'minimax-m2.7': {
         provider: 'minimax',
-        endpoint: 'https://api.minimax.chat/v1/chat/completions',
+        endpoint: 'https://api.minimax.io/v1/chat/completions',
         model: 'MiniMax-VL-01',
         apiKeyEnv: 'MINIMAX_API_KEY',
         strength: ['fast', 'general', 'agents'],
