@@ -1,4 +1,57 @@
 {
+  "role_taxonomy": {
+    "tiers": {
+      "executive": {
+        "description": "C-suite strategic leadership",
+        "examples": [
+          "CEO",
+          "CTO",
+          "CFO",
+          "COO",
+          "CMO"
+        ]
+      },
+      "director": {
+        "description": "Mid-level strategic direction",
+        "examples": [
+          "ProjectManager",
+          "TechLead",
+          "CreativeDirector",
+          "Producer",
+          "ResearchLead"
+        ]
+      },
+      "specialist": {
+        "description": "Hands-on execution experts",
+        "examples": [
+          "BackendDev",
+          "FrontendDev",
+          "DevopsEng",
+          "SecurityEng",
+          "QAEng",
+          "DataLead",
+          "MLEngineer",
+          "UXResearcher",
+          "TechWriter",
+          "GameDesigner",
+          "GameplayProgrammer",
+          "EngineProgrammer",
+          "AudioDirector",
+          "NarrativeDirector",
+          "SystemsDesigner",
+          "EconomyDesigner",
+          "ArtDirector",
+          "MobileSpecialist",
+          "SwiftUISpecialist",
+          "KotlinSpecialist",
+          "ReactNativeSpecialist",
+          "FlutterSpecialist",
+          "AirflowSpecialist",
+          "LlmSpecialist"
+        ]
+      }
+    }
+  },
   "agents": {
     "architect": {
       "name": "Solutions Architect",
@@ -15,7 +68,8 @@
         "Scalability",
         "Maintainability",
         "Integration patterns"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "backend-dev": {
       "name": "Backend Developer",
@@ -32,7 +86,8 @@
         "Performance",
         "Error handling",
         "Logging"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "frontend-dev": {
       "name": "Frontend Developer",
@@ -49,7 +104,8 @@
         "Accessibility",
         "Responsiveness",
         "Performance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "devops-eng": {
       "name": "DevOps Engineer",
@@ -66,7 +122,8 @@
         "Reliability",
         "Scalability",
         "Observability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "security-eng": {
       "name": "Security Engineer",
@@ -83,7 +140,8 @@
         "OWASP Top 10",
         "Data protection",
         "Authentication"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "qa-engineer": {
       "name": "QA Engineer",
@@ -100,7 +158,8 @@
         "Coverage",
         "Edge cases",
         "Regression testing"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "tech-director": {
       "name": "Technical Director",
@@ -117,7 +176,8 @@
         "Technical debt",
         "Innovation",
         "Team capability"
-      ]
+      ],
+      "role_tier": "director"
     },
     "product-director": {
       "name": "Product Director",
@@ -134,7 +194,8 @@
         "User value",
         "Time-to-market",
         "Competitive advantage"
-      ]
+      ],
+      "role_tier": "director"
     },
     "api-specialist": {
       "name": "API Specialist",
@@ -151,7 +212,8 @@
         "Performance",
         "Documentation",
         "Versioning"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "database-specialist": {
       "name": "Database Specialist",
@@ -168,7 +230,8 @@
         "Normalization",
         "Indexing",
         "Data integrity"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "cloud-specialist": {
       "name": "Cloud Specialist",
@@ -185,7 +248,8 @@
         "Cost efficiency",
         "Reliability",
         "Security"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "ml-engineer": {
       "name": "ML Engineer",
@@ -202,7 +266,8 @@
         "Accuracy",
         "Latency",
         "Reproducibility"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "data-engineer": {
       "name": "Data Engineer",
@@ -219,7 +284,8 @@
         "Reliability",
         "Latency",
         "Data quality"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "reliability-engineer": {
       "name": "Site Reliability Engineer",
@@ -236,7 +302,8 @@
         "Availability",
         "Latency",
         "Reliability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "ux-researcher": {
       "name": "UX Researcher",
@@ -253,7 +320,8 @@
         "User satisfaction",
         "Task completion",
         "Accessibility"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "technical-writer": {
       "name": "Technical Writer",
@@ -271,7 +339,8 @@
         "Clarity",
         "Completeness",
         "Findability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "mobile-specialist": {
       "name": "Mobile Specialist",
@@ -288,7 +357,8 @@
         "Performance",
         "Battery life",
         "Platform guidelines"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "web-specialist": {
       "name": "Web Specialist",
@@ -305,7 +375,8 @@
         "Performance",
         "SEO",
         "Accessibility"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "security-lead": {
       "name": "Security Lead",
@@ -322,7 +393,8 @@
         "Risk reduction",
         "Compliance",
         "Security awareness"
-      ]
+      ],
+      "role_tier": "director"
     },
     "data-lead": {
       "name": "Data Lead",
@@ -339,7 +411,8 @@
         "Data quality",
         "Insights",
         "Scalability"
-      ]
+      ],
+      "role_tier": "director"
     },
     "product-lead": {
       "name": "Product Lead",
@@ -356,7 +429,8 @@
         "User value",
         "Clarity",
         "Prioritization"
-      ]
+      ],
+      "role_tier": "director"
     },
     "research-lead": {
       "name": "Research Lead",
@@ -373,7 +447,8 @@
         "Insight quality",
         "Actionability",
         "Breadth"
-      ]
+      ],
+      "role_tier": "director"
     },
     "operations-director": {
       "name": "Operations Director",
@@ -390,7 +465,8 @@
         "Efficiency",
         "Quality",
         "Team velocity"
-      ]
+      ],
+      "role_tier": "director"
     },
     "seo-specialist": {
       "name": "SEO Specialist",
@@ -407,7 +483,8 @@
         "Rankings",
         "Traffic",
         "Conversion"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "creative-director": {
       "name": "Creative Director",
@@ -424,7 +501,8 @@
         "Player engagement",
         "Artistic coherence",
         "Narrative depth"
-      ]
+      ],
+      "role_tier": "director"
     },
     "technical-director-game": {
       "name": "Technical Director",
@@ -441,7 +519,8 @@
         "Performance",
         "Portability",
         "Technical feasibility"
-      ]
+      ],
+      "role_tier": "director"
     },
     "producer-game": {
       "name": "Executive Producer",
@@ -458,7 +537,8 @@
         "On-time delivery",
         "Scope control",
         "Stakeholder alignment"
-      ]
+      ],
+      "role_tier": "director"
     },
     "game-designer": {
       "name": "Game Designer",
@@ -475,7 +555,8 @@
         "Fun factor",
         "Balance",
         "Player retention"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "lead-programmer": {
       "name": "Lead Programmer",
@@ -492,7 +573,8 @@
         "Code quality",
         "Performance",
         "Maintainability"
-      ]
+      ],
+      "role_tier": "director"
     },
     "art-director-game": {
       "name": "Art Director",
@@ -509,7 +591,8 @@
         "Visual quality",
         "Consistency",
         "Production efficiency"
-      ]
+      ],
+      "role_tier": "director"
     },
     "audio-director-game": {
       "name": "Audio Director",
@@ -526,7 +609,8 @@
         "Audio quality",
         "Immersion",
         "Technical performance"
-      ]
+      ],
+      "role_tier": "director"
     },
     "narrative-director": {
       "name": "Narrative Director",
@@ -543,7 +627,8 @@
         "Narrative quality",
         "Player agency",
         "Consistency"
-      ]
+      ],
+      "role_tier": "director"
     },
     "qa-lead-game": {
       "name": "QA Lead",
@@ -560,7 +645,8 @@
         "Bug detection",
         "Test coverage",
         "Release quality"
-      ]
+      ],
+      "role_tier": "director"
     },
     "release-manager-game": {
       "name": "Release Manager",
@@ -577,7 +663,8 @@
         "On-time release",
         "Platform compliance",
         "Launch quality"
-      ]
+      ],
+      "role_tier": "director"
     },
     "localization-lead": {
       "name": "Localization Lead",
@@ -594,7 +681,8 @@
         "Cultural accuracy",
         "Text expansion",
         "Localization efficiency"
-      ]
+      ],
+      "role_tier": "director"
     },
     "gameplay-programmer": {
       "name": "Gameplay Programmer",
@@ -611,7 +699,8 @@
         "Responsiveness",
         "Game feel",
         "Edge cases"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "engine-programmer": {
       "name": "Engine Programmer",
@@ -628,7 +717,8 @@
         "Performance",
         "Stability",
         "Portability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "ai-programmer-game": {
       "name": "Game AI Programmer",
@@ -645,7 +735,8 @@
         "AI believability",
         "Performance",
         "Debuggability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "network-programmer": {
       "name": "Network Programmer",
@@ -662,7 +753,8 @@
         "Latency",
         "Reliability",
         "Security"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "tools-programmer": {
       "name": "Tools Programmer",
@@ -679,7 +771,8 @@
         "Usability",
         "Performance",
         "Reliability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "ui-programmer-game": {
       "name": "UI Programmer",
@@ -696,7 +789,8 @@
         "Responsiveness",
         "Consistency",
         "Accessibility"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "systems-designer": {
       "name": "Systems Designer",
@@ -713,7 +807,8 @@
         "Balance",
         "Player motivation",
         "Monetization"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "level-designer": {
       "name": "Level Designer",
@@ -730,7 +825,8 @@
         "Pacing",
         "Difficulty balance",
         "Player guidance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "economy-designer": {
       "name": "Economy Designer",
@@ -747,7 +843,8 @@
         "Revenue optimization",
         "Player fairness",
         "Retention"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "technical-artist": {
       "name": "Technical Artist",
@@ -764,7 +861,8 @@
         "Visual quality",
         "Performance",
         "Artist productivity"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "sound-designer-game": {
       "name": "Sound Designer",
@@ -781,7 +879,8 @@
         "Audio quality",
         "Memory budget",
         "Technical constraints"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "writer-game": {
       "name": "Writer",
@@ -798,7 +897,8 @@
         "Writing quality",
         "Character voice",
         "Narrative integration"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "world-builder": {
       "name": "World Builder",
@@ -815,7 +915,8 @@
         "Internal consistency",
         "Player engagement",
         "Depth"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "ux-designer-game": {
       "name": "UX Designer",
@@ -832,7 +933,8 @@
         "Player onboarding",
         "Retention",
         "Accessibility"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "prototyper": {
       "name": "Prototyper",
@@ -849,7 +951,8 @@
         "Speed",
         "Learning",
         "Proven viability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "performance-analyst": {
       "name": "Performance Analyst",
@@ -866,7 +969,8 @@
         "FPS stability",
         "Load times",
         "Memory usage"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "devops-engineer-game": {
       "name": "DevOps Engineer",
@@ -883,7 +987,8 @@
         "Build speed",
         "Reliability",
         "Platform compliance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "analytics-engineer-game": {
       "name": "Analytics Engineer",
@@ -900,7 +1005,8 @@
         "Data quality",
         "Insight value",
         "Performance impact"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "security-engineer-game": {
       "name": "Security Engineer",
@@ -917,7 +1023,8 @@
         "Anti-cheat effectiveness",
         "Server security",
         "Fair play"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "qa-tester-game": {
       "name": "QA Tester",
@@ -934,7 +1041,8 @@
         "Bug detection",
         "Coverage",
         "Reproducibility"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "accessibility-specialist-game": {
       "name": "Accessibility Specialist",
@@ -951,7 +1059,8 @@
         "WCAG compliance",
         "Player inclusion",
         "Platform requirements"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "live-ops-designer": {
       "name": "Live Ops Designer",
@@ -968,7 +1077,8 @@
         "Retention",
         "Revenue",
         "Player engagement"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "community-manager-game": {
       "name": "Community Manager",
@@ -985,7 +1095,8 @@
         "Community satisfaction",
         "Engagement",
         "Sentiment"
-      ]
+      ],
+      "role_tier": "director"
     },
     "react-specialist": {
       "name": "React Specialist",
@@ -1005,7 +1116,8 @@
         "Render performance",
         "Type safety",
         "Accessibility"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "vue-specialist": {
       "name": "Vue 3 Specialist",
@@ -1025,7 +1137,8 @@
         "SSR performance",
         "TypeScript support",
         "Vue best practices"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "svelte-specialist": {
       "name": "Svelte Specialist",
@@ -1045,7 +1158,8 @@
         "Reactivity model",
         "Svelte 5 runes",
         "Performance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "angular-specialist": {
       "name": "Angular Specialist",
@@ -1065,7 +1179,8 @@
         "RxJS patterns",
         "Lazy loading",
         "Change detection"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "htmlcss-specialist": {
       "name": "HTML/CSS Specialist",
@@ -1085,7 +1200,8 @@
         "CSS specificity",
         "Responsive breakpoints",
         "Animation performance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "typescript-specialist": {
       "name": "TypeScript Specialist",
@@ -1105,7 +1221,8 @@
         "Code clarity",
         "Strict mode",
         "Utility types"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "tailwindcss-specialist": {
       "name": "Tailwind CSS Specialist",
@@ -1125,7 +1242,8 @@
         "Design consistency",
         "Bundle size",
         "Customization"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "animation-specialist": {
       "name": "Animation Specialist",
@@ -1145,7 +1263,8 @@
         "Performance",
         "Accessibility",
         "Browser compatibility"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "nodejs-specialist": {
       "name": "Node.js Specialist",
@@ -1165,7 +1284,8 @@
         "Memory management",
         "Performance",
         "Security"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "express-specialist": {
       "name": "Express.js Specialist",
@@ -1185,7 +1305,8 @@
         "Middleware composition",
         "Security headers",
         "Error responses"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "fastapi-specialist": {
       "name": "FastAPI Specialist",
@@ -1205,7 +1326,8 @@
         "Data validation",
         "Auto documentation",
         "Performance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "django-specialist": {
       "name": "Django Specialist",
@@ -1225,7 +1347,8 @@
         "Security",
         "Scalability",
         "Admin customization"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "flask-specialist": {
       "name": "Flask Specialist",
@@ -1245,7 +1368,8 @@
         "Template performance",
         "Extension usage",
         "Modularity"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "nestjs-specialist": {
       "name": "NestJS Specialist",
@@ -1265,7 +1389,8 @@
         "DI patterns",
         "GraphQL efficiency",
         "Testing"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "golang-specialist": {
       "name": "Go Specialist",
@@ -1285,7 +1410,8 @@
         "Memory efficiency",
         "Error handling",
         "Stdlib usage"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "rust-web-specialist": {
       "name": "Rust Web Specialist",
@@ -1305,7 +1431,8 @@
         "Async performance",
         "Error types",
         "Zero-cost abstractions"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "spring-specialist": {
       "name": "Spring Boot Specialist",
@@ -1325,7 +1452,8 @@
         "Transaction handling",
         "Microservices patterns",
         "Testing"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "elixir-specialist": {
       "name": "Elixir/Phoenix Specialist",
@@ -1345,7 +1473,8 @@
         "LiveView patterns",
         "Ecto queries",
         "Process supervision"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "dotnet-specialist": {
       "name": ".NET Specialist",
@@ -1365,7 +1494,8 @@
         "DI container",
         "Performance",
         "Cross-platform"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "react-native-specialist": {
       "name": "React Native Specialist",
@@ -1385,7 +1515,8 @@
         "Performance",
         "Native bridge",
         "OTA updates"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "flutter-specialist": {
       "name": "Flutter Specialist",
@@ -1405,7 +1536,8 @@
         "Platform channels",
         "State management",
         "App bundle size"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "swiftui-specialist": {
       "name": "SwiftUI Specialist",
@@ -1425,7 +1557,8 @@
         "Swift concurrency",
         "iOS conventions",
         "Accessibility"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "uikit-specialist": {
       "name": "UIKit Specialist",
@@ -1445,7 +1578,8 @@
         "Memory management",
         "View recycling",
         "Programmatic UI"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "kotlin-specialist": {
       "name": "Kotlin Specialist",
@@ -1465,7 +1599,8 @@
         "Compose performance",
         "Coroutines patterns",
         "Build speed"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "postgresql-specialist": {
       "name": "PostgreSQL Specialist",
@@ -1485,7 +1620,8 @@
         "Index efficiency",
         "Data integrity",
         "Advanced features"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "mongodb-specialist": {
       "name": "MongoDB Specialist",
@@ -1505,7 +1641,8 @@
         "Schema design",
         "Replica set config",
         "Query optimization"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "redis-specialist": {
       "name": "Redis Specialist",
@@ -1525,7 +1662,8 @@
         "Memory efficiency",
         "TTL strategies",
         "Pub/sub patterns"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "dynamodb-specialist": {
       "name": "DynamoDB Specialist",
@@ -1545,7 +1683,8 @@
         "GSI optimization",
         "Cost efficiency",
         "Scan vs query"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "elasticsearch-specialist": {
       "name": "Elasticsearch Specialist",
@@ -1565,7 +1704,8 @@
         "Index performance",
         "Mapping design",
         "Cluster health"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "graphql-specialist": {
       "name": "GraphQL Specialist",
@@ -1585,7 +1725,8 @@
         "N+1 prevention",
         "Federation patterns",
         "Subscription stability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "aws-specialist": {
       "name": "AWS Specialist",
@@ -1605,7 +1746,8 @@
         "Security best practices",
         "Scalability",
         "Well-architected"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "gcp-specialist": {
       "name": "GCP Specialist",
@@ -1625,7 +1767,8 @@
         "Service integration",
         "Security",
         "Scalability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "azure-specialist": {
       "name": "Azure Specialist",
@@ -1645,7 +1788,8 @@
         "Cost management",
         "Security",
         "Integration patterns"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "kubernetes-specialist": {
       "name": "Kubernetes Specialist",
@@ -1665,7 +1809,8 @@
         "High availability",
         "Security",
         "GitOps workflows"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "docker-specialist": {
       "name": "Docker Specialist",
@@ -1685,7 +1830,8 @@
         "Build speed",
         "Layer caching",
         "Security scanning"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "terraform-specialist": {
       "name": "Terraform Specialist",
@@ -1705,7 +1851,8 @@
         "Module reusability",
         "Drift detection",
         "Security"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "ci-cd-specialist": {
       "name": "CI/CD Specialist",
@@ -1725,7 +1872,8 @@
         "Reliability",
         "Security scanning",
         "Deployment automation"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "monitoring-specialist": {
       "name": "Monitoring Specialist",
@@ -1745,7 +1893,8 @@
         "Metric coverage",
         "Dashboard clarity",
         "SLO definition"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "serverless-specialist": {
       "name": "Serverless Specialist",
@@ -1765,7 +1914,8 @@
         "Cost efficiency",
         "Vendor lock-in",
         "Observability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "python-data-specialist": {
       "name": "Python Data Specialist",
@@ -1785,7 +1935,8 @@
         "Vectorization",
         "Data quality",
         "Performance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "pytorch-specialist": {
       "name": "PyTorch Specialist",
@@ -1805,7 +1956,8 @@
         "GPU utilization",
         "Model accuracy",
         "Reproducibility"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "sklearn-specialist": {
       "name": "Scikit-learn Specialist",
@@ -1825,7 +1977,8 @@
         "Feature importance",
         "Cross-validation",
         "Model selection"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "pandas-specialist": {
       "name": "Pandas Specialist",
@@ -1845,7 +1998,8 @@
         "Memory efficiency",
         "Vectorized operations",
         "Chain quality"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "airflow-specialist": {
       "name": "Airflow Specialist",
@@ -1865,7 +2019,8 @@
         "Task retry logic",
         "Backfill strategies",
         "Monitoring"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "llm-specialist": {
       "name": "LLM Integration Specialist",
@@ -1885,7 +2040,8 @@
         "Context window usage",
         "Hallucination reduction",
         "Latency"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "mlops-specialist": {
       "name": "MLOps Specialist",
@@ -1905,7 +2061,8 @@
         "Feature consistency",
         "Deployment reliability",
         "Monitoring"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "linux-specialist": {
       "name": "Linux Specialist",
@@ -1925,7 +2082,8 @@
         "Performance tuning",
         "Security hardening",
         "Automation"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "network-specialist": {
       "name": "Network Specialist",
@@ -1945,7 +2103,8 @@
         "Security",
         "High availability",
         "Troubleshooting"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "bash-scripting-specialist": {
       "name": "Bash Scripting Specialist",
@@ -1965,7 +2124,8 @@
         "Portability",
         "Performance",
         "Safety"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "python-automation-specialist": {
       "name": "Python Automation Specialist",
@@ -1985,7 +2145,8 @@
         "Error handling",
         "Logging",
         "Scheduling efficiency"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "git-specialist": {
       "name": "Git Specialist",
@@ -2005,7 +2166,8 @@
         "Conflict resolution",
         "Automation",
         "History quality"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "performance-specialist": {
       "name": "Performance Specialist",
@@ -2025,7 +2187,8 @@
         "Bottleneck identification",
         "Speedup ratios",
         "Methodology"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "distributed-systems-specialist": {
       "name": "Distributed Systems Specialist",
@@ -2045,7 +2208,8 @@
         "Fault tolerance",
         "Latency",
         "Scalability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "microservices-specialist": {
       "name": "Microservices Specialist",
@@ -2065,7 +2229,8 @@
         "Resilience patterns",
         "Observability",
         "Deployment"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "api-design-specialist": {
       "name": "API Design Specialist",
@@ -2085,7 +2250,8 @@
         "Error design",
         "Versioning strategy",
         "Documentation"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "websocket-specialist": {
       "name": "Real-Time/WebSocket Specialist",
@@ -2105,7 +2271,8 @@
         "Reconnection logic",
         "Security",
         "Scalability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "appsec-specialist": {
       "name": "AppSec Specialist",
@@ -2125,7 +2292,8 @@
         "Secure by default",
         "Input validation",
         "Authentication"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "penetration-testing-specialist": {
       "name": "Penetration Testing Specialist",
@@ -2145,7 +2313,8 @@
         "Exploit accuracy",
         "Report clarity",
         "Scope adherence"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "cryptography-specialist": {
       "name": "Cryptography Specialist",
@@ -2165,7 +2334,8 @@
         "Key strength",
         "Implementation correctness",
         "Key rotation"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "oauth-specialist": {
       "name": "OAuth/Identity Specialist",
@@ -2185,7 +2355,8 @@
         "Scope management",
         "PKCE usage",
         "Refresh token handling"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "devsecops-specialist": {
       "name": "DevSecOps Specialist",
@@ -2205,7 +2376,8 @@
         "False positive rate",
         "Shift left",
         "Remediation workflow"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "ecommerce-specialist": {
       "name": "E-Commerce Specialist",
@@ -2225,7 +2397,8 @@
         "Payment security",
         "Inventory accuracy",
         "SEO"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "saas-specialist": {
       "name": "SaaS Specialist",
@@ -2245,7 +2418,8 @@
         "Billing accuracy",
         "Churn prevention",
         "Scalability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "fintech-specialist": {
       "name": "Fintech Specialist",
@@ -2265,7 +2439,8 @@
         "Transaction integrity",
         "Audit trails",
         "Fraud detection"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "iot-specialist": {
       "name": "IoT Specialist",
@@ -2285,7 +2460,8 @@
         "Security",
         "Offline capability",
         "OTA updates"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "blockchain-specialist": {
       "name": "Blockchain Specialist",
@@ -2305,7 +2481,8 @@
         "Gas optimization",
         "Standard compliance",
         "Audit readiness"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "automation-specialist": {
       "name": "Home Automation Specialist",
@@ -2325,7 +2502,8 @@
         "Latency",
         "Energy efficiency",
         "Integration breadth"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "raspberry-pi-specialist": {
       "name": "Raspberry Pi Specialist",
@@ -2345,7 +2523,8 @@
         "Power efficiency",
         "Stability",
         "Documentation"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "crypto-specialist": {
       "name": "Crypto Trading Specialist",
@@ -2365,7 +2544,8 @@
         "Risk management",
         "Slippage handling",
         "Security"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "media-specialist": {
       "name": "Media Processing Specialist",
@@ -2385,7 +2565,8 @@
         "Quality vs size",
         "Format support",
         "CDN integration"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "audio-specialist": {
       "name": "Audio Processing Specialist",
@@ -2405,7 +2586,8 @@
         "Latency",
         "Browser compatibility",
         "Performance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "openapi-specialist": {
       "name": "OpenAPI Specialist",
@@ -2425,7 +2607,8 @@
         "Spec validation",
         "Documentation quality",
         "SDK usability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "testing-specialist": {
       "name": "Testing Specialist",
@@ -2445,7 +2628,8 @@
         "Flakiness prevention",
         "Execution speed",
         "Maintainability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "ux-engineer": {
       "name": "UX Engineer",
@@ -2465,7 +2649,8 @@
         "Component reusability",
         "Accessibility",
         "Documentation"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "openclaw-specialist": {
       "name": "OpenClaw Specialist",
@@ -2485,7 +2670,8 @@
         "Tool reliability",
         "Agent orchestration",
         "Context management"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "solutions-architect": {
       "name": "Solutions Architect",
@@ -2505,7 +2691,8 @@
         "Maintainability",
         "Cost efficiency",
         "Risk assessment"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "frontend-architect": {
       "name": "Frontend Architect",
@@ -2525,7 +2712,8 @@
         "Accessibility",
         "Developer experience",
         "Design consistency"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "backend-architect": {
       "name": "Backend Architect",
@@ -2545,7 +2733,8 @@
         "Reliability",
         "Security",
         "Maintainability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "devops-director": {
       "name": "DevOps/Platform Director",
@@ -2565,7 +2754,8 @@
         "Automation",
         "Cost efficiency",
         "Developer velocity"
-      ]
+      ],
+      "role_tier": "director"
     },
     "security-director": {
       "name": "Security Director",
@@ -2585,7 +2775,8 @@
         "Compliance",
         "Incident response",
         "Security awareness"
-      ]
+      ],
+      "role_tier": "director"
     },
     "data-ml-director": {
       "name": "Data/ML Director",
@@ -2605,7 +2796,8 @@
         "ML impact",
         "Scalability",
         "Cost efficiency"
-      ]
+      ],
+      "role_tier": "director"
     },
     "api-architect": {
       "name": "API Architect",
@@ -2625,7 +2817,8 @@
         "Versioning",
         "Performance",
         "Documentation"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "mobile-director": {
       "name": "Mobile Director",
@@ -2645,7 +2838,8 @@
         "Performance",
         "Offline capability",
         "App store compliance"
-      ]
+      ],
+      "role_tier": "director"
     },
     "ux-director": {
       "name": "UX/Design Director",
@@ -2665,7 +2859,8 @@
         "Accessibility",
         "Design consistency",
         "Research quality"
-      ]
+      ],
+      "role_tier": "director"
     },
     "platform-director": {
       "name": "Platform Director",
@@ -2685,7 +2880,8 @@
         "Adoption",
         "Reliability",
         "Documentation"
-      ]
+      ],
+      "role_tier": "director"
     },
     "frontend-tech-lead": {
       "name": "Frontend Tech Lead",
@@ -2705,7 +2901,8 @@
         "Performance",
         "Accessibility",
         "Testing"
-      ]
+      ],
+      "role_tier": "director"
     },
     "backend-tech-lead": {
       "name": "Backend Tech Lead",
@@ -2725,7 +2922,8 @@
         "Security",
         "Performance",
         "Reliability"
-      ]
+      ],
+      "role_tier": "director"
     },
     "mobile-tech-lead": {
       "name": "Mobile Tech Lead",
@@ -2745,7 +2943,8 @@
         "Performance",
         "Battery life",
         "Offline support"
-      ]
+      ],
+      "role_tier": "director"
     },
     "devops-lead": {
       "name": "DevOps Lead",
@@ -2765,7 +2964,8 @@
         "Automation",
         "Deployment speed",
         "Observability"
-      ]
+      ],
+      "role_tier": "director"
     },
     "security-lead-eng": {
       "name": "Security Lead Engineer",
@@ -2785,7 +2985,8 @@
         "Secure coding",
         "Vulnerability detection",
         "Incident response"
-      ]
+      ],
+      "role_tier": "director"
     },
     "qa-lead-engineer": {
       "name": "QA Lead Engineer",
@@ -2805,7 +3006,8 @@
         "Automation rate",
         "Defect detection",
         "Regression prevention"
-      ]
+      ],
+      "role_tier": "director"
     },
     "data-engineering-lead": {
       "name": "Data Engineering Lead",
@@ -2825,7 +3027,8 @@
         "Pipeline reliability",
         "Latency",
         "Cost efficiency"
-      ]
+      ],
+      "role_tier": "director"
     },
     "cloud-infra-lead": {
       "name": "Cloud Infrastructure Lead",
@@ -2845,7 +3048,8 @@
         "Reliability",
         "Security",
         "Scalability"
-      ]
+      ],
+      "role_tier": "director"
     },
     "ml-engineering-lead": {
       "name": "ML Engineering Lead",
@@ -2865,7 +3069,8 @@
         "Inference latency",
         "Feature quality",
         "Reproducibility"
-      ]
+      ],
+      "role_tier": "director"
     },
     "platform-engineering-lead": {
       "name": "Platform Engineering Lead",
@@ -2885,7 +3090,8 @@
         "Time to value",
         "Reliability",
         "Documentation"
-      ]
+      ],
+      "role_tier": "director"
     },
     "product-engineering-lead": {
       "name": "Product Engineering Lead",
@@ -2905,7 +3111,8 @@
         "Quality",
         "Stakeholder alignment",
         "Technical debt"
-      ]
+      ],
+      "role_tier": "director"
     },
     "research-engineering-lead": {
       "name": "Research Engineering Lead",
@@ -2925,7 +3132,8 @@
         "Learning",
         "Technical rigor",
         "Clear communication"
-      ]
+      ],
+      "role_tier": "director"
     },
     "api-lead": {
       "name": "API Lead Engineer",
@@ -2945,7 +3153,8 @@
         "API consistency",
         "Documentation",
         "Performance"
-      ]
+      ],
+      "role_tier": "director"
     },
     "performance-engineering-lead": {
       "name": "Performance Engineering Lead",
@@ -2965,7 +3174,8 @@
         "Latency",
         "Resource efficiency",
         "Scalability"
-      ]
+      ],
+      "role_tier": "director"
     },
     "reliability-engineering-lead": {
       "name": "Site Reliability Lead",
@@ -2985,7 +3195,8 @@
         "Latency",
         "Incident response",
         "Postmortem quality"
-      ]
+      ],
+      "role_tier": "director"
     },
     "stripe-specialist": {
       "name": "Stripe Specialist",
@@ -3005,7 +3216,8 @@
         "Idempotency",
         "Error handling",
         "Revenue recognition"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "payment-gateway-specialist": {
       "name": "Payment Gateway Specialist",
@@ -3025,7 +3237,8 @@
         "Idempotency",
         "Fraud prevention",
         "Compliance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "auth0-specialist": {
       "name": "Auth0 Specialist",
@@ -3045,7 +3258,8 @@
         "User experience",
         "Compliance",
         "Universal login"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "clerk-specialist": {
       "name": "Clerk Auth Specialist",
@@ -3065,7 +3279,8 @@
         "Developer experience",
         "React patterns",
         "Multi-tenancy"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "supabase-auth-specialist": {
       "name": "Supabase Auth Specialist",
@@ -3085,7 +3300,8 @@
         "RLS correctness",
         "Performance",
         "Real-time sync"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "algolia-specialist": {
       "name": "Algolia Specialist",
@@ -3105,7 +3321,8 @@
         "Index performance",
         "Typo tolerance",
         "Faceted search"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "contentful-specialist": {
       "name": "Contentful Specialist",
@@ -3125,7 +3342,8 @@
         "Delivery performance",
         "Localization",
         "Webhooks"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "sanity-specialist": {
       "name": "Sanity CMS Specialist",
@@ -3145,7 +3363,8 @@
         "GROQ optimization",
         "CDN performance",
         "Real-time preview"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "langchain-specialist": {
       "name": "LangChain Specialist",
@@ -3165,7 +3384,8 @@
         "Token efficiency",
         "Error handling",
         "Observability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "huggingface-specialist": {
       "name": "HuggingFace Specialist",
@@ -3185,7 +3405,8 @@
         "Fine-tuning efficiency",
         "Inference latency",
         "Hub integration"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "rag-specialist": {
       "name": "RAG Specialist",
@@ -3205,7 +3426,8 @@
         "Context window usage",
         "Latency",
         "Hallucination reduction"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "vector-db-specialist": {
       "name": "Vector Database Specialist",
@@ -3225,7 +3447,8 @@
         "Index performance",
         "Memory efficiency",
         "Scalability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "crewai-specialist": {
       "name": "CrewAI Specialist",
@@ -3245,7 +3468,8 @@
         "Task routing",
         "Error handling",
         "Observability"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "nextjs-specialist": {
       "name": "Next.js Specialist",
@@ -3265,7 +3489,8 @@
         "Performance",
         "SEO",
         "App Router patterns"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "remix-specialist": {
       "name": "Remix Specialist",
@@ -3285,7 +3510,8 @@
         "Data loading",
         "Performance",
         "Error handling"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "nuxt-specialist": {
       "name": "Nuxt.js Specialist",
@@ -3305,7 +3531,8 @@
         "Auto-import patterns",
         "Module ecosystem",
         "SEO"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "astro-specialist": {
       "name": "Astro Specialist",
@@ -3325,7 +3552,8 @@
         "Content performance",
         "Islands hydration",
         "Build speed"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "radix-ui-specialist": {
       "name": "Radix UI Specialist",
@@ -3345,7 +3573,8 @@
         "Styling flexibility",
         "Animation",
         "Component composition"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "shadcn-specialist": {
       "name": "Shadcn/ui Specialist",
@@ -3365,7 +3594,8 @@
         "Design consistency",
         "Customization",
         "Theme maintenance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "playwright-specialist": {
       "name": "Playwright Specialist",
@@ -3385,7 +3615,8 @@
         "Parallel execution",
         "Coverage",
         "CI speed"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "cypress-specialist": {
       "name": "Cypress Specialist",
@@ -3405,7 +3636,8 @@
         "Flakiness prevention",
         "Coverage",
         "CI integration"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "jest-specialist": {
       "name": "Jest Specialist",
@@ -3425,7 +3657,8 @@
         "Mocking quality",
         "Coverage",
         "Type safety"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "vitest-specialist": {
       "name": "Vitest Specialist",
@@ -3445,7 +3678,8 @@
         "ESM native",
         "HMR-aware testing",
         "Type coverage"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "tdd-specialist": {
       "name": "TDD Specialist",
@@ -3465,7 +3699,8 @@
         "Design improvement",
         "Team velocity",
         "Legacy code"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "snowflake-specialist": {
       "name": "Snowflake Specialist",
@@ -3485,7 +3720,8 @@
         "Cost optimization",
         "Data sharing",
         "Security"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "databricks-specialist": {
       "name": "Databricks Specialist",
@@ -3505,7 +3741,8 @@
         "ML workflows",
         "Cost efficiency",
         "Data quality"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "bigquery-specialist": {
       "name": "BigQuery Specialist",
@@ -3525,7 +3762,8 @@
         "Partitioning strategy",
         "Cost control",
         "Security"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "dbt-specialist": {
       "name": "dbt Specialist",
@@ -3545,7 +3783,8 @@
         "Data quality tests",
         "Documentation",
         "Incremental strategies"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "kafka-specialist": {
       "name": "Kafka Specialist",
@@ -3565,7 +3804,8 @@
         "Latency",
         "Fault tolerance",
         "Schema evolution"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "redis-streams-specialist": {
       "name": "Redis Streams Specialist",
@@ -3585,7 +3825,8 @@
         "Ordering guarantees",
         "Memory efficiency",
         "Group management"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "opentelemetry-specialist": {
       "name": "OpenTelemetry Specialist",
@@ -3605,7 +3846,8 @@
         "Sampling strategies",
         "Context propagation",
         "Vendor neutrality"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "sentry-specialist": {
       "name": "Sentry Specialist",
@@ -3625,7 +3867,8 @@
         "Alert signal-to-noise",
         "Performance tracking",
         "Source map accuracy"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "datadog-specialist": {
       "name": "Datadog Specialist",
@@ -3645,7 +3888,8 @@
         "Alert quality",
         "Dashboard clarity",
         "Cost management"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "cloudflare-specialist": {
       "name": "Cloudflare Specialist",
@@ -3665,7 +3909,8 @@
         "Cold start reduction",
         "Cost efficiency",
         "Security"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "vercel-specialist": {
       "name": "Vercel Specialist",
@@ -3685,7 +3930,8 @@
         "Edge latency",
         "ISR patterns",
         "Analytics"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "firebase-specialist": {
       "name": "Firebase Specialist",
@@ -3705,7 +3951,8 @@
         "Security rules",
         "Billing optimization",
         "Offline support"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "supabase-specialist": {
       "name": "Supabase Specialist",
@@ -3725,7 +3972,8 @@
         "RLS design",
         "Realtime reliability",
         "Edge function patterns"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "nginx-specialist": {
       "name": "Nginx Specialist",
@@ -3745,7 +3993,8 @@
         "Security hardening",
         "SSL/TLS",
         "Reverse proxy design"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "traefik-specialist": {
       "name": "Traefik Specialist",
@@ -3765,7 +4014,8 @@
         "TLS automation",
         "Middleware patterns",
         "K8s integration"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "ansible-specialist": {
       "name": "Ansible Specialist",
@@ -3785,7 +4035,8 @@
         "Speed",
         "Role reusability",
         "Inventory accuracy"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "vault-specialist": {
       "name": "HashiCorp Vault Specialist",
@@ -3805,7 +4056,8 @@
         "High availability",
         "Policy design",
         "Secret rotation"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "consul-specialist": {
       "name": "HashiCorp Consul Specialist",
@@ -3825,7 +4077,8 @@
         "ACL security",
         "K8s integration",
         "Multi-datacenter"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "pulumi-specialist": {
       "name": "Pulumi Specialist",
@@ -3845,7 +4098,8 @@
         "Stack composition",
         "Diff validation",
         "Policy as code"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "cdk-specialist": {
       "name": "AWS CDK Specialist",
@@ -3865,7 +4119,8 @@
         "Stack dependencies",
         "Pipeline security",
         "Cost awareness"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "gdpr-specialist": {
       "name": "GDPR Compliance Specialist",
@@ -3885,7 +4140,8 @@
         "Data minimization",
         "Consent accuracy",
         "DSR SLA"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "hipaa-specialist": {
       "name": "HIPAA Compliance Specialist",
@@ -3905,7 +4161,8 @@
         "Audit completeness",
         "BAA compliance",
         "Breach notification"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "pci-dss-specialist": {
       "name": "PCI-DSS Specialist",
@@ -3925,7 +4182,8 @@
         "Encryption",
         "Access control",
         "Monitoring"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "soc2-specialist": {
       "name": "SOC 2 Specialist",
@@ -3945,7 +4203,8 @@
         "Evidence automation",
         "Audit readiness",
         "Continuous compliance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "python-specialist": {
       "name": "Python Specialist",
@@ -3965,7 +4224,8 @@
         "Performance",
         "Packaging quality",
         "Documentation"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "rust-systems-specialist": {
       "name": "Rust Systems Specialist",
@@ -3985,7 +4245,8 @@
         "Zero-cost abstractions",
         "WASM bundle size",
         "FFI safety"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "zig-specialist": {
       "name": "Zig Specialist",
@@ -4005,7 +4266,8 @@
         "Build speed",
         "C interop",
         "Memory control"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "phoenix-specialist": {
       "name": "Elixir/Phoenix Specialist",
@@ -4025,7 +4287,8 @@
         "LiveView performance",
         "Ecto query efficiency",
         "Distributed patterns"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "android-native-specialist": {
       "name": "Android Native Specialist",
@@ -4045,7 +4308,8 @@
         "Material You theming",
         "Battery life",
         "Play Store compliance"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "twilio-specialist": {
       "name": "Twilio Specialist",
@@ -4065,7 +4329,8 @@
         "Cost optimization",
         "International coverage",
         "Webhook security"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "web3-specialist": {
       "name": "Web3 Specialist",
@@ -4085,7 +4350,8 @@
         "Wallet compatibility",
         "Gas optimization",
         "NFT standards"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "solidity-specialist": {
       "name": "Solidity Specialist",
@@ -4105,7 +4371,8 @@
         "Gas efficiency",
         "Standard compliance",
         "Upgrade patterns"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "deno-specialist": {
       "name": "Deno Specialist",
@@ -4125,7 +4392,8 @@
         "Deploy performance",
         "NPM compatibility",
         "Standard library usage"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "bun-specialist": {
       "name": "Bun Specialist",
@@ -4145,7 +4413,8 @@
         "Request throughput",
         "SQLite performance",
         "NPM compatibility"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "hls-specialist": {
       "name": "HLS/DASH Streaming Specialist",
@@ -4165,7 +4434,8 @@
         "Buffering reduction",
         "DRM compatibility",
         "CDN delivery"
-      ]
+      ],
+      "role_tier": "specialist"
     },
     "webRTC-specialist": {
       "name": "WebRTC Specialist",
@@ -4185,7 +4455,8 @@
         "Firewall traversal",
         "Quality adaptation",
         "Group call scalability"
-      ]
+      ],
+      "role_tier": "specialist"
     }
   }
 }
