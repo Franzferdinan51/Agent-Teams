@@ -1,0 +1,35 @@
+{
+  "winner": {
+    "agentId": null,
+    "content": "",
+    "score": 0,
+    "breakdown": {}
+  },
+  "synthesized": {
+    "content": "",
+    "keyPoints": [],
+    "sourcesUsed": [],
+    "method": "none",
+    "score": 0
+  },
+  "scores": [],
+  "meta": {
+    "method": "hybrid",
+    "model": "qwen3.6-35b-a3b",
+    "providerName": "lmstudio",
+    "criteria": [
+      "relevance",
+      "completeness",
+      "accuracy"
+    ],
+    "goal": "",
+    "fallback": true,
+    "error": "no outputs supplied",
+    "createdAt": "2026-06-09T05:07:25.282Z",
+    "auditFile": null,
+    "version": "1.0.0",
+    "count": 0,
+    "winnerAgentId": null,
+    "winnerScore": 0
+  }
+}
