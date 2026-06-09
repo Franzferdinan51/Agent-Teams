@@ -116,6 +116,32 @@ hive-swarm-enhancements/
 - Pushed commit `3ddffbb` to main
 - Cron also shipped 3 more WebUI JS files: consensus-panel.js, hermes-chat.js, swarm-controller.js
 
+### Tick 1.0 (manual, ~10:00 EST 2026-06-09) — Execution layer ported from agnt.gg
+- Duckets shared https://github.com/agnt-gg/agnt and wanted the "loop" / "agents on agents" pattern
+- Cloned agnt-research locally (depth 1, 719 commits)
+- Studied: `backend/src/services/goal/` (GoalProcessor, GoalEvaluator, AgentTaskMatcher, TaskOrchestrator 1307 lines, SkillEvolver 712 lines, TraceAnalyzer, SkillForgeOrchestrator), `backend/src/services/evolution/` (InsightEngine, InsightTriggers), `backend/skills/hermes-subagent/`
+- **Spawned 3 parallel sub-agents** (all M2.7) to port the goal-system, subagent-orchestrator, evolution subsystems
+- Sub-agent 1 (goal-system) ✅ committed: goal-processor.js, goal-store.js, goal-evaluator.js
+- Sub-agent 2 (subagent-orchestrator) ✅ committed: task-orchestrator.js (576 lines), agent-task-matcher.js (245 lines), subagent-runner.js (375 lines)
+- Sub-agent 3 (evolution) ✅ committed: trace-analyzer.js, insight-engine.js, skill-evolver.js (ADVISOR MODE — no auto-mutation)
+- **Built in main thread (HARVEST-4):**
+  - `integration/hermes-subagent-bridge.js` (~280 lines) — native port of agnt's hermes-subagent pattern (CLI/HTTP/file modes, no Python venv)
+  - `integration/tool-forge.js` (~190 lines) — dynamic tool creation
+  - `README.md` — architecture overview
+  - `docs/PORTED-FROM-AGNT.md` — what was adapted vs left
+  - `SKILL.md` — dual-compliant (OpenClaw + Hermes Agent)
+- All 11 .js files syntax-verified ✅
+- Pushed commit `4534cee` to main
+- Updated overnight cron to include execution-layer work in mission list
+
+### Key adaptations from agnt
+- ✅ Storage: JSON files instead of SQLite (simpler, easier to inspect, can upgrade later)
+- ✅ Evolution: ADVISOR MODE (suggestions only, human must approve) — agnt's auto-mutates skills, too risky
+- ✅ Hermes bridge: native Node, no Python venv (CLI/HTTP/file modes)
+- ✅ Provider layer: reused our `providers/provider-adapter.js` (no provider-config drift)
+- ❌ Left behind: Electron desktop app, Puppeteer, 15+ providers, Vue.js frontend, SQLite, custom CLI flags
+- See `execution-layer/docs/PORTED-FROM-AGNT.md` for full mapping
+
 ### ⚠️ NEED FROM DUCKETS
 ~~The new `duckets-hermes-skills` repo is ready locally but `gh` isn't authenticated.~~ RESOLVED — Duckets said "just push it" and the skill is now in Agent-Teams `hermes-skills/`. The orphan `Franzferdinan51/Duckets-Hermes-Skills` repo exists but is empty — Duckets can delete it on GitHub.
 ```
