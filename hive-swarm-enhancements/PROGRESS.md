@@ -7,6 +7,8 @@
 ## 🎯 Mission
 Build a **native swarm intelligence layer** in `hive-swarm-enhancements/` that gives the Hive Nation real swarming + consensus + self-orchestration. **No external deps** (no hikarioyama/swarm-agent). **No deletion** — only enhancement.
 
+**Bonus mission (added 23:35 EST 2026-06-08):** Build a **multi-agent WebUI master dashboard** that lets Duckets see + control entire agent swarms in real-time, using Agent-Teams as the backend and Hermes/OpenClaw as the runtime harness.
+
 ## 🏗️ Architecture (target)
 
 ```
@@ -34,6 +36,22 @@ hive-swarm-enhancements/
 │   ├── push-to-main.sh       [DONE] Auto-merge feature → main
 │   └── *.txt                 [CRON] Per-tick build logs
 ├── SKILL.md                  [TODO] Hermes skill definition
+├── webui/                    [NEW] Multi-agent master dashboard
+│   ├── server.js             [TODO] Express + WebSocket + mesh relay
+│   ├── public/               [TODO] Static SPA (HTML/CSS/JS, no React build step)
+│   │   ├── index.html        [TODO] Main dashboard shell
+│   │   ├── css/              [TODO] Dark theme + swarm viz
+│   │   ├── js/               [TODO] WebSocket client, swarm controllers
+│   │   └── components/       [TODO] Agent cards, swarm tree, consensus panel
+│   ├── api/
+│   │   ├── swarm.js          [TODO] REST: start/stop/get swarms
+│   │   ├── agents.js         [TODO] REST: list/control agents
+│   │   ├── consensus.js      [TODO] REST: create/vote/resolve polls
+│   │   └── logs.js           [TODO] REST: stream logs
+│   ├── ws/
+│   │   └── relay.js          [TODO] Bridge browser <-> mesh <-> hermes
+│   ├── package.json          [TODO] express + ws only
+│   └── README.md             [TODO] How to run
 └── PROGRESS.md               [THIS FILE]
 ```
 
@@ -47,11 +65,36 @@ hive-swarm-enhancements/
 - ✅ Pushed commit `94011fd` to feature branch
 
 ### Next tick priorities (Tick 1, midnight 00:00 EST)
-- [ ] Create PROGRESS.md (this file) — DONE
-- [ ] Build `core/goal-decomposer.js` — uses provider-adapter for LLM call
-- [ ] Build `core/worker-dispatcher.js` — uses LiveMessenger to dispatch to mesh
-- [ ] Test decomposer + dispatcher end-to-end with a simple goal
-- [ ] Commit + push to main
+- [x] Create PROGRESS.md (this file)
+- [x] Build `core/goal-decomposer.js` — uses provider-adapter for LLM call
+- [x] Build `core/worker-dispatcher.js` — uses LiveMessenger to dispatch to mesh
+- [x] Test decomposer + dispatcher end-to-end with a simple goal
+- [x] Commit + push to main
+
+### WebUI dashboard priorities (NEW)
+- [ ] webui/server.js — Express + WebSocket, proxies to mesh (port 4000) and hermes
+- [ ] webui/public/index.html — dashboard shell with tabs: Swarms | Agents | Consensus | Logs | Settings
+- [ ] webui/public/js/dashboard.js — WebSocket client, live updates
+- [ ] webui/public/js/swarm-controller.js — start/stop/inspect swarms
+- [ ] webui/public/js/agent-cards.js — visual agent cards with status
+- [ ] webui/public/js/consensus-panel.js — live voting UI
+- [ ] webui/public/css/main.css — dark theme matching council-app.tsx
+- [ ] webui/api/* — REST endpoints
+- [ ] webui/ws/relay.js — bridge browser <-> mesh <-> hermes
+- [ ] webui/README.md — run instructions
+
+## 🖥️ WebUI Design Goals
+- **Single-page dashboard** — see all swarms + agents + consensus polls in one view
+- **Real-time updates** via WebSocket (sub-100ms like AGENTS.md spec)
+- **No build step** — vanilla HTML/CSS/JS, no React/Webpack (fast iteration, easy to modify)
+- **Dark theme** matching your existing council-app.tsx
+- **Agent cards** show: name, role, status, current task, last message, model
+- **Swarm tree view** — parent goal → decomposed subtasks → assigned workers
+- **Consensus panel** — live voting, vote counts, confidence bars
+- **Controls** — start/stop swarms, spawn agents, create polls, inject messages
+- **Logs stream** — tail mesh + agent output in real-time
+- **Hermes integration** — chat input at the bottom for direct agent commands
+- **Tailscale-friendly** — binds to 0.0.0.0, port 8787 (configurable)
 
 ## 🚧 Blockers
 None yet.
@@ -68,3 +111,7 @@ None yet.
 9. **Tick 9 (08:00)**: end-to-end test
 10. **Tick 10 (09:00)**: cleanup, final docs, README
 11. **Tick 11 (10:00)**: final review + report to Duckets
+12. **WebUI Tick A (parallel)**: server.js + relay.js + package.json
+13. **WebUI Tick B (parallel)**: index.html + css + main JS shell
+14. **WebUI Tick C (parallel)**: agent cards + swarm tree + consensus panel
+15. **WebUI Tick D**: end-to-end test, screenshots, docs
