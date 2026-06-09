@@ -213,6 +213,17 @@ class TaskOrchestrator extends EventEmitter {
 
         try {
             await this._driveLoop(record, agents);
+            // Set the run-level status based on what the loop actually did.
+            const counts = summariseRun(record);
+            if (counts.failed > 0 && counts.completed === 0) {
+                record.status = STATE.FAILED;
+            } else if (counts.killed > 0) {
+                record.status = STATE.KILLED;
+            } else if (counts.failed > 0) {
+                record.status = STATE.COMPLETED; // partial success
+            } else {
+                record.status = STATE.COMPLETED;
+            }
         } catch (err) {
             record.status = STATE.FAILED;
             record.error  = err.message;
