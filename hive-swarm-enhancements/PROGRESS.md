@@ -64,6 +64,15 @@ hive-swarm-enhancements/
 - Created cron `Hive Swarm Overnight Builder` — runs every hour 00:00-10:00 EST, model = MiniMax-M2.7
 - ✅ Pushed commit `94011fd` to feature branch
 
+### Tick 0.5 (manual, ~23:37 EST 2026-06-08) — kicked off before cron
+- **Spawned 3 parallel sub-agents (all using M2.7):**
+  - Sub-agent 1: `core/goal-decomposer.js` ✅ 969 lines, 40/40 smoke tests pass
+  - Sub-agent 2: `core/worker-dispatcher.js` ✅ 551 lines, write-through state
+  - Sub-agent 3: WebUI foundation ⏱️ timed out at 600s but delivered all files
+- **All 4 files syntax-verified** (`node -c`)
+- ✅ Pushed commit `4a8e23b` to main
+- WebUI delivered: server.js, README.md, package.json, public/index.html, css/main.css, js/dashboard.js
+
 ### Next tick priorities (Tick 1, midnight 00:00 EST)
 - [x] Create PROGRESS.md (this file)
 - [x] Build `core/goal-decomposer.js` — uses provider-adapter for LLM call
