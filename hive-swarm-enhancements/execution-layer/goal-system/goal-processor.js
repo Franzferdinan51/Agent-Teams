@@ -517,6 +517,10 @@ class GoalProcessor {
       return { ok: false, error: created.error, meta: this._meta(t0, source, opts) };
     }
 
+    // Make the goal durable before returning so callers / sibling
+    // processes can read it immediately.
+    this.store.flush();
+
     logLine(
       `goal ${created.goal.id} created (source=${source}, ` +
       `tasks=${created.goal.tasks.length}, duration=${Date.now() - t0}ms)`

@@ -183,9 +183,10 @@ class GoalStore {
   // -------------------------------------------------------------------------
 
   /**
-   * Load the index from disk. Idempotent and silent on failure (we just
-   * start with an empty index and let it be rebuilt on the next mutation).
-   * @returns {boolean} true if a pre-existing index was loaded
+   * Load the index from disk. Idempotent. Preserves any in-memory state
+   * that was built up since construction if the disk file is missing —
+   * the in-memory state is the source of truth within a single process.
+   * @returns {boolean} true if a pre-existing index was loaded from disk
    */
   load() {
     const data = readJsonSafe(this.indexFile);
@@ -194,7 +195,9 @@ class GoalStore {
       this._loaded = true;
       return true;
     }
-    this._index = [];
+    // No file (or malformed) — keep whatever's in memory. This makes
+    // repeated `load()` calls safe: they only overwrite when there's
+    // actually a persisted index to load.
     this._loaded = true;
     return false;
   }

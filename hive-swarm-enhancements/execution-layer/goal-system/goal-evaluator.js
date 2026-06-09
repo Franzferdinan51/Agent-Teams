@@ -349,6 +349,9 @@ class GoalEvaluator {
 
     if (this.persistResults) this._persist(goal, result);
 
+    // Persist index update from the status patch above (if any).
+    this.store.flush();
+
     logLine(
       `evaluate: ${goalId} → success=${result.success} score=${result.score} ` +
       `source=${result.source}`
