@@ -1,31 +1,19 @@
 #!/usr/bin/env node
 /**
  * @file cli.js
- * @description Hive Swarm native CLI — the MAIN entry point.
+ * Command-line interface for the Hive Swarm native swarm layer.
  *
- * Wires together the entire native layer:
- *
- *   planner  →  decomposer  →  dispatcher  →  aggregator  →  consensus
- *
- * Subcommands:
- *
- *   node cli.js swarm        "<GOAL>"  [--count N] [--domain X] [--model M] [--consensus]
- *   node cli.js decompose    "<GOAL>"  [--count N] [--domain X]   (no execution)
- *   node cli.js consensus    "<QUESTION>" "<choice1,choice2,...>"  [--timeout 60000]
- *   node cli.js plan         "<GOAL>"                            (print the plan only)
- *   node cli.js preflight                                       (check mesh + lmstudio)
+ * Usage:
+ *   node cli.js swarm        "your task here" [--count 3] [--domain build]
+ *   node cli.js status       <swarmId>
+ *   node cli.js list
+ *   node cli.js stop         <swarmId>
+ *   node cli.js poll         "Should we use TypeScript?" --options "Yes,No,Maybe"
+ *   node cli.js vote         <pollId> <option>
+ *   node cli.js dashboard
  *   node cli.js --help
- *   node cli.js help
  *
- * Output:
- *   - One JSON object per line on stdout (NDJSON / "JSON lines") for
- *     machine consumption.
- *   - Colored, human-readable summaries on stderr (status, progress dots).
- *   - Exit codes: 0=success, 1=user error, 2=infrastructure error.
- *
- * Dependencies: NONE outside the Node stdlib + the local `core/` modules.
- *
- * @author Hive Swarm (sub-agent C / 3)
+ * @author Hive Swarm (feature/swarm-enhancements)
  * @version 1.0.0
  */
 
@@ -45,148 +33,80 @@ const { URL } = require('url');
 // Sibling modules
 // ---------------------------------------------------------------------------
 
-// These three modules already exist in the repo (built by sub-agents A & B).
-const { plan: planGoal, Planner, __version: PLANNER_VERSION } = require('./planner');
-const {
-  decompose,
-  __version: DECOMP_VERSION,
-  DOMAIN_HINTS,
-} = require('./goal-decomposer');
-const WorkerDispatcher = require('./worker-dispatcher');
-
-// result-aggregator.js + consensus-engine.js are being built in parallel
-// by sub-agent B.  We require them defensively so the CLI still works
-// even if they're not yet on disk.
-let aggregateResults = null;
-let __version_AGG_VERSION = null;
-try {
-  // eslint-disable-next-line global-require
-  ({
-    aggregate: aggregateResults,
-    __version: __version_AGG_VERSION,
-  } = require('./result-aggregator'));
-} catch (_err) {
-  // Soft fallback: implement a trivial aggregator inline.
-  aggregateResults = async function inlineAggregate(plan, results) {
-    const accepted = (results || []).filter(r => r && r.status === 'fulfilled');
-    return {
-      ok: accepted.length > 0,
-      summary: `Aggregated ${accepted.length}/${(results || []).length} results`,
-      items: accepted.map(r => r.value || r),
-      method: 'inline-fallback',
-    };
-  };
-  __version_AGG_VERSION = 'inline-fallback';
-}
-
-let runConsensus = null;
-let __version_CONS_VERSION = null;
-try {
-  // eslint-disable-next-line global-require
-  ({
-    runConsensus,
-    __version: __version_CONS_VERSION,
-  } = require('./consensus-engine'));
-} catch (_err) {
-  runConsensus = null;
-  __version_CONS_VERSION = 'inline-fallback';
-}
+const { runSwarm, Planner } = require('./planner');
+const { createPoll, castVote, getPoll, ConsensusEngine } = require('./consensus-engine');
 
 // ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const __version = '1.0.0';
-
-const MESH_HTTP = process.env.MESH_URL || 'http://localhost:4000';
-const MESH_HEALTH = `${MESH_HTTP.replace(/\/$/, '')}/health`;
-const LMSTUDIO_URL = process.env.LMSTUDIO_URL || 'http://localhost:1234';
-const LMSTUDIO_MODELS = `${LMSTUDIO_URL.replace(/\/$/, '')}/v1/models`;
-
-const PREFLIGHT_TIMEOUT_MS = 3000;
-const HTTP_TIMEOUT_MS = 5000;
-
-// Exit codes.
-const EXIT_OK = 0;
-const EXIT_USER_ERROR = 1;
-const EXIT_INFRA_ERROR = 2;
-
-// ---------------------------------------------------------------------------
-// ANSI colors (chalk-style, zero deps)
+// ANSI colors (zero deps)
 // ---------------------------------------------------------------------------
 
 const useColor = process.stdout.isTTY !== false && process.env.NO_COLOR === undefined;
 const C = useColor
   ? {
-    reset: '\x1b[0m',
-    bold:  '\x1b[1m',
-    dim:   '\x1b[2m',
-    red:   '\x1b[31m',
-    green: '\x1b[32m',
-    yellow:'\x1b[33m',
-    blue:  '\x1b[34m',
-    magenta:'\x1b[35m',
-    cyan:  '\x1b[36m',
-    gray:  '\x1b[90m',
-  }
+      reset:   '\x1b[0m',
+      bold:    '\x1b[1m',
+      dim:     '\x1b[2m',
+      red:     '\x1b[31m',
+      green:   '\x1b[32m',
+      yellow:  '\x1b[33m',
+      blue:    '\x1b[34m',
+      magenta: '\x1b[35m',
+      cyan:    '\x1b[36m',
+      gray:    '\x1b[90m',
+    }
   : new Proxy({}, { get: () => '' });
 
-/** Wrap a string in a color. */
 function c(color, s) {
   return `${C[color] || ''}${s}${C.reset}`;
 }
 
 // ---------------------------------------------------------------------------
-// JSON-line event output
+// Global planner instance (used by status / list / stop)
 // ---------------------------------------------------------------------------
 
-/**
- * Emit a single JSON-line event on stdout.  This is the MACHINE-READABLE
- * channel.  Anything prettier goes to stderr via `log()`.
- *
- * @param {object} evt
- */
+const globalPlanner = new Planner();
+
+// ---------------------------------------------------------------------------
+// JSON-line output
+// ---------------------------------------------------------------------------
+
+/** Emit one NDJSON event to stdout. */
 function emit(evt) {
   try {
     process.stdout.write(JSON.stringify(evt) + '\n');
   } catch (err) {
-    // Last-ditch: never crash the process on a serialization error.
-    process.stdout.write(JSON.stringify({ event: 'error', error: String(err && err.message || err) }) + '\n');
+    process.stdout.write(JSON.stringify({ event: 'error', error: String(err) }) + '\n');
   }
 }
 
 /**
- * Human-readable log line on stderr.  Prefix with a tiny status badge.
- *
- * @param {string} tag    e.g. 'swarm', 'decompose', 'plan', 'preflight'
+ * Human-readable log on stderr.
+ * @param {string} tag
  * @param {string} msg
- * @param {string} [level] 'info' | 'warn' | 'error' | 'ok' (default 'info')
+ * @param {'info'|'warn'|'error'|'ok'} [level]
  */
 function log(tag, msg, level = 'info') {
-  const badge = {
-    info: c('blue', 'ℹ'),
-    warn: c('yellow', '⚠'),
+  const badges = {
+    info:  c('blue', 'ℹ'),
+    warn:  c('yellow', '⚠'),
     error: c('red', '✖'),
-    ok:   c('green', '✔'),
-  }[level] || c('blue', 'ℹ');
-  const tag2 = c('gray', `[${tag}]`);
-  const stream = (level === 'error' || level === 'warn') ? process.stderr : process.stderr;
-  stream.write(`${badge} ${tag2} ${msg}\n`);
+    ok:    c('green', '✔'),
+  };
+  const badge = badges[level] || c('blue', 'ℹ');
+  const tagStr = c('gray', `[${tag}]`);
+  const stream = level === 'error' || level === 'warn' ? process.stderr : process.stderr;
+  stream.write(`${badge} ${tagStr} ${msg}\n`);
 }
 
 // ---------------------------------------------------------------------------
-// Tiny HTTP helper (avoids `fetch` so we work on older Node too)
+// HTTP helper
 // ---------------------------------------------------------------------------
 
 /**
- * GET a URL and resolve with { status, ok, body, ms }.
- * Never throws — always resolves.
- *
- * @param {string} url
- * @param {number} [timeoutMs]
- * @returns {Promise<{ok:boolean, status:number, body:string, error:(string|null), ms:number}>}
+ * GET a URL, resolve with { ok, status, body, error, ms }.
+ * Never throws.
  */
-function httpGet(url, timeoutMs = HTTP_TIMEOUT_MS) {
+function httpGet(url, timeoutMs = 5000) {
   return new Promise((resolve) => {
     let parsed;
     try { parsed = new URL(url); } catch (err) {
@@ -204,593 +124,21 @@ function httpGet(url, timeoutMs = HTTP_TIMEOUT_MS) {
       let body = '';
       res.setEncoding('utf8');
       res.on('data', (chunk) => { body += chunk; });
-      res.on('end', () => {
-        resolve({
-          ok: res.statusCode >= 200 && res.statusCode < 300,
-          status: res.statusCode || 0,
-          body,
-          error: null,
-          ms: Date.now() - start,
-        });
-      });
+      res.on('end', () => resolve({
+        ok: res.statusCode >= 200 && res.statusCode < 300,
+        status: res.statusCode,
+        body,
+        error: null,
+        ms: Date.now() - start,
+      }));
     });
     req.on('timeout', () => {
       req.destroy();
       resolve({ ok: false, status: 0, body: '', error: 'timeout', ms: Date.now() - start });
     });
-    req.on('error', (err) => {
-      resolve({ ok: false, status: 0, body: '', error: err.message || String(err), ms: Date.now() - start });
-    });
+    req.on('error', (err) => resolve({ ok: false, status: 0, body: '', error: err.message, ms: Date.now() - start }));
     req.end();
   });
-}
-
-// ---------------------------------------------------------------------------
-// Help / version text
-// ---------------------------------------------------------------------------
-
-function printHelp() {
-  const lines = [
-    '',
-    c('bold', '  🐝 Hive Swarm CLI'),
-    c('dim',  `  v${__version}  (planner ${PLANNER_VERSION}, decomposer ${DECOMP_VERSION}, aggregator ${__version_AGG_VERSION || 'n/a'}, consensus ${__version_CONS_VERSION || 'n/a'})`),
-    '',
-    c('bold', '  Usage:'),
-    c('cyan', '    node cli.js swarm        "<GOAL>"  [--count N] [--domain X] [--model M] [--consensus] [--dry-run]'),
-    c('cyan', '    node cli.js decompose    "<GOAL>"  [--count N] [--domain X]'),
-    c('cyan', '    node cli.js consensus    "<QUESTION>" "<choice1,choice2,...>"  [--timeout 60000]'),
-    c('cyan', '    node cli.js plan         "<GOAL>"'),
-    c('cyan', '    node cli.js preflight'),
-    c('cyan', '    node cli.js --help'),
-    c('cyan', '    node cli.js --version'),
-    '',
-    c('bold', '  Commands:'),
-    `    ${c('cyan', 'swarm')}        Plan → decompose → dispatch → aggregate.  Streams NDJSON events.`,
-    `    ${c('cyan', 'decompose')}    Plan + decompose only.  Does NOT execute.`,
-    `    ${c('cyan', 'consensus')}    Run a consensus vote on a question with explicit choices.`,
-    `    ${c('cyan', 'plan')}         Print the routing plan for a goal (no decomposition).`,
-    `    ${c('cyan', 'preflight')}    Check mesh (${MESH_HEALTH}) + lmstudio (${LMSTUDIO_MODELS}).`,
-    '',
-    c('bold', '  Flags:'),
-    `    ${c('gray', '--count N')}     Number of agents (2-15, default 4).`,
-    `    ${c('gray', '--domain X')}    Domain hint: auto|build|game|research|audit|data|mobile|web|general.`,
-    `    ${c('gray', '--model M')}     LLM model for the planning call (default ${c('dim', 'qwen3.6-35b-a3b')}).`,
-    `    ${c('gray', '--consensus')}   Force a consensus layer on top of the swarm.`,
-    `    ${c('gray', '--dry-run')}     For swarm/decompose: stop after planning + decomposition.`,
-    `    ${c('gray', '--timeout MS')}  For consensus: how long to wait (ms, default 60000).`,
-    `    ${c('gray', '--no-llm')}      Skip the LLM and use heuristic routing.`,
-    `    ${c('gray', '--force A')}     Force a specific approach: direct|swarm|consensus|swarm+consensus|decompose-only.`,
-    `    ${c('gray', '--quiet')}       Suppress human-readable log lines (NDJSON only).`,
-    `    ${c('gray', '--output DIR')}  Write final result + audit files to DIR (default ./build-logs/swarm).`,
-    '',
-    c('bold', '  Examples:'),
-    `    ${c('gray', '$')} node cli.js preflight`,
-    `    ${c('gray', '$')} node cli.js plan "build a Discord bot"`,
-    `    ${c('gray', '$')} node cli.js swarm "build a Discord bot" --count 5 --domain build`,
-    `    ${c('gray', '$')} node cli.js swarm "audit the auth module" --consensus`,
-    `    ${c('gray', '$')} node cli.js decompose "design a Redis pipeline" --count 6`,
-    `    ${c('gray', '$')} node cli.js consensus "Which database?" "postgres,sqlite,mongo,duckdb"`,
-    '',
-    c('dim', '  NDJSON event stream:'),
-    `    ${c('dim', 'event: "decomposed"     { subtasks: [...] }')}`,
-    `    ${c('dim', 'event: "agent_started"  { dispatchId, subtaskId, agentId }')}`,
-    `    ${c('dim', 'event: "agent_progress" { dispatchId, subtaskId, progress, note }')}`,
-    `    ${c('dim', 'event: "agent_completed"{ dispatchId, subtaskId, result }')}`,
-    `    ${c('dim', 'event: "aggregated"     { items, summary, method }')}`,
-    `    ${c('dim', 'event: "consensus"      { winner, votes }')}`,
-    `    ${c('dim', 'event: "complete"       { ok, durationMs, plan, decomposition, aggregation }')}`,
-    '',
-    c('dim', '  Exit codes:  0 success · 1 user error · 2 infrastructure error'),
-    '',
-  ];
-  process.stdout.write(lines.join('\n'));
-}
-
-function printVersion() {
-  process.stdout.write(`hive-swarm-cli ${__version}\n`);
-}
-
-// ---------------------------------------------------------------------------
-// Pre-flight: mesh + lmstudio
-// ---------------------------------------------------------------------------
-
-/**
- * Check the mesh HTTP health endpoint and the LM Studio /v1/models endpoint.
- * Always resolves — never throws.  Returns a structured report.
- */
-async function preflight() {
-  emit({ event: 'preflight_start', mesh: MESH_HEALTH, lmstudio: LMSTUDIO_MODELS });
-
-  const [meshRes, lmRes] = await Promise.all([
-    httpGet(MESH_HEALTH, PREFLIGHT_TIMEOUT_MS),
-    httpGet(LMSTUDIO_MODELS, PREFLIGHT_TIMEOUT_MS),
-  ]);
-
-  const meshOk = meshRes.ok;
-  const lmOk = lmRes.ok;
-
-  const report = {
-    ok: meshOk && lmOk,                    // true only if BOTH are up
-    mesh: {
-      url: MESH_HEALTH,
-      reachable: meshRes.status > 0 || !meshRes.error,
-      httpStatus: meshRes.status,
-      ms: meshRes.ms,
-      error: meshRes.error,
-    },
-    lmstudio: {
-      url: LMSTUDIO_MODELS,
-      reachable: lmRes.status > 0 || !lmRes.error,
-      httpStatus: lmRes.status,
-      ms: lmRes.ms,
-      error: lmRes.error,
-    },
-    summary: {
-      mesh: meshOk ? 'up' : (meshRes.status === 0 ? 'unreachable' : 'unhealthy'),
-      lmstudio: lmOk ? 'up' : (lmRes.status === 0 ? 'unreachable' : 'unhealthy'),
-    },
-  };
-
-  emit({ event: 'preflight_result', ...report });
-  return report;
-}
-
-// ---------------------------------------------------------------------------
-// Build agents for a swarm
-// ---------------------------------------------------------------------------
-
-/**
- * Build N synthetic agent records for dispatch.  Real mesh agents would
- * come from the registry, but for offline / preflight-friendly operation
- * we generate a stable list of worker agents.
- *
- * @param {number} count
- * @param {string} domain
- * @returns {Array<{id:string, name:string, role:string, model:string, room:string, capabilities:string[]}>}
- */
-function buildSyntheticAgents(count, domain) {
-  const rooms = {
-    build: 'engineering',
-    game: 'game-dev',
-    research: 'research',
-    audit: 'qa',
-    data: 'data-eng',
-    mobile: 'mobile',
-    web: 'web',
-    general: 'general',
-    auto: 'general',
-  };
-  const roles = {
-    build: ['planner', 'implementer', 'reviewer', 'qa', 'integrator', 'doc-writer'],
-    game: ['game-designer', 'engineer', 'artist', 'qa', 'producer'],
-    research: ['researcher', 'analyst', 'writer', 'critic'],
-    audit: ['security', 'performance', 'style', 'tester', 'reviewer'],
-    data: ['data-engineer', 'analyst', 'visualizer', 'validator'],
-    mobile: ['ios-dev', 'android-dev', 'ux', 'qa', 'backend'],
-    web: ['frontend', 'backend', 'ux', 'qa', 'devops'],
-    general: ['planner', 'implementer', 'reviewer', 'qa'],
-    auto: ['planner', 'implementer', 'reviewer', 'qa'],
-  };
-  const room = rooms[domain] || 'general';
-  const rolePool = roles[domain] || roles.general;
-  const out = [];
-  for (let i = 0; i < count; i++) {
-    const role = rolePool[i % rolePool.length];
-    out.push({
-      id: `agent-${i + 1}`,
-      name: `${role}-${i + 1}`,
-      role,
-      model: 'qwen3.6-35b-a3b',
-      room,
-      capabilities: [role, domain, 'swarm-worker'],
-    });
-  }
-  return out;
-}
-
-// ---------------------------------------------------------------------------
-// Subcommand: plan
-// ---------------------------------------------------------------------------
-
-async function cmdPlan(goal, opts) {
-  if (!goal || typeof goal !== 'string' || !goal.trim()) {
-    log('plan', 'goal is required (got empty string)', 'error');
-    emit({ event: 'error', where: 'plan', kind: 'user', message: 'goal is required' });
-    return EXIT_USER_ERROR;
-  }
-
-  log('plan', `planning: "${truncate(goal, 80)}"`);
-  emit({ event: 'plan_start', goal });
-
-  const context = {
-    count: opts.count,
-    domain: opts.domain,
-    model: opts.model,
-    consensus: opts.consensus,
-    force: opts.force,
-    useLlm: !opts.noLlm,
-  };
-
-  const p = await planGoal(goal, context);
-
-  emit({ event: 'planned', plan: p });
-  log('plan', `${c('cyan', p.approach)} · ${c('dim', p.reason)}`, 'ok');
-  log('plan', `agents≈${p.estimatedAgents} · duration ${p.estimatedDuration} · source=${p.source}`, 'info');
-
-  return EXIT_OK;
-}
-
-// ---------------------------------------------------------------------------
-// Subcommand: decompose
-// ---------------------------------------------------------------------------
-
-async function cmdDecompose(goal, opts) {
-  if (!goal || typeof goal !== 'string' || !goal.trim()) {
-    log('decompose', 'goal is required (got empty string)', 'error');
-    emit({ event: 'error', where: 'decompose', kind: 'user', message: 'goal is required' });
-    return EXIT_USER_ERROR;
-  }
-
-  log('decompose', `decomposing: "${truncate(goal, 80)}"`);
-  emit({ event: 'decompose_start', goal, options: { count: opts.count, domain: opts.domain } });
-
-  const plan = await planGoal(goal, {
-    count: opts.count,
-    domain: opts.domain,
-    model: opts.model,
-    consensus: opts.consensus,
-    force: opts.force,
-    useLlm: !opts.noLlm,
-  });
-
-  // Force decompose-only so we never accidentally dispatch.
-  if (plan.approach !== 'decompose-only') {
-    plan.approach = 'decompose-only';
-    plan.reason = 'decompose subcommand — execution disabled';
-    plan.params.consensus = false;
-  }
-
-  emit({
-    event: 'planned',
-    plan,
-  });
-
-  const decomposition = await decompose(goal, {
-    count: opts.count || plan.params.count,
-    domain: opts.domain || plan.params.domain,
-    model: opts.model || plan.params.model,
-  });
-
-  emit({
-    event: 'decomposed',
-    decomposition,
-  });
-
-  log('decompose', `${decomposition.subtasks.length} subtasks · domain=${decomposition.meta.domain}`, 'ok');
-  if (decomposition.meta.auditFile) {
-    log('decompose', `audit: ${decomposition.meta.auditFile}`, 'info');
-  }
-  if (decomposition.meta.fallback) {
-    log('decompose', `heuristic fallback (${decomposition.meta.error || 'no LLM'})`, 'warn');
-  }
-
-  return EXIT_OK;
-}
-
-// ---------------------------------------------------------------------------
-// Subcommand: swarm
-// ---------------------------------------------------------------------------
-
-async function cmdSwarm(goal, opts) {
-  if (!goal || typeof goal !== 'string' || !goal.trim()) {
-    log('swarm', 'goal is required (got empty string)', 'error');
-    emit({ event: 'error', where: 'swarm', kind: 'user', message: 'goal is required' });
-    return EXIT_USER_ERROR;
-  }
-
-  const startedAt = Date.now();
-  log('swarm', `starting swarm: "${truncate(goal, 80)}"`);
-  emit({ event: 'swarm_start', goal, options: optsToPlain(opts) });
-
-  // 1. Plan.
-  const plan = await planGoal(goal, {
-    count: opts.count,
-    domain: opts.domain,
-    model: opts.model,
-    consensus: opts.consensus,
-    force: opts.force,
-    useLlm: !opts.noLlm,
-  });
-  emit({ event: 'planned', plan });
-  log('swarm', `${c('cyan', plan.approach)} · ${c('dim', plan.reason)}`, 'ok');
-
-  // 2. Decompose (unless direct — single subtask = the goal itself).
-  let decomposition;
-  if (plan.approach === 'direct') {
-    decomposition = {
-      goal,
-      subtasks: [{
-        id: 't1',
-        title: truncate(goal, 60),
-        description: goal,
-        role: 'implementer',
-        model: plan.params.model || opts.model || 'qwen3.6-35b-a3b',
-        depends_on: [],
-        payload: { goal },
-      }],
-      meta: { domain: plan.params.domain, fallback: true, error: 'direct — no decomposition', auditFile: null },
-    };
-  } else {
-    decomposition = await decompose(goal, {
-      count: plan.params.count,
-      domain: plan.params.domain,
-      model: plan.params.model || opts.model,
-    });
-  }
-  emit({ event: 'decomposed', decomposition });
-  log('swarm', `${decomposition.subtasks.length} subtasks`, 'ok');
-
-  // Dry-run short-circuit: stop after plan + decompose.
-  if (opts.dryRun) {
-    emit({
-      event: 'complete',
-      ok: true,
-      dryRun: true,
-      durationMs: Date.now() - startedAt,
-      plan,
-      decomposition,
-      aggregation: null,
-    });
-    log('swarm', 'dry-run — exiting before dispatch', 'ok');
-    return EXIT_OK;
-  }
-
-  // 3. Build agents.
-  const agents = buildSyntheticAgents(
-    plan.approach === 'direct' ? 1 : (plan.params.count || decomposition.subtasks.length),
-    plan.params.domain
-  );
-  emit({ event: 'agents_ready', count: agents.length, agents: agents.map(a => ({ id: a.id, role: a.role })) });
-  log('swarm', `${agents.length} synthetic agents ready (${plan.params.domain})`, 'info');
-
-  // 4. Dispatch.
-  const dispatcher = new WorkerDispatcher({ persist: true });
-  const { dispatchId, promises, all } = dispatcher.dispatch(decomposition.subtasks, agents, { goal });
-
-  // Forward dispatcher events as NDJSON.
-  const agentResults = new Array(promises.length).fill(null);
-  dispatcher.on('agent_started', (e) => {
-    emit({ event: 'agent_started', ...e });
-    log('swarm', `▶ ${e.subtaskId} started (${e.agentId || '?'})`, 'info');
-  });
-  dispatcher.on('agent_progress', (e) => {
-    emit({ event: 'agent_progress', ...e });
-    if (e.progress != null) {
-      process.stderr.write(`  ${c('dim', e.subtaskId)} ${bar(e.progress)} ${e.progress}%\n`);
-    }
-  });
-  dispatcher.on('agent_completed', (e) => {
-    emit({ event: 'agent_completed', ...e });
-    log('swarm', `✔ ${e.subtaskId} completed`, 'ok');
-  });
-  dispatcher.on('agent_failed', (e) => {
-    emit({ event: 'agent_failed', ...e });
-    log('swarm', `✖ ${e.subtaskId} failed: ${e.error || 'unknown'}`, 'warn');
-  });
-
-  // If we're offline (mesh down), the subtasks will hang.  Race them against
-  // a short grace period; if nothing resolves, fall back to synthetic
-  // "echo" results so the swarm still reports something useful.
-  const allSettled = await Promise.race([
-    all,
-    new Promise((resolve) => setTimeout(() => resolve({
-      status: 'timeout',
-      results: promises.map(() => ({ status: 'pending' })),
-    }), Math.max(1000, opts.dispatchTimeoutMs || 10000))),
-  ]);
-
-  // Collect whatever we got.  For any "pending" subtask (mesh down),
-  // synthesize an offline-completion result.
-  const isOfflineFallback = allSettled.status === 'timeout';
-  const subtaskResults = isOfflineFallback
-    ? decomposition.subtasks.map((sub, idx) => ({
-        status: 'fulfilled',
-        value: {
-          subtaskId: sub.id,
-          offline: true,
-          summary: `offline fallback for: ${sub.title || sub.description || sub.id}`,
-          payload: sub.payload || null,
-        },
-      }))
-    : (allSettled.results || []);
-
-  subtaskResults.forEach((r, idx) => {
-    agentResults[idx] = (r && r.status === 'fulfilled') ? r.value : { error: r && r.reason ? String(r.reason) : 'unknown' };
-  });
-
-  // 5. Aggregate.
-  let aggregation = null;
-  try {
-    if (typeof aggregateResults === 'function') {
-      aggregation = await aggregateResults(decomposition, subtaskResults);
-    }
-  } catch (err) {
-    log('swarm', `aggregator threw: ${err.message}`, 'warn');
-    aggregation = { ok: false, error: err.message, items: subtaskResults, method: 'error' };
-  }
-  emit({ event: 'aggregated', aggregation });
-  log('swarm', `aggregated (${aggregation && aggregation.items ? aggregation.items.length : 0} items)`, 'ok');
-
-  // 6. Consensus (optional).
-  let consensus = null;
-  const wantConsensus = opts.consensus || plan.params.consensus || plan.approach === 'consensus' || plan.approach === 'swarm+consensus';
-  if (wantConsensus) {
-    if (typeof runConsensus === 'function') {
-      try {
-        consensus = await runConsensus({
-          question: `Best synthesized answer for: ${truncate(goal, 80)}`,
-          choices: (aggregation && aggregation.items && aggregation.items.length
-            ? aggregation.items.map((it, i) => `#${i + 1} ${truncate(typeof it === 'string' ? it : (it && it.summary) || JSON.stringify(it).slice(0, 60), 80)}`)
-            : ['yes', 'no', 'abstain']),
-          timeoutMs: opts.consensusTimeoutMs || 60000,
-        });
-        emit({ event: 'consensus', consensus });
-        log('swarm', `consensus: ${consensus && consensus.winner ? consensus.winner : 'no winner'}`, 'ok');
-      } catch (err) {
-        log('swarm', `consensus failed: ${err.message}`, 'warn');
-        consensus = { ok: false, error: err.message };
-        emit({ event: 'consensus', consensus });
-      }
-    } else {
-      log('swarm', 'consensus-engine not available — skipping consensus layer', 'warn');
-      consensus = { ok: false, error: 'consensus-engine module not loaded' };
-      emit({ event: 'consensus', consensus });
-    }
-  }
-
-  // 7. Persist final result to disk.
-  const outDir = ensureOutputDir(opts.output);
-  const finalReport = {
-    ok: true,
-    durationMs: Date.now() - startedAt,
-    goal,
-    plan,
-    decomposition,
-    aggregation,
-    consensus,
-    offline: isOfflineFallback,
-    dispatchId,
-    completedAt: new Date().toISOString(),
-  };
-  let reportPath = null;
-  try {
-    reportPath = path.join(outDir, `swarm-${Date.now()}.json`);
-    fs.writeFileSync(reportPath, JSON.stringify(finalReport, null, 2));
-  } catch (err) {
-    log('swarm', `could not write report: ${err.message}`, 'warn');
-  }
-  emit({
-    event: 'complete',
-    ok: true,
-    durationMs: finalReport.durationMs,
-    plan,
-    decomposition,
-    aggregation,
-    consensus,
-    dispatchId,
-    reportPath,
-  });
-  log('swarm', `done in ${(finalReport.durationMs / 1000).toFixed(1)}s · report: ${reportPath || '(none)'}`, 'ok');
-
-  // Cleanly close dispatcher.
-  try { await dispatcher.close(); } catch (_) { /* ignore */ }
-
-  return EXIT_OK;
-}
-
-// ---------------------------------------------------------------------------
-// Subcommand: consensus
-// ---------------------------------------------------------------------------
-
-async function cmdConsensus(args, opts) {
-  if (args.length < 2) {
-    log('consensus', 'usage: node cli.js consensus "<QUESTION>" "<choice1,choice2,...>"', 'error');
-    emit({ event: 'error', where: 'consensus', kind: 'user', message: 'need QUESTION + comma-separated choices' });
-    return EXIT_USER_ERROR;
-  }
-  const question = args[0];
-  const choicesRaw = args[1];
-  const choices = choicesRaw.split(',').map(s => s.trim()).filter(Boolean);
-  if (choices.length < 2) {
-    log('consensus', 'need at least 2 distinct choices', 'error');
-    emit({ event: 'error', where: 'consensus', kind: 'user', message: 'need >= 2 choices' });
-    return EXIT_USER_ERROR;
-  }
-
-  const timeoutMs = opts.consensusTimeoutMs || 60000;
-  log('consensus', `question: "${truncate(question, 80)}"  ·  choices: ${choices.length}`);
-  emit({ event: 'consensus_start', question, choices, timeoutMs });
-
-  if (typeof runConsensus !== 'function') {
-    // Inline fallback — majority vote by hashing the question.
-    log('consensus', 'consensus-engine not available — using inline majority vote', 'warn');
-    let tally = 0;
-    for (let i = 0; i < question.length; i++) tally = (tally + question.charCodeAt(i)) % choices.length;
-    const winner = choices[tally];
-    const result = { ok: true, winner, votes: Object.fromEntries(choices.map((c, i) => [c, i === tally ? 1 : 0])), method: 'inline-fallback' };
-    emit({ event: 'consensus_result', result });
-    return EXIT_OK;
-  }
-
-  try {
-    const result = await runConsensus({ question, choices, timeoutMs });
-    emit({ event: 'consensus_result', result });
-    log('consensus', `winner: ${result && result.winner || 'n/a'}`, 'ok');
-    return EXIT_OK;
-  } catch (err) {
-    log('consensus', `failed: ${err.message}`, 'error');
-    emit({ event: 'consensus_error', error: err.message });
-    return EXIT_INFRA_ERROR;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Subcommand: preflight
-// ---------------------------------------------------------------------------
-
-async function cmdPreflight() {
-  log('preflight', `mesh: ${MESH_HEALTH}`);
-  log('preflight', `lmstudio: ${LMSTUDIO_MODELS}`);
-  const report = await preflight();
-  log('preflight', `mesh: ${c(report.mesh.reachable ? 'green' : 'red', report.summary.mesh)}`, report.mesh.reachable ? 'ok' : 'warn');
-  log('preflight', `lmstudio: ${c(report.lmstudio.reachable ? 'green' : 'red', report.summary.lmstudio)}`, report.lmstudio.reachable ? 'ok' : 'warn');
-  if (report.ok) {
-    log('preflight', 'all systems go', 'ok');
-    return EXIT_OK;
-  }
-  log('preflight', 'one or more services unreachable — swarms will fall back to heuristic / offline mode', 'warn');
-  // Treat as infra warning, not a hard error.
-  return EXIT_OK;
-}
-
-// ---------------------------------------------------------------------------
-// Small utilities
-// ---------------------------------------------------------------------------
-
-function truncate(s, n) {
-  if (typeof s !== 'string') s = String(s);
-  return s.length <= n ? s : s.slice(0, n - 1) + '…';
-}
-
-/** Tiny ASCII progress bar for stderr. */
-function bar(pct) {
-  const width = 20;
-  const filled = Math.max(0, Math.min(width, Math.round((pct / 100) * width)));
-  return '[' + '█'.repeat(filled) + '·'.repeat(width - filled) + ']';
-}
-
-/** Ensure the output dir exists.  Default: ./build-logs/swarm */
-function ensureOutputDir(dir) {
-  const finalDir = dir
-    ? path.resolve(dir)
-    : path.resolve(__dirname, '..', 'build-logs', 'swarm');
-  try { fs.mkdirSync(finalDir, { recursive: true }); } catch (_) { /* ignore */ }
-  return finalDir;
-}
-
-/** Strip large internal-only fields from an opts object for the event stream. */
-function optsToPlain(opts) {
-  return {
-    count: opts.count,
-    domain: opts.domain,
-    model: opts.model,
-    consensus: !!opts.consensus,
-    dryRun: !!opts.dryRun,
-    noLlm: !!opts.noLlm,
-    force: opts.force,
-    output: opts.output,
-    quiet: !!opts.quiet,
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -798,16 +146,8 @@ function optsToPlain(opts) {
 // ---------------------------------------------------------------------------
 
 /**
- * Parse argv into a subcommand + options bag.
- *
- * Supports:
- *   <cmd> [args...]
- *   --flag
- *   --flag value
- *   --flag=value
- *
- * @param {string[]} argv
- * @returns {{ cmd:string, args:string[], opts:object }}
+ * Parse argv into { cmd, args, opts }.
+ * Supports: <cmd> [args...] [--flag] [--flag value] [--flag=value]
  */
 function parseArgs(argv) {
   const opts = {};
@@ -817,10 +157,7 @@ function parseArgs(argv) {
     const tok = argv[i];
     if (tok === '--help' || tok === '-h')         { opts.help = true; i++; continue; }
     if (tok === '--version' || tok === '-V')      { opts.version = true; i++; continue; }
-    if (tok === '--consensus')                    { opts.consensus = true; i++; continue; }
-    if (tok === '--dry-run')                      { opts.dryRun = true; i++; continue; }
-    if (tok === '--quiet')                        { opts.quiet = true; i++; continue; }
-    if (tok === '--no-llm')                       { opts.noLlm = true; i++; continue; }
+    if (tok === '--json')                         { opts.json = true; i++; continue; }
     if (tok.startsWith('--') && tok.includes('=')) {
       const [k, ...rest] = tok.slice(2).split('=');
       opts[k] = rest.join('=');
@@ -842,10 +179,345 @@ function parseArgs(argv) {
     positional.push(tok);
     i++;
   }
+  return { cmd: positional[0] || 'help', args: positional.slice(1), opts };
+}
 
-  const cmd = positional[0] || 'help';
-  const args = positional.slice(1);
-  return { cmd, args, opts };
+// ---------------------------------------------------------------------------
+// Small utilities
+// ---------------------------------------------------------------------------
+
+function truncate(s, n) {
+  if (typeof s !== 'string') s = String(s);
+  return s.length <= n ? s : s.slice(0, n - 1) + '…';
+}
+
+// ---------------------------------------------------------------------------
+// Command: swarm
+// ---------------------------------------------------------------------------
+
+async function cmdSwarm(args, opts) {
+  const goal = args[0];
+  if (!goal || typeof goal !== 'string' || !goal.trim()) {
+    log('swarm', 'goal is required', 'error');
+    return 1;
+  }
+
+  const count = parseInt(opts.count, 10) || 3;
+  const domain = opts.domain || 'auto';
+  const timeout = parseInt(opts.timeout, 10) || (5 * 60 * 1000);
+
+  log('swarm', `starting: "${truncate(goal, 60)}"`, 'info');
+  emit({ event: 'swarm_start', goal, count, domain });
+
+  const swarmOptions = { count, domain, timeout };
+
+  try {
+    // runSwarm returns the full record
+    const result = await runSwarm(goal, swarmOptions);
+
+    if (opts.json) {
+      process.stdout.write(JSON.stringify(result) + '\n');
+    } else {
+      log('swarm', `✔ swarm ${result.swarmId} done in ${((result.totalDuration || 0) / 1000).toFixed(1)}s`, 'ok');
+      log('swarm', `  subtasks: ${result.subtasks ? result.subtasks.length : 0}`, 'info');
+      log('swarm', `  synthesis: ${result.synthesis ? (result.synthesis.summary || 'ok') : 'n/a'}`, 'info');
+      if (result.scores && result.scores.length > 0) {
+        log('swarm', `  top score: ${result.scores[0] && result.scores[0].score}`, 'info');
+      }
+      if (result._savedPath) {
+        log('swarm', `  saved: ${result._savedPath}`, 'dim');
+      }
+    }
+
+    emit({ event: 'swarm_complete', swarmId: result.swarmId, ...result });
+    return 0;
+  } catch (err) {
+    log('swarm', `failed: ${err && err.message || err}`, 'error');
+    emit({ event: 'swarm_error', error: err && err.message || String(err) });
+    return 2;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Command: status
+// ---------------------------------------------------------------------------
+
+async function cmdStatus(args, opts) {
+  const swarmId = args[0];
+  if (!swarmId) {
+    log('status', 'swarmId is required', 'error');
+    return 1;
+  }
+
+  const status = globalPlanner.getStatus(swarmId);
+  if (!status) {
+    log('status', `swarm ${swarmId} not found`, 'error');
+    emit({ event: 'status', swarmId, found: false });
+    return 1;
+  }
+
+  if (opts.json) {
+    process.stdout.write(JSON.stringify(status) + '\n');
+  } else {
+    log('status', `swarm ${swarmId}`, 'info');
+    log('status', `  goal:     ${truncate(status.goal || '', 60)}`, 'dim');
+    log('status', `  status:   ${c(status.status === 'completed' ? 'green' : status.status === 'failed' ? 'red' : 'yellow', status.status)}`, 'info');
+    log('status', `  duration: ${((status.totalDuration || 0) / 1000).toFixed(1)}s`, 'dim');
+  }
+
+  emit({ event: 'status', swarmId, status });
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
+// Command: list
+// ---------------------------------------------------------------------------
+
+async function cmdList(args, opts) {
+  const swarms = globalPlanner.listActive();
+
+  if (opts.json) {
+    process.stdout.write(JSON.stringify(swarms) + '\n');
+  } else {
+    if (swarms.length === 0) {
+      log('list', 'no active swarms', 'info');
+    } else {
+      for (const s of swarms) {
+        const color = s.status === 'completed' ? 'green' : s.status === 'failed' ? 'red' : s.status === 'stopped' ? 'yellow' : 'cyan';
+        log('list', `${c(color, s.swarmId)}  ${truncate(s.goal || '', 40)}  ${s.status}`, 'info');
+      }
+    }
+  }
+
+  emit({ event: 'list', count: swarms.length, swarms });
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
+// Command: stop
+// ---------------------------------------------------------------------------
+
+async function cmdStop(args, opts) {
+  const swarmId = args[0];
+  if (!swarmId) {
+    log('stop', 'swarmId is required', 'error');
+    return 1;
+  }
+
+  const result = globalPlanner.stop(swarmId);
+  if (!result) {
+    log('stop', `swarm ${swarmId} not found`, 'error');
+    return 1;
+  }
+
+  if (opts.json) {
+    process.stdout.write(JSON.stringify(result) + '\n');
+  } else {
+    if (result.stopped) {
+      log('stop', `✔ stopped ${swarmId} (${result.killed} tasks killed)`, 'ok');
+    } else {
+      log('stop', `⚠ could not stop ${swarmId}: ${result.reason || 'no active dispatcher'}`, 'warn');
+    }
+  }
+
+  emit({ event: 'stop', swarmId, ...result });
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
+// Command: poll
+// ---------------------------------------------------------------------------
+
+async function cmdPoll(args, opts) {
+  const topic = args[0];
+  if (!topic || typeof topic !== 'string' || !topic.trim()) {
+    log('poll', 'topic is required', 'error');
+    return 1;
+  }
+
+  const optionsRaw = opts.options || 'Yes,No';
+  const options = optionsRaw.split(',').map(s => s.trim()).filter(Boolean);
+  if (options.length < 2) {
+    log('poll', 'need at least 2 options (--options "A,B,C")', 'error');
+    return 1;
+  }
+
+  const timeoutMs = parseInt(opts.timeout, 10) || 60000;
+
+  log('poll', `creating poll: "${truncate(topic, 60)}"`, 'info');
+  emit({ event: 'poll_create_start', topic, options, timeoutMs });
+
+  try {
+    const poll = await createPoll(topic, { options, timeout: timeoutMs });
+
+    if (poll.error) {
+      log('poll', `poll creation failed: ${poll.error}`, 'error');
+      emit({ event: 'poll_create_error', error: poll.error });
+      return 2;
+    }
+
+    if (opts.json) {
+      process.stdout.write(JSON.stringify(poll) + '\n');
+    } else {
+      log('poll', `✔ poll created: ${c('cyan', poll.pollId)}`, 'ok');
+      log('poll', `  topic:   ${topic}`, 'dim');
+      log('poll', `  options: ${options.join(', ')}`, 'dim');
+      log('poll', `  status:  ${poll.status}`, 'dim');
+    }
+
+    emit({ event: 'poll_created', poll });
+    return 0;
+  } catch (err) {
+    log('poll', `failed: ${err && err.message || err}`, 'error');
+    emit({ event: 'poll_error', error: err && err.message || String(err) });
+    return 2;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Command: vote
+// ---------------------------------------------------------------------------
+
+async function cmdVote(args, opts) {
+  const pollId = args[0];
+  const option = args[1];
+  if (!pollId || !option) {
+    log('vote', 'usage: node cli.js vote <pollId> <option>', 'error');
+    return 1;
+  }
+
+  const voterId = opts.voterId || `voter-${Date.now()}`;
+
+  log('vote', `casting vote for "${option}" on poll ${pollId}`, 'info');
+  emit({ event: 'vote_cast_start', pollId, voterId, option });
+
+  try {
+    const result = await castVote(pollId, voterId, option);
+
+    if (result.error) {
+      log('vote', `vote failed: ${result.error}`, 'error');
+      emit({ event: 'vote_error', error: result.error });
+      return 2;
+    }
+
+    if (opts.json) {
+      process.stdout.write(JSON.stringify(result) + '\n');
+    } else {
+      log('vote', `✔ vote cast: ${option}`, 'ok');
+    }
+
+    emit({ event: 'vote_cast', pollId, voterId, option, ...result });
+    return 0;
+  } catch (err) {
+    log('vote', `failed: ${err && err.message || err}`, 'error');
+    emit({ event: 'vote_error', error: err && err.message || String(err) });
+    return 2;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Command: dashboard
+// ---------------------------------------------------------------------------
+
+async function cmdDashboard(args, opts) {
+  const port = parseInt(opts.port, 10) || 3000;
+  const host = opts.host || 'localhost';
+
+  log('dashboard', `starting webui on ${host}:${port}`, 'info');
+  emit({ event: 'dashboard_start', host, port });
+
+  // Try to spawn the webui server if available
+  try {
+    const webuiServerPath = path.resolve(__dirname, '..', 'webui', 'server.js');
+    if (fs.existsSync(webuiServerPath)) {
+      const { spawn } = require('child_process');
+      const child = spawn('node', [webuiServerPath], {
+        stdio: 'inherit',
+        detached: true,
+        env: { ...process.env, PORT: port, HOST: host },
+      });
+      child.unref();
+      log('dashboard', `✔ webui spawned (pid ${child.pid})`, 'ok');
+      return 0;
+    }
+  } catch (_) { /* fall through */ }
+
+  // Fallback: start a minimal static server
+  const webuiIndexPath = path.resolve(__dirname, '..', 'webui', 'public', 'index.html');
+  if (!fs.existsSync(webuiIndexPath)) {
+    log('dashboard', 'webui not found — run from hive-swarm-enhancements/ or install webui', 'error');
+    return 2;
+  }
+
+  const server = http.createServer((req, res) => {
+    if (req.url === '/' || req.url === '/index.html') {
+      fs.readFile(webuiIndexPath, (err, data) => {
+        if (err) { res.writeHead(500); res.end('Not found'); return; }
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(data);
+      });
+    } else {
+      res.writeHead(404);
+      res.end('Not found');
+    }
+  });
+
+  server.listen(port, host, () => {
+    log('dashboard', `✔ listening on ${host}:${port}`, 'ok');
+  });
+
+  emit({ event: 'dashboard_listening', host, port });
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
+// Help
+// ---------------------------------------------------------------------------
+
+function printHelp() {
+  const lines = [
+    '',
+    c('bold', '  🐝 Hive Swarm CLI'),
+    c('dim', '  v1.0.0'),
+    '',
+    c('bold', '  Usage:'),
+    `    ${c('cyan', 'node cli.js swarm')}      "your task" [--count N] [--domain X] [--timeout MS] [--json]`,
+    `    ${c('cyan', 'node cli.js status')}     <swarmId> [--json]`,
+    `    ${c('cyan', 'node cli.js list')}       [--json]`,
+    `    ${c('cyan', 'node cli.js stop')}       <swarmId> [--json]`,
+    `    ${c('cyan', 'node cli.js poll')}       "question?" --options "Yes,No,Maybe" [--timeout MS] [--json]`,
+    `    ${c('cyan', 'node cli.js vote')}       <pollId> <option> [--voter-id ID] [--json]`,
+    `    ${c('cyan', 'node cli.js dashboard')} [--port N] [--host HOST]`,
+    `    ${c('cyan', 'node cli.js --help')}`,
+    '',
+    c('bold', '  Commands:'),
+    `    ${c('cyan', 'swarm')}       Run the full decompose → dispatch → aggregate pipeline`,
+    `    ${c('cyan', 'status')}      Show status of a previously-run swarm`,
+    `    ${c('cyan', 'list')}        List all tracked swarms (active and completed)`,
+    `    ${c('cyan', 'stop')}       Stop an active swarm by killing its tasks`,
+    `    ${c('cyan', 'poll')}        Create a new consensus poll with explicit options`,
+    `    ${c('cyan', 'vote')}        Cast a vote on an active poll`,
+    `    ${c('cyan', 'dashboard')}    Start the web UI server`,
+    '',
+    c('bold', '  Flags:'),
+    `    ${c('gray', '--count N')}      Worker count (default 3)`,
+    `    ${c('gray', '--domain X')}     Domain hint: auto|build|game|research|audit|data|mobile|web|general`,
+    `    ${c('gray', '--timeout MS')}   Per-subtask timeout in ms (default 300000)`,
+    `    ${c('gray', '--options A,B')}  Comma-separated options for poll commands`,
+    `    ${c('gray', '--json')}         Machine-readable JSON output`,
+    `    ${c('gray', '--port N')}       Webui port (default 3000)`,
+    `    ${c('gray', '--host HOST')}    Webui host (default localhost)`,
+    '',
+    c('bold', '  Examples:'),
+    `    ${c('gray', '$')} node cli.js swarm "build a REST API for my project" --count 3 --domain build`,
+    `    ${c('gray', '$')} node cli.js swarm "audit my codebase" --count 4 --domain audit`,
+    `    ${c('gray', '$')} node cli.js list`,
+    `    ${c('gray', '$')} node cli.js stop swarm-1234567890`,
+    `    ${c('gray', '$')} node cli.js poll "Should we use TypeScript?" --options "Yes,No,Maybe"`,
+    `    ${c('gray', '$')} node cli.js vote abc123 "Yes"`,
+    '',
+  ];
+  process.stdout.write(lines.join('\n') + '\n');
 }
 
 // ---------------------------------------------------------------------------
@@ -853,101 +525,65 @@ function parseArgs(argv) {
 // ---------------------------------------------------------------------------
 
 async function main() {
-  // Global SIGINT handler: emit a final event and a friendly message.
-  let interrupted = false;
-  process.on('SIGINT', () => {
-    if (interrupted) {
-      process.stderr.write('\nforced exit\n');
-      process.exit(130);
-    }
-    interrupted = true;
-    emit({ event: 'interrupted', message: 'SIGINT received — partial results may be available' });
-    process.stderr.write(`\n${c('yellow', '⚠')} interrupted — partial results: ${path.resolve(__dirname, '..', 'build-logs', 'swarm')}\n`);
-    // Give stdout a moment to flush, then exit.
-    setTimeout(() => process.exit(130), 100);
-  });
-
   const { cmd, args, opts } = parseArgs(process.argv.slice(2));
 
   if (opts.help || cmd === 'help') {
     printHelp();
-    return EXIT_OK;
+    return 0;
   }
+
   if (opts.version) {
-    printVersion();
-    return EXIT_OK;
+    process.stdout.write('hive-swarm-cli 1.0.0\n');
+    return 0;
   }
-  if (opts.quiet) {
-    // Suppress human-readable logs by overriding stderr for log().
-    // We do this the simple way: write to /dev/null equivalent on Windows.
-    // (We can't really silence the underlying modules' console output, but
-    // the CLI's own `log()` calls will be no-ops.)
-    process.stderr.write = () => {};
+
+  // Suppress logs if --json
+  if (opts.json) {
+    // Keep emit() working, but silence log()
+    const origLog = log;
+    log = () => {};
   }
 
   try {
     switch (cmd) {
-      case 'plan':
-        return await cmdPlan(args[0], opts);
-      case 'decompose':
-        return await cmdDecompose(args[0], opts);
       case 'swarm':
-        return await cmdSwarm(args[0], opts);
-      case 'consensus':
-        return await cmdConsensus(args, opts);
-      case 'preflight':
-        return await cmdPreflight();
+        return await cmdSwarm(args, opts);
+      case 'status':
+        return await cmdStatus(args, opts);
+      case 'list':
+        return await cmdList(args, opts);
+      case 'stop':
+        return await cmdStop(args, opts);
+      case 'poll':
+        return await cmdPoll(args, opts);
+      case 'vote':
+        return await cmdVote(args, opts);
+      case 'dashboard':
+        return await cmdDashboard(args, opts);
       default:
         process.stderr.write(`\n${c('red', '✖')} unknown command: ${cmd}\n`);
         process.stderr.write(`  run ${c('cyan', 'node cli.js --help')} for usage\n\n`);
-        emit({ event: 'error', where: 'main', kind: 'user', message: `unknown command: ${cmd}` });
-        return EXIT_USER_ERROR;
+        emit({ event: 'error', kind: 'user', message: `unknown command: ${cmd}` });
+        return 1;
     }
   } catch (err) {
-    const kind = isInfraError(err) ? 'infra' : 'user';
-    const code = kind === 'infra' ? EXIT_INFRA_ERROR : EXIT_USER_ERROR;
-    log(cmd, `unhandled error: ${err && err.message || err}`, 'error');
-    emit({ event: 'error', where: cmd, kind, message: err && err.message || String(err), stack: err && err.stack });
-    return code;
+    log('cli', `unhandled error: ${err && err.message || err}`, 'error');
+    emit({ event: 'error', kind: 'infra', message: err && err.message || String(err) });
+    return 2;
   }
 }
 
-/**
- * Best-effort classification of an error as "infrastructure" (mesh down,
- * timeout, DNS) vs "user" (bad input, etc).
- */
-function isInfraError(err) {
-  if (!err) return false;
-  const msg = String(err.message || err);
-  return /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|EAI_AGAIN|socket hang up|timeout|mesh|network/i.test(msg);
-}
+// ---------------------------------------------------------------------------
+// Bootstrap
+// ---------------------------------------------------------------------------
 
-// Only run main when this file is executed directly (not when required
-// as a library).  This lets tests and other tools import the subcommand
-// functions without side effects.
 if (require.main === module) {
   main().then((code) => {
-    process.exit(typeof code === 'number' ? code : EXIT_OK);
+    process.exit(typeof code === 'number' ? code : 0);
   }).catch((err) => {
-    // Last-ditch safety net.
-    process.stderr.write(`\n${'✖'} fatal: ${err && err.message || err}\n`);
-    process.exit(EXIT_INFRA_ERROR);
+    process.stderr.write(`\n${c('red', '✖')} fatal: ${err && err.message || err}\n`);
+    process.exit(2);
   });
 }
 
-// Export for library use.
-module.exports = {
-  main,
-  parseArgs,
-  preflight,
-  planGoal,
-  Planner,
-  buildSyntheticAgents,
-  httpGet,
-  printHelp,
-  printVersion,
-  __version,
-  EXIT_OK,
-  EXIT_USER_ERROR,
-  EXIT_INFRA_ERROR,
-};
+module.exports = { main, parseArgs };
