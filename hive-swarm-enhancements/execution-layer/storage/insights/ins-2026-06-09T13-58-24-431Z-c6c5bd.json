@@ -1,0 +1,120 @@
+{
+  "id": "ins-2026-06-09T13-58-24-431Z-c6c5bd",
+  "createdAt": "2026-06-09T13:58:24.432Z",
+  "traceDir": "C:\\Users\\franz\\Agent-Teams\\hive-swarm-enhancements\\build-logs\\swarm-runs",
+  "insightDir": "C:\\Users\\franz\\Agent-Teams\\hive-swarm-enhancements\\execution-layer\\storage\\insights",
+  "traceCount": 7,
+  "traceIds": [
+    "swarm-1780981307297-vk89no",
+    "swarm-1780981645108-8k6v61",
+    "swarm-1780988684941-l8v18l",
+    "swarm-1780995689940-zws6yy",
+    "swarm-1780999311390-rynokh",
+    "swarm-1781002925103-f74igh",
+    "swarm-1781010094355-1jrj3c"
+  ],
+  "stats": {
+    "totalTraces": 7,
+    "totalTasks": 7,
+    "completedTasks": 7,
+    "failedTasks": 0,
+    "successRate": 1,
+    "avgDurationMs": 87,
+    "p50DurationMs": 83,
+    "p90DurationMs": 124,
+    "errorFrequency": {},
+    "byAgent": {
+      "agent-1": {
+        "count": 6,
+        "successRate": 1,
+        "avgDurationMs": 80.66666666666667
+      },
+      "agent-2": {
+        "count": 1,
+        "successRate": 1,
+        "avgDurationMs": 124
+      }
+    },
+    "byRole": {
+      "planner": {
+        "count": 6,
+        "successRate": 1,
+        "avgDurationMs": 80.66666666666667
+      },
+      "researcher": {
+        "count": 1,
+        "successRate": 1,
+        "avgDurationMs": 124
+      }
+    }
+  },
+  "anomalyCount": 0,
+  "successPatterns": [
+    {
+      "attribute": "mode",
+      "value": "local",
+      "frequency": 7,
+      "successRate": 1
+    },
+    {
+      "attribute": "role",
+      "value": "planner",
+      "frequency": 6,
+      "successRate": 1
+    },
+    {
+      "attribute": "agentId",
+      "value": "agent-1",
+      "frequency": 6,
+      "successRate": 1
+    }
+  ],
+  "failurePatterns": [
+    {
+      "attribute": "mode",
+      "value": "local",
+      "frequency": 7,
+      "successRate": 0
+    },
+    {
+      "attribute": "role",
+      "value": "planner",
+      "frequency": 6,
+      "successRate": 0
+    },
+    {
+      "attribute": "agentId",
+      "value": "agent-1",
+      "frequency": 6,
+      "successRate": 0
+    }
+  ],
+  "insights": [
+    {
+      "type": "success_rate",
+      "severity": "low",
+      "text": "Aggregate success rate is 100.0% over 7 task(s) across 7 trace(s)."
+    }
+  ],
+  "patterns": [
+    {
+      "type": "role_dominance",
+      "role": "planner",
+      "frequency": 6,
+      "successRate": 1,
+      "text": "Role \"planner\" ran 6 times with 100% success."
+    },
+    {
+      "type": "agent_dominance",
+      "agent": "agent-1",
+      "frequency": 6,
+      "successRate": 1,
+      "text": "Agent \"agent-1\" ran 6 times with 100% success."
+    }
+  ],
+  "recommendations": [],
+  "source": "heuristic",
+  "llmAttempted": false,
+  "llmError": null,
+  "__version": "0.1.0"
+}

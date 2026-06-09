@@ -1,0 +1,29 @@
+{
+  "id": "evo-2026-06-09T13-58-32-825Z-c35714",
+  "skillName": "another-skill",
+  "createdAt": "2026-06-09T13:58:32.825Z",
+  "status": "pending",
+  "suggestion": {
+    "proposedChange": "Clarify the skill prompt to state its scope, inputs, and expected outputs more explicitly.",
+    "rationale": "No actionable recommendations were available in the supplied insight reports; defaulting to a low-risk clarification.",
+    "risk": "low"
+  },
+  "rationale": "No actionable recommendations were available in the supplied insight reports; defaulting to a low-risk clarification.",
+  "risk": "low",
+  "diff": null,
+  "proposedPrompt": null,
+  "evidence": {
+    "insightIds": [
+      "x"
+    ],
+    "insightSummaries": [
+      {
+        "id": "x",
+        "recommendationCount": 0
+      }
+    ]
+  },
+  "llmAttempted": true,
+  "llmError": "LLM HTTP 401: {\n    \"error\": {\n        \"message\": \"An LM Studio API token is required to make requests to this server, but none was provided using the Authorization header using the 'Bearer' scheme (i.e., 'Authorization: Bearer $LM_API_TOKEN'). Learn more at: https://lmstudio.ai/docs/developer/core/authentication.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"invalid_api_key\"\n    }\n}",
+  "__version": "0.1.0"
+}

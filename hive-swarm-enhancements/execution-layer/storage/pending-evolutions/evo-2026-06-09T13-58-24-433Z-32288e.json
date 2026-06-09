@@ -1,0 +1,36 @@
+{
+  "id": "evo-2026-06-09T13-58-24-433Z-32288e",
+  "skillName": "test-skill",
+  "createdAt": "2026-06-09T13:58:24.433Z",
+  "status": "applied",
+  "suggestion": {
+    "proposedChange": "Clarify the skill prompt to state its scope, inputs, and expected outputs more explicitly.",
+    "rationale": "No actionable recommendations were available in the supplied insight reports; defaulting to a low-risk clarification.",
+    "risk": "low"
+  },
+  "rationale": "No actionable recommendations were available in the supplied insight reports; defaulting to a low-risk clarification.",
+  "risk": "low",
+  "diff": null,
+  "proposedPrompt": null,
+  "evidence": {
+    "insightIds": [
+      "ins-2026-06-09T13-58-24-431Z-c6c5bd"
+    ],
+    "insightSummaries": [
+      {
+        "id": "ins-2026-06-09T13-58-24-431Z-c6c5bd",
+        "successRate": 1,
+        "recommendationCount": 0
+      }
+    ]
+  },
+  "llmAttempted": false,
+  "llmError": null,
+  "__version": "0.1.0",
+  "decision": "approved",
+  "decidedAt": "2026-06-09T13:58:24.434Z",
+  "approver": "human-reviewer",
+  "decisionNote": "looks good",
+  "appliedAt": "2026-06-09T13:58:24.434Z",
+  "appliedBy": "human-reviewer"
+}
