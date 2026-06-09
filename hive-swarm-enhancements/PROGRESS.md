@@ -73,6 +73,15 @@ hive-swarm-enhancements/
 - ✅ Pushed commit `4a8e23b` to main
 - WebUI delivered: server.js, README.md, package.json, public/index.html, css/main.css, js/dashboard.js
 
+### Tick 0.6 (manual, ~23:55 EST 2026-06-08) — Hermes skill wiring
+- Created `skills/hive-swarm/SKILL.md` (canonical Agent-Teams-side skill)
+- Created `skills/hive-swarm/hive-swarm.sh` (CLI wrapper: preflight, dashboard, swarm, consensus, status)
+- Created Hermes-side skill `duckets-stack/hive-swarm-agent-teams/SKILL.md` (so Hermes discovers + uses the swarm layer in our daily chats)
+- Installed `ws` npm dep (required by worker-dispatcher)
+- Smoke-tested decomposer end-to-end — heuristic fallback worked when LM Studio returned ECONNRESET (good safety net)
+- ✅ Pushed commit `d1f1897` to main
+- **Hermes can now find and use the swarm skill in our chats**
+
 ### Next tick priorities (Tick 1, midnight 00:00 EST)
 - [x] Create PROGRESS.md (this file)
 - [x] Build `core/goal-decomposer.js` — uses provider-adapter for LLM call
