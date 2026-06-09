@@ -1,0 +1,97 @@
+{
+  "ok": true,
+  "durationMs": 10030,
+  "goal": "build a Discord bot",
+  "plan": {
+    "approach": "swarm",
+    "reason": "goal looks like parallel work — running a swarm",
+    "params": {
+      "count": 2,
+      "domain": "auto",
+      "model": null,
+      "consensus": false
+    },
+    "estimatedAgents": 2,
+    "estimatedDuration": "~3 min",
+    "source": "heuristic"
+  },
+  "decomposition": {
+    "goal": "build a Discord bot",
+    "subtasks": [
+      {
+        "id": "t1",
+        "title": "Build a Discord bot",
+        "prompt": "Original goal: build a Discord bot\n\nYour specific task (planner):\nbuild a Discord bot\n\nDeliverable: a concrete result an integrator can combine with the other 1 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+        "role": "planner",
+        "depends_on": []
+      },
+      {
+        "id": "t2",
+        "title": "Researcher pass on the goal",
+        "prompt": "Original goal: build a Discord bot\n\nYour specific task (researcher):\nApply a focused researcher perspective to: build a Discord bot\n\nDeliverable: a concrete result an integrator can combine with the other 1 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+        "role": "researcher",
+        "depends_on": []
+      },
+      {
+        "id": "t3",
+        "title": "Integrate and verify the parallel work",
+        "prompt": "Original goal: build a Discord bot\n\nTake the outputs of the 2 parallel subtasks above and:\n  1. reconcile any overlaps or conflicts,\n  2. produce a single unified deliverable that satisfies the goal,\n  3. run a final QA / sanity check,\n  4. report back with the integrated result and a short summary.",
+        "role": "integrator",
+        "depends_on": [
+          "t1",
+          "t2"
+        ]
+      }
+    ],
+    "meta": {
+      "domain": "auto",
+      "count": 3,
+      "model": null,
+      "providerName": "lmstudio",
+      "fallback": true,
+      "error": "read ECONNRESET",
+      "createdAt": "2026-06-09T04:11:54.549Z",
+      "auditFile": "C:\\Users\\franz\\Agent-Teams\\hive-swarm-enhancements\\build-logs\\decompositions\\2026-06-09T04-11-54-554Z-0ef87b79.json",
+      "version": "1.0.0"
+    }
+  },
+  "aggregation": {
+    "winner": {
+      "agentId": null,
+      "content": "",
+      "score": 0,
+      "breakdown": {}
+    },
+    "synthesized": {
+      "content": "",
+      "keyPoints": [],
+      "sourcesUsed": [],
+      "method": "none",
+      "score": 0
+    },
+    "scores": [],
+    "meta": {
+      "method": "hybrid",
+      "model": "qwen3.6-35b-a3b",
+      "providerName": "lmstudio",
+      "criteria": [
+        "relevance",
+        "completeness",
+        "accuracy"
+      ],
+      "goal": "",
+      "fallback": true,
+      "error": "no outputs supplied",
+      "createdAt": "2026-06-09T04:12:04.561Z",
+      "auditFile": "C:\\Users\\franz\\Agent-Teams\\hive-swarm-enhancements\\build-logs\\aggregations\\2026-06-09T04-12-04-561Z-d590be48.json",
+      "version": "1.0.0",
+      "count": 0,
+      "winnerAgentId": null,
+      "winnerScore": 0
+    }
+  },
+  "consensus": null,
+  "offline": true,
+  "dispatchId": "dispatch-1780978314556-37z5v7",
+  "completedAt": "2026-06-09T04:12:04.562Z"
+}

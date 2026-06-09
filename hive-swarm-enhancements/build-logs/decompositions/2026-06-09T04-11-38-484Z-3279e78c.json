@@ -1,0 +1,56 @@
+{
+  "goal": "build a Discord bot",
+  "subtasks": [
+    {
+      "id": "t1",
+      "title": "Build a Discord bot",
+      "prompt": "Original goal: build a Discord bot\n\nYour specific task (planner):\nbuild a Discord bot\n\nDeliverable: a concrete result an integrator can combine with the other 3 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+      "role": "planner",
+      "depends_on": []
+    },
+    {
+      "id": "t2",
+      "title": "Researcher pass on the goal",
+      "prompt": "Original goal: build a Discord bot\n\nYour specific task (researcher):\nApply a focused researcher perspective to: build a Discord bot\n\nDeliverable: a concrete result an integrator can combine with the other 3 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+      "role": "researcher",
+      "depends_on": []
+    },
+    {
+      "id": "t3",
+      "title": "Implementer pass on the goal",
+      "prompt": "Original goal: build a Discord bot\n\nYour specific task (implementer):\nApply a focused implementer perspective to: build a Discord bot\n\nDeliverable: a concrete result an integrator can combine with the other 3 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+      "role": "implementer",
+      "depends_on": []
+    },
+    {
+      "id": "t4",
+      "title": "Reviewer pass on the goal",
+      "prompt": "Original goal: build a Discord bot\n\nYour specific task (reviewer):\nApply a focused reviewer perspective to: build a Discord bot\n\nDeliverable: a concrete result an integrator can combine with the other 3 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+      "role": "reviewer",
+      "depends_on": []
+    },
+    {
+      "id": "t5",
+      "title": "Integrate and verify the parallel work",
+      "prompt": "Original goal: build a Discord bot\n\nTake the outputs of the 4 parallel subtasks above and:\n  1. reconcile any overlaps or conflicts,\n  2. produce a single unified deliverable that satisfies the goal,\n  3. run a final QA / sanity check,\n  4. report back with the integrated result and a short summary.",
+      "role": "integrator",
+      "depends_on": [
+        "t1",
+        "t2",
+        "t3",
+        "t4"
+      ]
+    }
+  ],
+  "meta": {
+    "domain": "auto",
+    "count": 5,
+    "model": null,
+    "providerName": "lmstudio",
+    "fallback": true,
+    "error": "read ECONNRESET",
+    "createdAt": "2026-06-09T04:11:38.469Z",
+    "auditFile": null,
+    "version": "1.0.0"
+  }
+}

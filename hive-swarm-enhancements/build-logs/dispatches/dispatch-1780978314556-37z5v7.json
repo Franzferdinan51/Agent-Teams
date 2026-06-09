@@ -1,0 +1,65 @@
+{
+  "id": "dispatch-1780978314556-37z5v7",
+  "goal": "build a Discord bot",
+  "createdAt": 1780978314556,
+  "status": "pending",
+  "subtasks": [
+    {
+      "id": "t1",
+      "index": 0,
+      "title": "Build a Discord bot",
+      "description": null,
+      "room": "general",
+      "agentId": "agent-1",
+      "agentName": "planner-1",
+      "agentRole": "planner",
+      "state": "pending",
+      "progress": 0,
+      "startedAt": null,
+      "endedAt": null,
+      "result": null,
+      "error": null,
+      "timeoutMs": 300000
+    },
+    {
+      "id": "t2",
+      "index": 1,
+      "title": "Researcher pass on the goal",
+      "description": null,
+      "room": "general",
+      "agentId": "agent-1",
+      "agentName": "planner-1",
+      "agentRole": "planner",
+      "state": "pending",
+      "progress": 0,
+      "startedAt": null,
+      "endedAt": null,
+      "result": null,
+      "error": null,
+      "timeoutMs": 300000
+    },
+    {
+      "id": "t3",
+      "index": 2,
+      "title": "Integrate and verify the parallel work",
+      "description": null,
+      "room": "general",
+      "agentId": "agent-1",
+      "agentName": "planner-1",
+      "agentRole": "planner",
+      "state": "pending",
+      "progress": 0,
+      "startedAt": null,
+      "endedAt": null,
+      "result": null,
+      "error": null,
+      "timeoutMs": 300000
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "completed": 0,
+    "failed": 0,
+    "killed": 0
+  }
+}
