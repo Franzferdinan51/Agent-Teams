@@ -33,6 +33,26 @@ const MESH_KEY = process.env.MESH_KEY || 'openclaw-mesh-default-key';
 const MESH_WS = MESH_HTTP.replace(/^http/i, 'ws') + '/ws';
 const VERSION = '1.0.0';
 
+/**
+ * Check if the Agent Mesh HTTP API is reachable.
+ * Used to decide whether to attempt mesh dispatch or fall back to local mode.
+ * @returns {Promise<boolean>}
+ */
+async function isMeshAvailable() {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch(`${MESH_HTTP}/api/agents`, {
+      headers: { 'X-API-Key': MESH_KEY },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 const DEFAULT_SUBTASK_TIMEOUT_MS = 5 * 60 * 1000;   // 5 minutes
 const DEFAULT_RECONNECT_MS = 5 * 1000;              // 5 s backoff
 const DEFAULT_DISPATCH_DIR = path.join(

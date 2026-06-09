@@ -85,12 +85,31 @@ function settledResults(results) {
   ).filter(Boolean);
 }
 
+// Check if the Agent Mesh HTTP API is reachable (2s timeout)
+async function isMeshAvailable() {
+  const MESH_HTTP = process.env.MESH_URL || 'http://localhost:4000';
+  const MESH_KEY = process.env.MESH_KEY || 'openclaw-mesh-default-key';
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch(`${MESH_HTTP}/api/agents`, {
+      headers: { 'X-API-Key': MESH_KEY },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // runSwarm — the primary top-level entry point
 // ---------------------------------------------------------------------------
 
 /**
  * Run a complete swarm: decompose → dispatch → aggregate → save.
+ * Falls back to local-mode if the Agent Mesh is unreachable.
  *
  * @param {string} goal  The free-form goal string.
  * @param {object} [options]
@@ -123,26 +142,18 @@ async function runSwarm(goal, options = {}) {
   const decomposer = new GoalDecomposer();
   const decomposition = await decomposer.decompose(goal, { count, domain });
 
-  // 2. Build synthetic agents (same pattern as CLI)
-  const agents = buildSyntheticAgents(count, domain);
+  // 2. Check mesh availability before deciding dispatch path
+  const meshAvailable = await isMeshAvailable();
 
-  // 3. Dispatch
-  const dispatcher = new WorkerDispatcher({
-    dispatcherId: options.dispatcherId || `dispatcher-${swarmId}`,
-    subtaskTimeout: timeout,
-    persist: options.persist !== false,
-    autoConnect: true,
-  });
-
-  const { dispatchId, promises } = dispatcher.dispatch(
-    decomposition.subtasks,
-    agents,
-    { goal }
-  );
-
-  // 4. Wait for all results
-  const settled = await Promise.allSettled(promises);
-  const results = settledResults(settled);
+  let results;
+  if (meshAvailable) {
+    // Normal path: fan out over the Agent Mesh
+    results = await runMeshDispatch(decomposition, count, domain, timeout, swarmId, options);
+  } else {
+    // Fallback: run locally with synthetic results (good for demos/testing/offline)
+    console.warn(`[runSwarm] ⚠️  mesh unavailable — using local fallback mode`);
+    results = await runLocalFallback(decomposition, count, domain, timeout, swarmId);
+  }
 
   // 5. Aggregate
   const synthesis = await aggregate(decomposition, results);
@@ -163,9 +174,8 @@ async function runSwarm(goal, options = {}) {
     domain,
     count,
     timeout,
-    dispatchId,
+    mode: meshAvailable ? 'mesh' : 'local',
     subtasks: decomposition.subtasks,
-    agents: agents.map(a => ({ id: a.id, role: a.role, name: a.name })),
     results,
     synthesis,
     scores,
@@ -177,6 +187,65 @@ async function runSwarm(goal, options = {}) {
   record._savedPath = savedPath;
 
   return record;
+}
+
+/**
+ * Fan subtasks out over the Agent Mesh WebSocket via WorkerDispatcher.
+ * Returns once all subtasks resolve (or time out).
+ */
+async function runMeshDispatch(decomposition, count, domain, timeout, swarmId, options) {
+  const agents = buildSyntheticAgents(count, domain);
+  const dispatcher = new WorkerDispatcher({
+    dispatcherId: options.dispatcherId || `dispatcher-${swarmId}`,
+    subtaskTimeout: timeout,
+    persist: options.persist !== false,
+    autoConnect: true,
+  });
+
+  const { dispatchId, promises } = dispatcher.dispatch(
+    decomposition.subtasks,
+    agents,
+    { goal: decomposition.goal }
+  );
+
+  const settled = await Promise.allSettled(promises);
+  return settledResults(settled);
+}
+
+/**
+ * Local fallback: simulate worker responses with structured synthetic results.
+ * Used when the mesh is down. Produces realistic multi-worker output so the
+ * decompose → aggregate pipeline is fully exercised.
+ */
+async function runLocalFallback(decomposition, count, domain, timeout, swarmId) {
+  const subtasks = decomposition.subtasks || [];
+  const agents = buildSyntheticAgents(count, domain);
+
+  // Simulate a brief "processing" delay per subtask (50-150ms)
+  const delay = (ms) => new Promise(r => setTimeout(r, ms));
+
+  const results = await Promise.all(
+    subtasks.slice(0, count).map(async (subtask, i) => {
+      const agent = agents[i % agents.length];
+      await delay(50 + Math.floor(Math.random() * 100));
+
+      return {
+        dispatchId: `local-${swarmId}`,
+        subtaskId: subtask.id || subtask.title || `subtask-${i}`,
+        agentId: agent.id,
+        result: {
+          status: 'completed',
+          output: `[LOCAL FALLBACK] Processed: ${subtask.title || subtask.description || 'task'} by ${agent.name} (${agent.role})`,
+          agent: agent.name,
+          role: agent.role,
+          mode: 'local',
+          duration: 50 + Math.floor(Math.random() * 100),
+        }
+      };
+    })
+  );
+
+  return results;
 }
 
 /**
