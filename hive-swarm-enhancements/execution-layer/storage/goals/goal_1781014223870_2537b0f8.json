@@ -1,0 +1,20 @@
+{
+  "id": "goal_1781014223870_2537b0f8",
+  "title": "test",
+  "description": "smoke test",
+  "status": "pending",
+  "priority": "medium",
+  "createdAt": "2026-06-09T14:10:23.870Z",
+  "updatedAt": "2026-06-09T14:10:23.870Z",
+  "successCriteria": {
+    "deliverables": [
+      "Complete the requested goal"
+    ],
+    "qualityChecks": [
+      "Output meets requirements"
+    ]
+  },
+  "estimatedDuration": 120,
+  "tasks": [],
+  "meta": {}
+}
