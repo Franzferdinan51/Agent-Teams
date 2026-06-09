@@ -173,6 +173,9 @@ class GoalStore {
     /** @type {boolean} */
     this._loaded = false;
     ensureDir(this.root);
+    // Eagerly hydrate from disk so `listGoals` works on a fresh instance
+    // even before any local mutations have been made.
+    this.load();
   }
 
   // -------------------------------------------------------------------------
