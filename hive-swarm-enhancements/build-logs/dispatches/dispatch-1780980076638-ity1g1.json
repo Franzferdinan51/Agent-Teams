@@ -1,0 +1,65 @@
+{
+  "id": "dispatch-1780980076638-ity1g1",
+  "goal": "write a hello world",
+  "createdAt": 1780980076638,
+  "status": "pending",
+  "subtasks": [
+    {
+      "id": "t1",
+      "index": 0,
+      "title": "Write a hello world",
+      "description": null,
+      "room": "general",
+      "agentId": "agent-1",
+      "agentName": "planner-1",
+      "agentRole": "planner",
+      "state": "pending",
+      "progress": 0,
+      "startedAt": null,
+      "endedAt": null,
+      "result": null,
+      "error": null,
+      "timeoutMs": 300000
+    },
+    {
+      "id": "t2",
+      "index": 1,
+      "title": "Researcher pass on the goal",
+      "description": null,
+      "room": "general",
+      "agentId": "agent-1",
+      "agentName": "planner-1",
+      "agentRole": "planner",
+      "state": "pending",
+      "progress": 0,
+      "startedAt": null,
+      "endedAt": null,
+      "result": null,
+      "error": null,
+      "timeoutMs": 300000
+    },
+    {
+      "id": "t3",
+      "index": 2,
+      "title": "Integrate and verify the parallel work",
+      "description": null,
+      "room": "general",
+      "agentId": "agent-1",
+      "agentName": "planner-1",
+      "agentRole": "planner",
+      "state": "pending",
+      "progress": 0,
+      "startedAt": null,
+      "endedAt": null,
+      "result": null,
+      "error": null,
+      "timeoutMs": 300000
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "completed": 0,
+    "failed": 0,
+    "killed": 0
+  }
+}
