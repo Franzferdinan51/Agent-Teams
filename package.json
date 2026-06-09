@@ -25,9 +25,8 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "ws": "^8.16.0"
+    "ws": "^8.21.0"
   },
-  "peerDependencies": {},
   "keywords": [
     "multi-agent",
     "ai-council",
