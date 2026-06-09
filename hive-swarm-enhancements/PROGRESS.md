@@ -82,6 +82,32 @@ hive-swarm-enhancements/
 - ✅ Pushed commit `d1f1897` to main
 - **Hermes can now find and use the swarm skill in our chats**
 
+### Tick 0.7 (manual, ~00:10 EST 2026-06-09) — More core + new skills repo
+- Spawned 3 parallel sub-agents:
+  - A: Created `C:\Users\franz\duckets-hermes-skills\` repo (8 files, MIT, READMEs, skill mirror)
+  - B: Built `result-aggregator.js` (54KB) + `consensus-engine.js` (485 lines) ✅
+  - C: Built `planner.js` (513 lines) + `cli.js` (783 lines) + core/README.md ✅
+- Cron also shipped (in parallel during this tick):
+  - WebUI API routes: agents.js, consensus.js, logs.js, store.js, swarm.js
+  - WebSocket relay (ws/relay.js)
+  - Live test data in build-logs/
+- **END-TO-END CLI WORKS**: `node cli.js --help`, `preflight`, `plan "X"`, `swarm "X"`, `consensus` all run clean
+- All 13 .js files syntax-verified
+- 7 hermes-skills repo files created locally, ready to push (need GH auth — see below)
+
+### ⚠️ NEED FROM DUCKETS
+The new `duckets-hermes-skills` repo is ready locally but `gh` isn't authenticated. Duckets needs to run ONE of:
+```bash
+# Option A: gh CLI
+gh auth login
+gh repo create Franzferdinan51/Duckets-Hermes-Skills --public --source=. --push
+
+# Option B: token
+$env:GITHUB_TOKEN = "ghp_xxx..."
+curl -X POST -H "Authorization: token $env:GITHUB_TOKEN" -d '{"name":"Duckets-Hermes-Skills","private":false}' https://api.github.com/user/repos
+git -C C:\Users\franz\duckets-hermes-skills push -u origin main
+```
+
 ### Next tick priorities (Tick 1, midnight 00:00 EST)
 - [x] Create PROGRESS.md (this file)
 - [x] Build `core/goal-decomposer.js` — uses provider-adapter for LLM call
