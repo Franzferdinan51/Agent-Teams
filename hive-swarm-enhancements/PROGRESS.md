@@ -349,3 +349,20 @@ node cli.js swarm "write a hello world function" --count 2 --json
 
 ## 🚧 Blockers
 None. Execution-layer fully integrated.
+
+### Tick 1.2 (~15:00 EST 2026-06-09) — CodingHarness integration + docs
+- Duckets shared https://github.com/Franzferdinan51/Custom-Code-Harness — his mature TypeScript coding agent
+- Studied: 16+ subcommands (`ch`, `ch agent`, `ch goal`, `ch loop`, `ch serve`, `ch mcp`, `ch web`, `ch desktop`), MCP server on port 3456, HTTP+SSE on port 18800, Electron desktop, TUI on OpenTUI
+- **Added `codingharness-mcp` mode to `hermes-subagent-bridge.js`** (v1.0.0 → v1.1.0):
+  - Auto-detects `ch mcp` health endpoint
+  - Calls via JSON-RPC 2.0 over HTTP
+  - Falls back to Hermes CLI/HTTP/file if unavailable
+- **Updated root `README.md`:**
+  - Added 🐝 Hive Swarm + 🎯 Hermēskills to "What's Built-In" table
+  - Full file tree with new directories
+  - Quick-start examples (`node cli.js goal "X"`)
+  - CodingHarness integration section
+- **Created `hive-swarm-enhancements/README.md`** — top-level README for the swarm layer
+- **Updated `CHANGELOG.md`** — new `[Unreleased]` section documenting everything shipped today
+- **Updated overnight cron prompt** — tells future sub-agents to USE CodingHarness for code-heavy work
+- Pushed to main: `e07cf00` ✅
