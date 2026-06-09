@@ -367,16 +367,14 @@ function normalizeSubtasks(raw) {
     }
     seenIds.add(unique);
 
-    // depends_on: array of strings, referencing earlier ids only.
+    // depends_on: array of strings. We accept any well-formed id here
+    // and prune to the final id set in the post-pass below (which also
+    // guarantees no forward references to not-yet-existing ids).
     let deps = [];
     if (Array.isArray(item.depends_on)) {
       deps = item.depends_on
         .map(d => String(d || '').trim())
-        .filter(d => /^[a-zA-Z0-9_-]{1,32}$/.test(d) && seenIds.has(d) === false)
-        // After we've added this id, "earlier" means: already in seenIds OR
-        // refers to an id we'll definitely create. We only allow references
-        // to ids we've already finalized, so filter post-hoc below.
-        ;
+        .filter(d => /^[a-zA-Z0-9_-]{1,32}$/.test(d));
     }
     // Re-filter depends_on: only keep ids that exist in the final set OR
     // are likely siblings. We resolve in a second pass for safety.
@@ -476,44 +474,61 @@ function parseDecompositionResponse(text) {
  */
 function heuristicDecompose(goal, options) {
   const domain = DOMAIN_HINTS[options.domain] || DOMAIN_HINTS.auto;
-  const target = Math.max(
-    MIN_SUBTASKS,
-    Math.min(MAX_SUBTASKS, options.count || 5)
+  // Reserve one slot for the final integration subtask.
+  const workerSlots = Math.max(
+    1,
+    Math.min(MAX_SUBTASKS - 1, (options.count || MIN_SUBTASKS) - 1)
   );
   const safeGoal = (goal || '').trim() || 'Achieve the stated objective.';
 
   // Split into natural chunks: sentences, then "and", then comma, then
-  // a single chunk. Take the first `target-1` so we can append a
-  // synthesis task at the end.
+  // a single chunk. We may end up with fewer chunks than workerSlots
+  // (e.g. for a one-sentence goal) — in that case we synthesize
+  // additional role-based subtasks below.
   const sentences = safeGoal
     .split(/(?<=[.!?])\s+|\s+\band\b\s+|\s*,\s*/i)
     .map(s => s.trim())
     .filter(Boolean);
 
-  const chunks = sentences.length > 1
-    ? sentences.slice(0, target - 1)
-    : [safeGoal];
+  const baseChunks = sentences.length > 0 ? sentences : [safeGoal];
 
+  // Build the working subtasks. We *always* produce exactly
+  // `workerSlots` of them, padding by reusing the last chunk under
+  // different roles when the natural split is too thin.
   const roles = domain.roles.length ? domain.roles : FALLBACK_ROLES;
 
-  const subtasks = chunks.map((chunk, idx) => {
-    const role = roles[idx % roles.length] || FALLBACK_ROLES[idx % FALLBACK_ROLES.length];
-    return {
-      id: `t${idx + 1}`,
-      title: capitalizeTitle(chunk.split(/\s+/).slice(0, 7).join(' ')) || `Subtask ${idx + 1}`,
+  /** @type {Array<object>} */
+  const subtasks = [];
+  for (let i = 0; i < workerSlots; i++) {
+    const chunk = baseChunks[i] || baseChunks[baseChunks.length - 1];
+    const role = roles[i % roles.length] ||
+      FALLBACK_ROLES[i % FALLBACK_ROLES.length];
+    const isPadded = i >= baseChunks.length;
+    const titleSeed = chunk.split(/\s+/).slice(0, 7).join(' ').trim();
+    const title = isPadded
+      ? `${capitalizeTitle(role)} pass on the goal`
+      : (capitalizeTitle(titleSeed) || `Subtask ${i + 1}`);
+
+    subtasks.push({
+      id: `t${i + 1}`,
+      title,
       prompt: [
         `Original goal: ${safeGoal}`,
         '',
         `Your specific task (${role}):`,
-        chunk,
+        isPadded
+          ? `Apply a focused ${role} perspective to: ${chunk}`
+          : chunk,
         '',
-        `Deliverable: a concrete result an integrator can combine with the other ${chunks.length - 1} parallel subtask(s).`,
-        `Work in parallel — do not depend on outputs of other subtasks unless absolutely required.`,
+        `Deliverable: a concrete result an integrator can combine ` +
+        `with the other ${workerSlots - 1} parallel subtask(s).`,
+        `Work in parallel — do not depend on outputs of other ` +
+        `subtasks unless absolutely required.`,
       ].join('\n'),
       role,
       depends_on: [],
-    };
-  });
+    });
+  }
 
   // Final synthesis subtask.
   subtasks.push({
@@ -522,7 +537,8 @@ function heuristicDecompose(goal, options) {
     prompt: [
       `Original goal: ${safeGoal}`,
       '',
-      `Take the outputs of the ${subtasks.length} parallel subtasks above and:`,
+      `Take the outputs of the ${subtasks.length} parallel subtasks ` +
+      `above and:`,
       '  1. reconcile any overlaps or conflicts,',
       '  2. produce a single unified deliverable that satisfies the goal,',
       '  3. run a final QA / sanity check,',

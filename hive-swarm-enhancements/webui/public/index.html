@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐝 Hive Swarm Dashboard</title>
+  <meta name="description" content="Multi-agent master dashboard for the Hive Swarm" />
+  <meta name="theme-color" content="#0a0e14" />
+
+  <!--
+    No build step. Pure HTML/CSS/JS. Order matters: defer means they execute
+    in document order, so dependencies are wired in script load order.
+  -->
+  <link rel="stylesheet" href="/css/main.css" />
+
+  <!-- App shell, then feature controllers. Add new feature scripts here. -->
+  <script defer src="/js/dashboard.js"></script>
+  <!-- Future slots (added by sibling sub-agents / later ticks):
+       <script defer src="/js/swarm-controller.js"></script>
+       <script defer src="/js/agent-cards.js"></script>
+       <script defer src="/js/consensus-panel.js"></script>
+       <script defer src="/js/logs-stream.js"></script>
+       <script defer src="/js/settings.js"></script>
+  -->
+</head>
+<body>
+  <!-- =================================================================
+       HEADER — fixed top bar
+       ================================================================= -->
+  <header class="app-header" role="banner">
+    <div class="app-header__left">
+      <h1 class="app-header__title">
+        <span class="app-header__emoji" aria-hidden="true">🐝</span>
+        Hive Swarm Dashboard
+      </h1>
+      <span class="app-header__subtitle" id="header-subtitle">
+        multi-agent control plane
+      </span>
+    </div>
+    <div class="app-header__right">
+      <div class="connection-status" id="connection-status" title="WebSocket connection to the dashboard server">
+        <span class="status-dot status-dot--unknown" id="status-dot"></span>
+        <span class="connection-status__label" id="status-label">connecting…</span>
+      </div>
+      <div class="mesh-status" id="mesh-status" title="Upstream Agent Mesh connection" hidden>
+        <span class="status-dot status-dot--unknown" id="mesh-status-dot"></span>
+        <span class="mesh-status__label">mesh: ?</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- =================================================================
+       TABS
+       ================================================================= -->
+  <nav class="tab-bar" role="tablist" aria-label="Dashboard sections">
+    <button class="tab" role="tab" id="tab-swarms" aria-selected="true"
+            aria-controls="panel-swarms" data-tab="swarms">
+      <span class="tab__icon" aria-hidden="true">🧬</span>
+      <span class="tab__label">Swarms</span>
+    </button>
+    <button class="tab" role="tab" id="tab-agents" aria-selected="false"
+            aria-controls="panel-agents" data-tab="agents">
+      <span class="tab__icon" aria-hidden="true">🤖</span>
+      <span class="tab__label">Agents</span>
+    </button>
+    <button class="tab" role="tab" id="tab-consensus" aria-selected="false"
+            aria-controls="panel-consensus" data-tab="consensus">
+      <span class="tab__icon" aria-hidden="true">🗳️</span>
+      <span class="tab__label">Consensus</span>
+    </button>
+    <button class="tab" role="tab" id="tab-logs" aria-selected="false"
+            aria-controls="panel-logs" data-tab="logs">
+      <span class="tab__icon" aria-hidden="true">📜</span>
+      <span class="tab__label">Logs</span>
+    </button>
+    <button class="tab" role="tab" id="tab-settings" aria-selected="false"
+            aria-controls="panel-settings" data-tab="settings">
+      <span class="tab__icon" aria-hidden="true">⚙️</span>
+      <span class="tab__label">Settings</span>
+    </button>
+  </nav>
+
+  <!-- =================================================================
+       MAIN BODY — tab panels (shells — JS will populate)
+       ================================================================= -->
+  <main class="app-body" role="main">
+
+    <!-- SWARMS PANEL -->
+    <section class="tab-panel" id="panel-swarms" role="tabpanel"
+             aria-labelledby="tab-swarms" data-panel="swarms">
+      <div class="panel-header">
+        <h2>Active Swarms</h2>
+        <div class="panel-actions">
+          <button class="btn btn--primary" id="btn-new-swarm" type="button">
+            <span aria-hidden="true">+</span> New Swarm
+          </button>
+          <button class="btn" id="btn-refresh-swarms" type="button"
+                  title="Reload swarms from server">
+            ⟳ Refresh
+          </button>
+        </div>
+      </div>
+      <div class="panel-body" id="swarms-list" data-empty="true">
+        <p class="empty-state" id="swarms-empty">
+          No active swarms. Click <strong>+ New Swarm</strong> to start one.
+        </p>
+      </div>
+    </section>
+
+    <!-- AGENTS PANEL -->
+    <section class="tab-panel" id="panel-agents" role="tabpanel"
+             aria-labelledby="tab-agents" data-panel="agents" hidden>
+      <div class="panel-header">
+        <h2>Agents</h2>
+        <div class="panel-actions">
+          <button class="btn" id="btn-refresh-agents" type="button"
+                  title="Reload agent list from mesh">
+            ⟳ Refresh
+          </button>
+        </div>
+      </div>
+      <div class="panel-body" id="agents-grid" data-empty="true">
+        <p class="empty-state" id="agents-empty">
+          Loading agent roster from mesh…
+        </p>
+      </div>
+    </section>
+
+    <!-- CONSENSUS PANEL -->
+    <section class="tab-panel" id="panel-consensus" role="tabpanel"
+             aria-labelledby="tab-consensus" data-panel="consensus" hidden>
+      <div class="panel-header">
+        <h2>Consensus Polls</h2>
+        <div class="panel-actions">
+          <button class="btn btn--primary" id="btn-new-poll" type="button">
+            <span aria-hidden="true">+</span> New Poll
+          </button>
+        </div>
+      </div>
+      <div class="panel-body" id="polls-list" data-empty="true">
+        <p class="empty-state" id="polls-empty">
+          No active polls. Use <strong>+ New Poll</strong> to ask the swarm a question.
+        </p>
+      </div>
+    </section>
+
+    <!-- LOGS PANEL -->
+    <section class="tab-panel" id="panel-logs" role="tabpanel"
+             aria-labelledby="tab-logs" data-panel="logs" hidden>
+      <div class="panel-header">
+        <h2>Logs</h2>
+        <div class="panel-actions">
+          <select id="logs-filter" class="select" aria-label="Filter logs by swarm">
+            <option value="">all swarms</option>
+          </select>
+          <button class="btn" id="btn-clear-logs" type="button">Clear view</button>
+        </div>
+      </div>
+      <div class="panel-body panel-body--scroll" id="logs-view" data-empty="true">
+        <p class="empty-state" id="logs-empty">
+          No log lines yet. Tail will fill as events stream in.
+        </p>
+      </div>
+    </section>
+
+    <!-- SETTINGS PANEL -->
+    <section class="tab-panel" id="panel-settings" role="tabpanel"
+             aria-labelledby="tab-settings" data-panel="settings" hidden>
+      <div class="panel-header">
+        <h2>Settings</h2>
+      </div>
+      <div class="panel-body" id="settings-body">
+        <div class="card">
+          <h3 class="card__title">Connection</h3>
+          <dl class="kv">
+            <dt>Dashboard URL</dt><dd id="settings-dashboard-url">—</dd>
+            <dt>Mesh URL</dt><dd id="settings-mesh-url">—</dd>
+            <dt>WebSocket</dt><dd id="settings-ws-url">—</dd>
+            <dt>Uptime</dt><dd id="settings-uptime">—</dd>
+          </dl>
+          <button class="btn" id="btn-health-check" type="button">Run health check</button>
+        </div>
+        <div class="card">
+          <h3 class="card__title">Display</h3>
+          <label class="form-row">
+            <input type="checkbox" id="settings-compact" />
+            <span>Compact mode (denser cards)</span>
+          </label>
+          <label class="form-row">
+            <input type="checkbox" id="settings-animations" checked />
+            <span>Enable animations</span>
+          </label>
+        </div>
+        <div class="card">
+          <h3 class="card__title">About</h3>
+          <p class="muted">
+            Hive Swarm Dashboard v0.1.0 — multi-agent control plane for the
+            Agent-Teams mesh. See <code>webui/README.md</code> for details.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =================================================================
+       BOTTOM — fixed Hermes chat input
+       ================================================================= -->
+  <footer class="chat-bar" role="contentinfo">
+    <form class="chat-bar__form" id="chat-form" autocomplete="off">
+      <textarea
+        id="chat-input"
+        class="chat-bar__input"
+        rows="1"
+        placeholder="Send a command to Hermes…  (Enter to send, Shift+Enter for newline)"
+        aria-label="Hermes command input"
+        maxlength="8000"></textarea>
+      <button class="btn btn--primary chat-bar__send" id="chat-send" type="submit">
+        Send ↵
+      </button>
+    </form>
+    <div class="chat-bar__hint" id="chat-hint">
+      Hermes will relay your message to the Agent Mesh.
+    </div>
+  </footer>
+
+  <!-- =================================================================
+       TOAST CONTAINER
+       ================================================================= -->
+  <div class="toast-container" id="toast-container" aria-live="polite"
+       aria-atomic="false"></div>
+
+  <!-- =================================================================
+       TEMPLATES (cloned by JS, never rendered directly)
+       ================================================================= -->
+  <template id="tpl-swarm-card">
+    <article class="card card--swarm" data-swarm-id="">
+      <header class="card__header">
+        <h3 class="card__title swarm-card__title">
+          <span class="swarm-card__emoji">🐝</span>
+          <span class="swarm-card__id"></span>
+        </h3>
+        <span class="badge swarm-card__status"></span>
+      </header>
+      <p class="swarm-card__goal"></p>
+      <dl class="kv kv--inline">
+        <dt>workers</dt><dd class="swarm-card__workers">0</dd>
+        <dt>subtasks</dt><dd class="swarm-card__subtasks">0</dd>
+        <dt>updated</dt><dd class="swarm-card__updated">—</dd>
+      </dl>
+      <details class="swarm-card__details">
+        <summary>details</summary>
+        <pre class="swarm-card__json"></pre>
+      </details>
+      <footer class="card__footer">
+        <button class="btn btn--danger btn--small swarm-card__kill" type="button">
+          Kill
+        </button>
+      </footer>
+    </article>
+  </template>
+
+  <template id="tpl-agent-card">
+    <article class="card card--agent" data-agent-id="">
+      <header class="card__header">
+        <h3 class="card__title agent-card__name"></h3>
+        <span class="badge agent-card__status">
+          <span class="status-dot"></span>
+          <span class="agent-card__status-label">unknown</span>
+        </span>
+      </header>
+      <dl class="kv kv--inline">
+        <dt>role</dt><dd class="agent-card__role">—</dd>
+        <dt>model</dt><dd class="agent-card__model">—</dd>
+        <dt>task</dt><dd class="agent-card__task">—</dd>
+      </dl>
+    </article>
+  </template>
+
+  <template id="tpl-poll-card">
+    <article class="card card--poll" data-poll-id="">
+      <header class="card__header">
+        <h3 class="card__title poll-card__question"></h3>
+        <span class="badge poll-card__status">open</span>
+      </header>
+      <ul class="poll-card__choices"></ul>
+    </article>
+  </template>
+
+  <template id="tpl-log-line">
+    <div class="log-line" data-level="info">
+      <span class="log-line__time"></span>
+      <span class="log-line__level"></span>
+      <span class="log-line__source"></span>
+      <span class="log-line__message"></span>
+    </div>
+  </template>
+
+  <template id="tpl-toast">
+    <div class="toast" role="status">
+      <span class="toast__icon" aria-hidden="true"></span>
+      <span class="toast__message"></span>
+      <button class="toast__close" type="button" aria-label="Dismiss">×</button>
+    </div>
+  </template>
+
+</body>
+</html>
