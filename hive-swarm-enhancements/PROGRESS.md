@@ -144,6 +144,35 @@ hive-swarm-enhancements/
 
 ### ⚠️ NEED FROM DUCKETS
 ~~The new `duckets-hermes-skills` repo is ready locally but `gh` isn't authenticated.~~ RESOLVED — Duckets said "just push it" and the skill is now in Agent-Teams `hermes-skills/`. The orphan `Franzferdinan51/Duckets-Hermes-Skills` repo exists but is empty — Duckets can delete it on GitHub.
+
+### Tick 1.1 (manual, ~14:30 EST 2026-06-09) — GLUE + E2E + Roles
+- Duckets said "do whatever you need to get the job done" + "use crons while I'm away"
+- Spawned 3 parallel sub-agents (all M2.7):
+  - **GLUE-1**: Built `execution-layer/glue.js` (~770 lines) + top-level `cli.js` (~750 lines) — wires execution layer to core swarm
+  - **E2E-1**: Built `tests/e2e/loop.test.js` (511 lines) — full pipeline test, **9/9 pass in 83ms**
+  - **ROLES-1**: Added `role_taxonomy` + `role_tier` to agent-registry.json (218 agents tagged) + `execution-layer/role-helper.js` (268 lines)
+- Created new cron: `Weekly Evolution Review` — Sunday 6 AM, sends Telegram digest
+- Updated `Hive Swarm Overnight Builder` cron with full 9-mission priority list
+- Pushed 3 new commits to main: `000c926` (E2E), `3c4ba43` (roles), `a1ce22f` (merge)
+
+### E2E test result (verified)
+```
+✔ 1+2. GoalProcessor + GoalStore create and persist the goal
+✔ 3. AgentTaskMatcher ranks stub agents for each task
+✔ 4+5. Simulate execution and persist swarm-run traces
+✔ 6. TraceAnalyzer produces stats, anomalies, and patterns
+✔ 7. InsightEngine writes an insight report to disk
+✔ 8. SkillEvolver.suggestEvolution() writes a pending record
+✔ 9. GoalEvaluator.evaluate() scores and persists the result
+✔ 10. All artifacts on disk are present and valid JSON
+duration_ms 83.4363
+```
+
+### Role taxonomy result (verified)
+- 0 executives (no CEO/CTO/CFO in registry)
+- 39 directors (with Director/Lead/Manager/Producer tokens)
+- 179 specialists
+- Bug caught + fixed: naive substring match classified "director" as executive because "cto" is a substring. Switched to tokenized matching.
 ```
 
 ### Next tick priorities (Tick 1, midnight 00:00 EST)
