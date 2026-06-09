@@ -1,0 +1,48 @@
+{
+  "goal": "build a Discord bot with slash commands",
+  "subtasks": [
+    {
+      "id": "t1",
+      "title": "Build a Discord bot with slash commands",
+      "prompt": "Original goal: build a Discord bot with slash commands\n\nYour specific task (front-end):\nbuild a Discord bot with slash commands\n\nDeliverable: a concrete result an integrator can combine with the other 2 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+      "role": "front-end",
+      "depends_on": []
+    },
+    {
+      "id": "t2",
+      "title": "Back-end pass on the goal",
+      "prompt": "Original goal: build a Discord bot with slash commands\n\nYour specific task (back-end):\nApply a focused back-end perspective to: build a Discord bot with slash commands\n\nDeliverable: a concrete result an integrator can combine with the other 2 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+      "role": "back-end",
+      "depends_on": []
+    },
+    {
+      "id": "t3",
+      "title": "Database pass on the goal",
+      "prompt": "Original goal: build a Discord bot with slash commands\n\nYour specific task (database):\nApply a focused database perspective to: build a Discord bot with slash commands\n\nDeliverable: a concrete result an integrator can combine with the other 2 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+      "role": "database",
+      "depends_on": []
+    },
+    {
+      "id": "t4",
+      "title": "Integrate and verify the parallel work",
+      "prompt": "Original goal: build a Discord bot with slash commands\n\nTake the outputs of the 3 parallel subtasks above and:\n  1. reconcile any overlaps or conflicts,\n  2. produce a single unified deliverable that satisfies the goal,\n  3. run a final QA / sanity check,\n  4. report back with the integrated result and a short summary.",
+      "role": "integrator",
+      "depends_on": [
+        "t1",
+        "t2",
+        "t3"
+      ]
+    }
+  ],
+  "meta": {
+    "domain": "build",
+    "count": 4,
+    "model": null,
+    "providerName": "lmstudio",
+    "fallback": true,
+    "error": "read ECONNRESET",
+    "createdAt": "2026-06-09T03:51:42.765Z",
+    "auditFile": null,
+    "version": "1.0.0"
+  }
+}
