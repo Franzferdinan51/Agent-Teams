@@ -630,23 +630,52 @@ class RelayManager {
 // ------------------------------------------------------------------
 
   /**
-   * Attempt to connect to Hermes bridge.
-   * Currently a stub — logs that hermes bridge is disabled/unavailable.
-   * @returns {boolean} true if Hermes is available
-   */
-  connectHermes() {
-    if (!this._opts.hermesBridgeEnabled) {
-      log('INFO', 'Hermes bridge disabled (HERMES_BRIDGE env not set to true)');
+     * Attempt to connect to Hermes bridge.
+     *
+     * Hermes runs as a Python gateway subprocess accessed via Unix socket
+     * (path set in HERMES_SOCKET env var). There is no raw HTTP port.
+     *
+     * This method checks bridge readiness and logs informative status.
+     * Real socket communication would be implemented here when the
+     * Hermes gateway protocol is defined.
+     *
+     * @returns {boolean} true if Hermes socket is detected and bridge is live
+     */
+    connectHermes() {
+      const { hermesBridgeEnabled, hermesSocket } = this._opts;
+
+      if (!hermesBridgeEnabled) {
+        log('INFO', '[HermesBridge] Disabled — set HERMES_BRIDGE=true to enable');
+        return false;
+      }
+
+      if (!hermesSocket) {
+        log('WARN', '[HermesBridge] Enabled but HERMES_SOCKET is not set — bridge unavailable');
+        log('INFO', '[HermesBridge] Expected path format: /path/to/hermes.sock (Unix domain socket)');
+        return false;
+      }
+
+      // Informative: log what we would connect to
+      log('INFO', `[HermesBridge] Hermes gateway subprocess socket: ${hermesSocket}`);
+
+      // Check if socket file exists (informative only — real impl would connect)
+      try {
+        const fs = require('fs');
+        fs.accessSync(hermesSocket, fs.constants.R_OK);
+        log('INFO', `[HermesBridge] Socket file found — bridge would be live`);
+      } catch {
+        log('WARN', `[HermesBridge] Socket file not found at ${hermesSocket} — is Hermes gateway running?`);
+      }
+
+      // TODO: implement Unix socket communication with Hermes gateway protocol
+      // Expected flow:
+      //   1. Connect to hermesSocket via net.Socket
+      //   2. Send handshake JSON (e.g. { type: 'relay_bridge', token: HERMES_TOKEN })
+      //   3. Read responses from Hermes and broadcast to browser clients
+      //   4. Forward browser messages to Hermes via the socket
+      log('INFO', '[HermesBridge] Bridge stub — Unix socket transport not yet wired to relay');
       return false;
     }
-    if (!this._opts.hermesSocket) {
-      log('INFO', 'Hermes bridge enabled but HERMES_SOCKET not set — bridge unavailable');
-      return false;
-    }
-    // TODO: wire up to real hermes unix socket
-    log('INFO', `Hermes bridge stub — would connect to ${this._opts.hermesSocket}`);
-    return false;
-  }
 
   // ------------------------------------------------------------------
   // Shutdown
