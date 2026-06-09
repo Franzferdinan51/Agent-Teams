@@ -113,6 +113,8 @@ npm run start:webui
 | **Senate (94)** | Binding decrees from Council recommendations | - |
 | **Agent Teams** | Spawn specialized agents for tasks | - |
 | **Hive Mesh** | P2P agent communication | 4000 |
+| **🐝 Hive Swarm** | Multi-agent swarm + execution layer (see `hive-swarm-enhancements/`) | 8787 |
+| **🎯 Hermēskills** | Dual-compliant skills for OpenClaw + Hermes Agent (see `hermes-skills/`) | - |
 
 ---
 
@@ -217,8 +219,47 @@ Agent-Teams/
 ├── scripts/             # 80+ Hive scripts
 ├── agents/              # Agent definitions
 ├── skills/              # Agent skills
-└── docs/                # Documentation
+├── hermes-skills/       # Dual-compliant skills (OpenClaw + Hermes Agent)
+│   ├── README.md
+│   ├── SKILLS-INDEX.md
+│   ├── scripts/         # verify-compliance.sh, sync-to-local.sh
+│   └── skills/
+│       └── hive-swarm-agent-teams/   # the canonical dual-compliant skill
+├── hive-swarm-enhancements/  # 🐝 native multi-agent swarm layer
+│   ├── core/            # decomposer, dispatcher, aggregator, consensus, planner, CLI
+│   ├── execution-layer/ # ported from agnt.gg: goals → DAG → subagents → traces → insights → evolution
+│   │   ├── goal-system/         # goal-processor, goal-store, goal-evaluator
+│   │   ├── subagent-orchestrator/  # task-orchestrator, agent-task-matcher, subagent-runner
+│   │   ├── evolution/           # trace-analyzer, insight-engine, skill-evolver (advisor mode)
+│   │   ├── integration/         # hermes-subagent-bridge, tool-forge
+│   │   └── glue.js              # pipeline runner that wires core + execution-layer
+│   ├── webui/           # master dashboard (port 8787)
+│   ├── cli.js           # top-level CLI: goal, swarm, goal-list, goal-get, etc.
+│   ├── tests/e2e/       # 9/9 pass in 83ms
+│   ├── PROGRESS.md      # overnight build log
+│   └── build-logs/      # audit trail
+├── agent-swarm-system/  # 218 agents tagged with role_tier (executive/director/specialist)
+├── docs/                # Documentation
+└── ...
 ```
+
+### 🐝 Hive Swarm Quick Start
+
+```bash
+cd /c/Users/franz/Agent-Teams
+node hive-swarm-enhancements/cli.js goal "build a Discord bot" --count 5   # full pipeline
+node hive-swarm-enhancements/cli.js swarm "research LLM tools"               # quick swarm
+node hive-swarm-enhancements/cli.js goal-list                                # see all goals
+node --test hive-swarm-enhancements/tests/e2e/loop.test.js                  # 9/9 tests
+```
+
+### 🎯 CodingHarness Integration
+
+The swarm layer can delegate heavy work to **CodingHarness** (https://github.com/Franzferdinan51/Custom-Code-Harness) via:
+- `ch mcp` — MCP server on port 3456 (use the `hermes-subagent-bridge.js` → `ch mcp` URL)
+- `ch goal` — multi-step planning (use when our `goal-system/` needs planning)
+- `ch loop` — re-send prompts with sentinels
+- `ch serve` — HTTP+SSE API on port 18800 (drives web UI)
 
 ---
 

@@ -534,3 +534,44 @@ Bill Introduced → Senate Vote → House Vote → President → Law
 
 [Unreleased]: https://github.com/Franzferdinan51/Agent-Teams/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/Franzferdinan51/Agent-Teams/releases/tag/v1.0.0
+
+## [Unreleased] - 2026-06-09 - Hive Swarm + Execution Layer
+
+### Added — `hive-swarm-enhancements/`
+- **Core layer** (`core/`): goal-decomposer, worker-dispatcher, result-aggregator, consensus-engine, planner, CLI
+- **Execution layer** (`execution-layer/`): ported from agnt.gg
+  - `goal-system/`: GoalProcessor, GoalStore, GoalEvaluator
+  - `subagent-orchestrator/`: TaskOrchestrator (DAG), AgentTaskMatcher (4-signal scoring), SubagentRunner
+  - `evolution/`: TraceAnalyzer, InsightEngine, SkillEvolver (advisor mode only)
+  - `integration/`: hermes-subagent-bridge (4 modes: CodingHarness MCP / Hermes CLI / HTTP / file), tool-forge
+  - `glue.js`: pipeline runner wiring core + execution-layer
+- **WebUI master dashboard** (`webui/`, port 8787): Express + WS + dark-theme SPA
+- **Top-level CLI** (`cli.js`): `goal / swarm / goal-list / goal-get / goal-eval / goal-insights / preflight`
+- **E2E test** (`tests/e2e/loop.test.js`): 9/9 pass in 83ms
+
+### Added — `hermes-skills/`
+- **Dual-compliant skills** (work in both OpenClaw and Hermes Agent loaders)
+- `skills/hive-swarm-agent-teams/`: the canonical multi-agent swarm skill
+- `scripts/verify-compliance.sh`: automated dual-compliance checker
+- `scripts/sync-to-local.sh`: one-liner to deploy to `~/.hermes/skills/duckets-stack/`
+
+### Added — `agent-swarm-system/`
+- `role_taxonomy` block: executive / director / specialist tiers
+- `role_tier` field tagged on all 218 agents
+- `execution-layer/role-helper.js`: `getTier / getAgentsByTier / recommendAgentsForTask`
+
+### Added — Cron
+- `Hive Swarm Overnight Builder` (hourly 00:00-10:00 EST, M2.7)
+- `Weekly Evolution Review` (Sun 6 AM, sends Telegram digest of last 7 days)
+
+### Added — CodingHarness Integration
+- `hermes-subagent-bridge.js` supports `codingharness-mcp` mode (auto-detected)
+- Delegates to `ch mcp` (port 3456, JSON-RPC 2.0, 13 tools) for code-heavy sub-tasks
+- Falls back to Hermes CLI / HTTP / file mode if unavailable
+
+### Adapted from agnt.gg (not forked)
+- ✅ Storage: JSON files instead of SQLite
+- ✅ Evolution: ADVISOR MODE (suggestions only, human must approve) — agnt's auto-mutates skills, too risky
+- ✅ Hermes bridge: native Node, no Python venv
+- ✅ Provider layer: reused `providers/provider-adapter.js`
+- ❌ Left behind: Electron, Puppeteer, 15+ providers, Vue.js, SQLite

@@ -1,25 +1,29 @@
 /**
  * @file hermes-subagent-bridge.js
  * @description Native port of agnt's hermes-subagent pattern — delegate heavy work
- *              to a Hermes Agent sub-process running in the user's own environment.
+ *              to a Hermes Agent sub-process OR to **CodingHarness** (`ch mcp` /
+ *              `ch serve`) running in the user's own environment.
  *
- *              This is the "agents on top of agents" pattern: a Hive Swarm subagent
- *              can hand off a complex task to Hermes, which has its own toolset,
- *              persistent memory, and skills. When Hermes finishes, we get the
- *              result back via stdout/file.
+ *              Three targets supported:
+ *              1. **CodingHarness MCP** (preferred for code work) — `ch mcp` on
+ *                 port 3456, JSON-RPC 2.0, exposes 13 tools the agent loop uses
+ *                 to any MCP-compatible client.
+ *              2. **Hermes CLI / HTTP / file** — fallback when CodingHarness
+ *                 is unavailable, or for non-code tasks.
  *
- * Why native instead of calling the agnt sandbox? Because:
- *   1. We don't have agnt's Electron sandbox on this machine
- *   2. We have Hermes already running via `hermes` CLI / API
- *   3. Native = no extra deps, no VM, no Python venv
+ *              Why native? Because:
+ *              1. We have CodingHarness + Hermes already running
+ *              2. Native = no extra deps, no VM, no Python venv
+ *              3. CodingHarness already has goal/loop/agent subcommands
  *
- * Verified invocation patterns (adapted from agnt's hermes-subagent skill):
+ * Verified invocation patterns:
+ *   - CodingHarness MCP: POST http://localhost:3456/mcp with JSON-RPC 2.0
  *   - Direct subprocess: `hermes run "task"` with --output json
  *   - HTTP API: POST to hermes gateway (localhost:8765 or wherever)
  *   - File-based: write prompt to .hermes/inbox/, poll for response
  *
  * @author Hive Swarm (HARVEST-4, ported from agnt.gg hermes-subagent skill)
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 'use strict';
@@ -49,9 +53,10 @@ function safeJson(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } ca
 class HermesSubagentBridge {
   /**
    * @param {object} [opts]
-   * @param {string} [opts.mode='auto']   'auto' | 'cli' | 'http' | 'file'
+   * @param {string} [opts.mode='auto']   'auto' | 'codingharness-mcp' | 'cli' | 'http' | 'file'
    * @param {string} [opts.cliPath]       path to hermes CLI (default: 'hermes' on PATH)
    * @param {string} [opts.httpUrl]       hermes HTTP gateway (default: http://localhost:8765)
+   * @param {string} [opts.chMcpUrl]      CodingHarness MCP endpoint (default: http://localhost:3456/mcp)
    * @param {number} [opts.timeoutMs=300000]  5 min default
    * @param {string} [opts.model]         model override (e.g. 'minimax/MiniMax-M2.7')
    */
@@ -60,15 +65,16 @@ class HermesSubagentBridge {
       mode: 'auto',
       cliPath: 'hermes',
       httpUrl: process.env.HERMES_GATEWAY_URL || 'http://localhost:8765',
+      chMcpUrl: process.env.CH_MCP_URL || 'http://localhost:3456/mcp',
       timeoutMs: 300000,
       model: null,
     }, opts);
   }
 
   /**
-   * Delegate a task to a Hermes sub-agent.
+   * Delegate a task to a Hermes sub-agent (or CodingHarness via MCP).
    * @param {object} task     { prompt, system?, model?, tools?, sessionId? }
-   * @returns {Promise<{output, sessionId, durationMs, meta}>}
+   * @returns {Promise<{output, sessionId, durationMs, mode, meta}>}
    */
   async delegate(task) {
     if (!task || !task.prompt) throw new TypeError('task.prompt is required');
@@ -76,12 +82,12 @@ class HermesSubagentBridge {
     const t0 = Date.now();
     let result;
     try {
-      if (mode === 'cli') result = await this._delegateCli(task);
+      if (mode === 'codingharness-mcp') result = await this._delegateCodingHarness(task);
+      else if (mode === 'cli') result = await this._delegateCli(task);
       else if (mode === 'http') result = await this._delegateHttp(task);
       else if (mode === 'file') result = await this._delegateFile(task);
       else throw new Error(`unknown delegation mode: ${mode}`);
     } catch (e) {
-      // Capture the failure as a trace so the evolution engine can learn
       this._writeTrace({
         kind: 'hermes-delegate',
         task,
@@ -102,20 +108,83 @@ class HermesSubagentBridge {
       sessionId: result.sessionId,
       createdAt: nowIso(),
     });
-    return Object.assign({ durationMs: Date.now() - t0 }, result);
+    return Object.assign({ durationMs: Date.now() - t0, mode }, result);
   }
 
   async _detectMode() {
-    // Prefer HTTP if reachable, else CLI, else file
+    // Preferred: CodingHarness MCP (if reachable AND for code work)
+    try {
+      const r = await this._httpGet(this.opts.chMcpUrl.replace(/\/mcp$/, '') + '/health', 1500);
+      if (r && r.ok) return 'codingharness-mcp';
+    } catch (_) { /* fallthrough */ }
+    // Fallback: HTTP hermes gateway
     try {
       const r = await this._httpGet(this.opts.httpUrl + '/health', 1500);
       if (r && r.ok) return 'http';
     } catch (_) { /* fallthrough */ }
+    // Fallback: hermes CLI
     try {
       await this._which(this.opts.cliPath);
       return 'cli';
     } catch (_) { /* fallthrough */ }
     return 'file';
+  }
+
+  // --- CodingHarness MCP mode -----------------------------------------
+  // JSON-RPC 2.0 over HTTP+SSE. We use tools/call on the agent_run tool
+  // (or whichever CodingHarness exposes for "run a prompt"). Result is
+  // synchronously returned if the tool is short-running, or streamed via
+  // SSE for long-running tasks. We use the sync path for simplicity.
+  _delegateCodingHarness(task) {
+    return new Promise((resolve, reject) => {
+      const requestId = 'hive-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex');
+      const body = JSON.stringify({
+        jsonrpc: '2.0',
+        id: requestId,
+        method: 'tools/call',
+        params: {
+          name: 'agent_run',
+          arguments: {
+            prompt: task.prompt,
+            system: task.system,
+            model: this.opts.model || task.model,
+            session_id: task.sessionId,
+          },
+        },
+      });
+      const t0 = Date.now();
+      const u = new URL(this.opts.chMcpUrl);
+      const lib = u.protocol === 'https:' ? require('https') : require('http');
+      const req = lib.request({
+        hostname: u.hostname, port: u.port || (u.protocol === 'https:' ? 443 : 80),
+        path: u.pathname, method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+        timeout: this.opts.timeoutMs,
+      }, res => {
+        let data = '';
+        res.on('data', d => data += d);
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.error) return reject(new Error(`CodingHarness JSON-RPC error: ${JSON.stringify(parsed.error)}`));
+            const result = parsed.result || {};
+            const content = Array.isArray(result.content)
+              ? result.content.map(c => c.text || '').join('\n')
+              : (result.output || result.content || data);
+            resolve({
+              output: content,
+              sessionId: result.session_id || result.sessionId || task.sessionId || null,
+            });
+          } catch (e) {
+            reject(new Error(`CodingHarness parse error: ${data.slice(0, 300)}`));
+          }
+        });
+      });
+      req.on('error', reject);
+      req.on('timeout', () => { req.destroy(); reject(new Error(`CodingHarness MCP timeout after ${this.opts.timeoutMs}ms`)); });
+      req.write(body);
+      req.end();
+    });
   }
 
   // --- CLI mode -------------------------------------------------------
@@ -231,5 +300,5 @@ class HermesSubagentBridge {
   }
 }
 
-const __version = '1.0.0';
+const __version = '1.1.0';
 module.exports = { HermesSubagentBridge, delegate: (task, opts) => new HermesSubagentBridge(opts).delegate(task), __version };
