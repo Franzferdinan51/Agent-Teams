@@ -1,0 +1,66 @@
+{
+  "traceId": "trace_1781027843975_4268d656",
+  "task": {
+    "id": "task_1781027841959_51125174",
+    "title": "researcher: Research the market.",
+    "prompt": "Research the market.",
+    "description": "Research the market.",
+    "role": "implementer",
+    "depends_on": [],
+    "dependsOn": [],
+    "requiredCapability": "implementer",
+    "room": "build",
+    "payload": {
+      "requiredTools": [
+        "general"
+      ],
+      "priority": "medium"
+    }
+  },
+  "agent": null,
+  "messages": [],
+  "response": null,
+  "output": null,
+  "meta": {
+    "traceId": "trace_1781027843975_4268d656",
+    "taskId": "task_1781027841959_51125174",
+    "agentId": null,
+    "role": null,
+    "provider": "mesh",
+    "model": "mesh-default",
+    "startedAt": "2026-06-09T17:57:21.963Z",
+    "endedAt": "2026-06-09T17:57:23.975Z",
+    "durationMs": 2012,
+    "tokens": {
+      "prompt": 0,
+      "completion": 0,
+      "total": 0
+    },
+    "toolCalls": [],
+    "error": "[dispatch-1781027841963-0hdqhn/task_1781027841959_51125174] timeout after 2000ms",
+    "status": "failed"
+  },
+  "swarmId": "dispatch-1781027841963-0hdqhn",
+  "subtasks": [
+    {
+      "id": "task_1781027841959_51125174",
+      "title": "researcher: Research the market.",
+      "role": null
+    }
+  ],
+  "results": [
+    {
+      "dispatchId": "dispatch-1781027841963-0hdqhn",
+      "subtaskId": "task_1781027841959_51125174",
+      "agentId": null,
+      "result": {
+        "status": "failed",
+        "output": null,
+        "role": null,
+        "mode": "mesh",
+        "duration": 2012,
+        "error": "[dispatch-1781027841963-0hdqhn/task_1781027841959_51125174] timeout after 2000ms"
+      }
+    }
+  ]
+}

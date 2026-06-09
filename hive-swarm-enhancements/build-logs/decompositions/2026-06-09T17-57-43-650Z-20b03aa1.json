@@ -1,0 +1,40 @@
+{
+  "goal": "Build a simple REST API",
+  "subtasks": [
+    {
+      "id": "t1",
+      "title": "Build a simple REST API",
+      "prompt": "Original goal: Build a simple REST API\n\nYour specific task (front-end):\nBuild a simple REST API\n\nDeliverable: a concrete result an integrator can combine with the other 1 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+      "role": "front-end",
+      "depends_on": []
+    },
+    {
+      "id": "t2",
+      "title": "Back-end pass on the goal",
+      "prompt": "Original goal: Build a simple REST API\n\nYour specific task (back-end):\nApply a focused back-end perspective to: Build a simple REST API\n\nDeliverable: a concrete result an integrator can combine with the other 1 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+      "role": "back-end",
+      "depends_on": []
+    },
+    {
+      "id": "t3",
+      "title": "Integrate and verify the parallel work",
+      "prompt": "Original goal: Build a simple REST API\n\nTake the outputs of the 2 parallel subtasks above and:\n  1. reconcile any overlaps or conflicts,\n  2. produce a single unified deliverable that satisfies the goal,\n  3. run a final QA / sanity check,\n  4. report back with the integrated result and a short summary.",
+      "role": "integrator",
+      "depends_on": [
+        "t1",
+        "t2"
+      ]
+    }
+  ],
+  "meta": {
+    "domain": "build",
+    "count": 3,
+    "model": null,
+    "providerName": "lmstudio",
+    "fallback": true,
+    "error": "read ECONNRESET",
+    "createdAt": "2026-06-09T17:57:43.643Z",
+    "auditFile": null,
+    "version": "1.0.0"
+  }
+}

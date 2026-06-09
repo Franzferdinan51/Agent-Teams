@@ -1,0 +1,109 @@
+{
+  "swarmId": "run_1781027841963_91d57766",
+  "goalId": "goal_1781027841959_ea4065f9",
+  "goal": "Research the market. Then build a prototype. Then review the code.",
+  "startedAt": 1781027841963,
+  "completedAt": "2026-06-09T17:57:23.975Z",
+  "totalDuration": 2012,
+  "domain": "auto",
+  "mode": "glue",
+  "subtasks": [
+    {
+      "id": "task_1781027841959_51125174",
+      "title": "researcher: Research the market.",
+      "description": "Research the market.",
+      "role": "implementer",
+      "requiredTools": [
+        "general"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "task_1781027841959_da919176",
+      "title": "planner: Then build a prototype.",
+      "description": "Then build a prototype.",
+      "role": "implementer",
+      "requiredTools": [
+        "general"
+      ],
+      "depends_on": [
+        "0"
+      ]
+    },
+    {
+      "id": "task_1781027841959_caeeea17",
+      "title": "implementer: Then review the code.",
+      "description": "Then review the code.",
+      "role": "implementer",
+      "requiredTools": [
+        "general"
+      ],
+      "depends_on": [
+        "1"
+      ]
+    }
+  ],
+  "agents": [
+    {
+      "id": "coder-1",
+      "name": "Implementer",
+      "role": "implementer",
+      "room": "build"
+    },
+    {
+      "id": "coordinator-1",
+      "name": "Coordinator",
+      "role": "coordinator",
+      "room": "coordination"
+    }
+  ],
+  "results": [
+    {
+      "dispatchId": "dispatch-1781027841963-0hdqhn",
+      "subtaskId": "task_1781027841959_51125174",
+      "agentId": null,
+      "status": "failed",
+      "result": {
+        "status": "failed",
+        "output": null,
+        "role": "implementer",
+        "mode": "mesh",
+        "duration": 2012,
+        "error": "[dispatch-1781027841963-0hdqhn/task_1781027841959_51125174] timeout after 2000ms"
+      }
+    },
+    {
+      "dispatchId": "dispatch-1781027841963-0hdqhn",
+      "subtaskId": "task_1781027841959_da919176",
+      "agentId": null,
+      "status": "failed",
+      "result": {
+        "status": "failed",
+        "output": null,
+        "role": "implementer",
+        "mode": "mesh",
+        "duration": 2002,
+        "error": "[dispatch-1781027841963-0hdqhn/task_1781027841959_da919176] timeout after 2000ms"
+      }
+    },
+    {
+      "dispatchId": "dispatch-1781027841963-0hdqhn",
+      "subtaskId": "task_1781027841959_caeeea17",
+      "agentId": null,
+      "status": "failed",
+      "result": {
+        "status": "failed",
+        "output": null,
+        "role": "implementer",
+        "mode": "mesh",
+        "duration": 1992,
+        "error": "[dispatch-1781027841963-0hdqhn/task_1781027841959_caeeea17] timeout after 2000ms"
+      }
+    }
+  ],
+  "synthesis": {
+    "summary": "glue: 0/3 completed",
+    "completedCount": 0,
+    "failedCount": 3
+  }
+}

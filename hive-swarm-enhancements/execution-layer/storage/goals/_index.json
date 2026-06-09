@@ -1,0 +1,20 @@
+[
+  {
+    "id": "goal_1781027841959_ea4065f9",
+    "title": "Research the market. Then build a prototype. Then review ...",
+    "status": "in_progress",
+    "priority": "medium",
+    "createdAt": "2026-06-09T17:57:21.959Z",
+    "updatedAt": "2026-06-09T17:57:23.982Z",
+    "taskCount": 3
+  },
+  {
+    "id": "goal_1781027863640_71aab94e",
+    "title": "Build a simple REST API",
+    "status": "completed",
+    "priority": "medium",
+    "createdAt": "2026-06-09T17:57:43.640Z",
+    "updatedAt": "2026-06-09T17:57:43.804Z",
+    "taskCount": 1
+  }
+]

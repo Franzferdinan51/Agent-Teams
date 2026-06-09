@@ -1,0 +1,42 @@
+{
+  "id": "goal_1781027863640_71aab94e",
+  "title": "Build a simple REST API",
+  "description": "Build a simple REST API",
+  "status": "completed",
+  "priority": "medium",
+  "createdAt": "2026-06-09T17:57:43.640Z",
+  "updatedAt": "2026-06-09T17:57:43.804Z",
+  "successCriteria": {
+    "deliverables": [
+      "Complete the requested task"
+    ],
+    "qualityChecks": [
+      "Output meets requirements"
+    ]
+  },
+  "estimatedDuration": 30,
+  "tasks": [
+    {
+      "id": "task_1781027863640_12f03f77",
+      "title": "Build a simple REST API",
+      "description": "Build a simple REST API",
+      "status": "pending",
+      "priority": "medium",
+      "requiredTools": [
+        "general"
+      ],
+      "dependsOn": [],
+      "orderIndex": 0,
+      "createdAt": "2026-06-09T17:57:43.640Z",
+      "updatedAt": "2026-06-09T17:57:43.640Z",
+      "result": null
+    }
+  ],
+  "meta": {
+    "source": "heuristic",
+    "domain": "build",
+    "model": "qwen3.6-35b-a3b",
+    "provider": "lmstudio",
+    "processedAt": "2026-06-09T17:57:43.640Z"
+  }
+}

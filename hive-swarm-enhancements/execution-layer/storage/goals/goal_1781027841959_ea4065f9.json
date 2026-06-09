@@ -1,0 +1,78 @@
+{
+  "id": "goal_1781027841959_ea4065f9",
+  "title": "Research the market. Then build a prototype. Then review ...",
+  "description": "Research the market. Then build a prototype. Then review the code.",
+  "status": "in_progress",
+  "priority": "medium",
+  "createdAt": "2026-06-09T17:57:21.959Z",
+  "updatedAt": "2026-06-09T17:57:23.982Z",
+  "successCriteria": {
+    "deliverables": [
+      "researcher: Research the market.",
+      "planner: Then build a prototype.",
+      "implementer: Then review the code."
+    ],
+    "qualityChecks": [
+      "All tasks completed successfully"
+    ]
+  },
+  "estimatedDuration": 90,
+  "tasks": [
+    {
+      "id": "task_1781027841959_51125174",
+      "title": "researcher: Research the market.",
+      "description": "Research the market.",
+      "status": "failed",
+      "priority": "medium",
+      "requiredTools": [
+        "general"
+      ],
+      "dependsOn": [],
+      "orderIndex": 0,
+      "createdAt": "2026-06-09T17:57:21.959Z",
+      "updatedAt": "2026-06-09T17:57:23.976Z",
+      "result": null
+    },
+    {
+      "id": "task_1781027841959_da919176",
+      "title": "planner: Then build a prototype.",
+      "description": "Then build a prototype.",
+      "status": "failed",
+      "priority": "medium",
+      "requiredTools": [
+        "general"
+      ],
+      "dependsOn": [
+        "0"
+      ],
+      "orderIndex": 1,
+      "createdAt": "2026-06-09T17:57:21.959Z",
+      "updatedAt": "2026-06-09T17:57:23.977Z",
+      "result": null
+    },
+    {
+      "id": "task_1781027841959_caeeea17",
+      "title": "implementer: Then review the code.",
+      "description": "Then review the code.",
+      "status": "failed",
+      "priority": "medium",
+      "requiredTools": [
+        "general"
+      ],
+      "dependsOn": [
+        "1"
+      ],
+      "orderIndex": 2,
+      "createdAt": "2026-06-09T17:57:21.959Z",
+      "updatedAt": "2026-06-09T17:57:23.980Z",
+      "result": null
+    }
+  ],
+  "meta": {
+    "source": "heuristic",
+    "domain": "auto",
+    "model": "qwen3.6-35b-a3b",
+    "provider": "lmstudio",
+    "processedAt": "2026-06-09T17:57:21.958Z"
+  }
+}

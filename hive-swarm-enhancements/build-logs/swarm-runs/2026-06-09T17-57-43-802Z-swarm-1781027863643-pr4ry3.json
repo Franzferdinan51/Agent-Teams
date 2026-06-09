@@ -1,0 +1,103 @@
+{
+  "swarmId": "swarm-1781027863643-pr4ry3",
+  "goal": "Build a simple REST API",
+  "startedAt": 1781027863643,
+  "completedAt": "2026-06-09T17:57:43.802Z",
+  "totalDuration": 159,
+  "domain": "build",
+  "count": 2,
+  "timeout": 300000,
+  "mode": "local",
+  "subtasks": [
+    {
+      "id": "t1",
+      "title": "Build a simple REST API",
+      "prompt": "Original goal: Build a simple REST API\n\nYour specific task (front-end):\nBuild a simple REST API\n\nDeliverable: a concrete result an integrator can combine with the other 1 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+      "role": "front-end",
+      "depends_on": []
+    },
+    {
+      "id": "t2",
+      "title": "Back-end pass on the goal",
+      "prompt": "Original goal: Build a simple REST API\n\nYour specific task (back-end):\nApply a focused back-end perspective to: Build a simple REST API\n\nDeliverable: a concrete result an integrator can combine with the other 1 parallel subtask(s).\nWork in parallel — do not depend on outputs of other subtasks unless absolutely required.",
+      "role": "back-end",
+      "depends_on": []
+    },
+    {
+      "id": "t3",
+      "title": "Integrate and verify the parallel work",
+      "prompt": "Original goal: Build a simple REST API\n\nTake the outputs of the 2 parallel subtasks above and:\n  1. reconcile any overlaps or conflicts,\n  2. produce a single unified deliverable that satisfies the goal,\n  3. run a final QA / sanity check,\n  4. report back with the integrated result and a short summary.",
+      "role": "integrator",
+      "depends_on": [
+        "t1",
+        "t2"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "dispatchId": "local-swarm-1781027863643-pr4ry3",
+      "subtaskId": "t1",
+      "agentId": "agent-1",
+      "result": {
+        "status": "completed",
+        "output": "[LOCAL FALLBACK] Processed: Build a simple REST API by planner-1 (planner)",
+        "agent": "planner-1",
+        "role": "planner",
+        "mode": "local",
+        "duration": 119
+      }
+    },
+    {
+      "dispatchId": "local-swarm-1781027863643-pr4ry3",
+      "subtaskId": "t2",
+      "agentId": "agent-2",
+      "result": {
+        "status": "completed",
+        "output": "[LOCAL FALLBACK] Processed: Back-end pass on the goal by implementer-2 (implementer)",
+        "agent": "implementer-2",
+        "role": "implementer",
+        "mode": "local",
+        "duration": 126
+      }
+    }
+  ],
+  "synthesis": {
+    "winner": {
+      "agentId": null,
+      "content": "",
+      "score": 0,
+      "breakdown": {}
+    },
+    "synthesized": {
+      "content": "",
+      "keyPoints": [],
+      "sourcesUsed": [],
+      "method": "none",
+      "score": 0
+    },
+    "scores": [],
+    "meta": {
+      "method": "hybrid",
+      "model": "qwen3.6-35b-a3b",
+      "providerName": "lmstudio",
+      "criteria": [
+        "relevance",
+        "completeness",
+        "accuracy"
+      ],
+      "goal": "",
+      "fallback": true,
+      "error": "no outputs supplied",
+      "createdAt": "2026-06-09T17:57:43.801Z",
+      "auditFile": "C:\\Users\\franz\\Agent-Teams\\hive-swarm-enhancements\\build-logs\\aggregations\\2026-06-09T17-57-43-801Z-c668b94c.json",
+      "version": "1.0.0",
+      "count": 0,
+      "winnerAgentId": null,
+      "winnerScore": 0
+    }
+  },
+  "scores": [],
+  "ranked": [],
+  "swarmRunsDir": "C:\\Users\\franz\\Agent-Teams\\hive-swarm-enhancements\\build-logs\\swarm-runs"
+}
