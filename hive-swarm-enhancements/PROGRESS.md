@@ -136,7 +136,7 @@ hive-swarm-enhancements/
 - [ ] webui/public/js/consensus-panel.js — live voting UI
 - [ ] webui/public/css/main.css — dark theme matching council-app.tsx
 - [ ] webui/api/* — REST endpoints
-- [ ] webui/ws/relay.js — bridge browser <-> mesh <-> hermes
+- [x] webui/ws/relay.js — bridge browser <-> mesh <-> hermes (Hermes bridge fix: syntax PASS, relay works)
 - [ ] webui/README.md — run instructions
 
 ## 🖥️ WebUI Design Goals
