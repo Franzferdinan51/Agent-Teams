@@ -575,3 +575,61 @@ Bill Introduced → Senate Vote → House Vote → President → Law
 - ✅ Hermes bridge: native Node, no Python venv
 - ✅ Provider layer: reused `providers/provider-adapter.js`
 - ❌ Left behind: Electron, Puppeteer, 15+ providers, Vue.js, SQLite
+
+---
+
+## [Unreleased] — 2026-06-09 — Multi-Harness + Dual-Runtime
+
+### Added
+- **Multi-harness support** via `hive-swarm-enhancements/integration/harness-registry.json`
+  - 5 harnesses pre-registered: codingharness (`ch`), opencode, claude-code, codex, grok-build
+  - Add a new harness by appending an entry — no code changes needed
+  - Capability-first selection: `task.kind` → `task_routing`, or `task.capabilities` → intersection
+  - Auto-detects installed harnesses via PATH
+- **Dual-runtime support** via `hive-swarm-enhancements/integration/runtime-registry.json`
+  - Works in BOTH OpenClaw (🦞, :18789, X-API-Key) AND Hermes Agent (⚕️, :8765, Bearer)
+  - Auto-probes both gateways, picks the first healthy one
+  - Standalone mode for offline / direct-spawn use
+- **Refactored `hermes-subagent-bridge.js` v2.0.0**
+  - `Registry`, `RuntimeDetector`, `HarnessResolver` classes
+  - `status()` for doctor / inventory
+  - `delegate({ prompt, kind, capabilities, model, harness, sessionId })`
+  - Returns `{ output, sessionId, durationMs, runtime, harness, mode, meta }`
+  - All 4 modes preserved: `mcp` (via runtime proxy), `headless-cli` (per-harness), `http` (runtime-native), `file` (offline fallback)
+- **Tests** (`tests/e2e/harness-bridge.test.js`): **15/15 pass**
+  - Runs as plain Node script (no mocha dep): `npm run test:harness-bridge`
+  - Cross-runtime envelope validation
+  - Trace writing verified
+  - Live integration test (auto-skips if no harness installed)
+- **Package scripts** (`package.json`):
+  - `npm run test:harness-bridge` — full bridge test
+  - `npm run test:all` — both bridge + loop tests
+  - `npm run harness:status` — show detected runtime + installed harnesses
+
+### Changed
+- `hermes-subagent-bridge.js` upgraded from v1.1.0 → v2.0.0
+- `hive-swarm-enhancements/README.md` updated with dual-runtime + multi-harness docs
+- `Hive Swarm Overnight Builder` cron prompt updated with v2.0.0 API + new priority list
+
+### How to add a new harness (3 minutes)
+```json
+// Edit hive-swarm-enhancements/integration/harness-registry.json
+{
+  "harnesses": {
+    "my-harness": {
+      "id": "my-harness",
+      "name": "My Harness",
+      "binary": "mh",
+      "modes": ["headless-cli"],
+      "capabilities": { "code_edit": true, ... },
+      "headless": {
+        "command": "mh",
+        "args": ["run", "{prompt}"],
+        "outputFormat": "text"
+      },
+      "selection": { "fallback_priority": 6 }
+    }
+  }
+}
+```
+That's it. Next `delegate()` call will use it.

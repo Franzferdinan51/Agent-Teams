@@ -1,0 +1,131 @@
+{
+  "$schema": "https://agent-teams.local/schemas/runtime-registry.v1.json",
+  "version": "1.0.0",
+  "description": "Agent runtime registry. The bridge uses this to detect which agent framework is hosting the bridge — OpenClaw (🦞) or Hermes Agent (⚕️) — and adapt its envelope (URL, headers, paths, transport) accordingly. Add a new runtime by dropping an entry below.",
+  "default_runtime": "auto",
+  "runtimes": {
+    "openclaw": {
+      "id": "openclaw",
+      "name": "OpenClaw",
+      "icon": "🦞",
+      "repo": "https://github.com/openclaw/openclaw",
+      "probe": {
+        "urls": [
+          "http://localhost:18789",
+          "http://localhost:18789/health",
+          "http://localhost:18789/v1/health"
+        ],
+        "timeoutMs": 1500,
+        "success_match": "status_code < 500"
+      },
+      "envelope": {
+        "baseUrl": "http://localhost:18789",
+        "auth": {
+          "type": "api-key-header",
+          "header": "X-API-Key",
+          "value": "${OPENCLAW_API_KEY:-openclaw-mesh-default-key}"
+        },
+        "agent_run": {
+          "method": "POST",
+          "path": "/v1/agent/run",
+          "body": {
+            "prompt": "{prompt}",
+            "system": "{system}",
+            "model": "{model}",
+            "session_id": "{sessionId}"
+          },
+          "response": {
+            "output": "output || content || text || body",
+            "session_id": "session_id || sessionId"
+          }
+        },
+        "mcp_proxy": {
+          "method": "POST",
+          "path": "/v1/mcp/tools/call",
+          "body": {
+            "server": "{harness}",
+            "method": "tools/call",
+            "params": "{params}"
+          }
+        },
+        "skill_load": {
+          "method": "GET",
+          "path": "/v1/skills/{name}"
+        },
+        "memory": {
+          "read": { "method": "GET", "path": "/v1/memory?key={key}" },
+          "write": { "method": "POST", "path": "/v1/memory", "body": { "key": "{key}", "content": "{content}" } }
+        }
+      },
+      "skill_format": "openclaw-skill",
+      "skill_dir": "~/.openclaw/skills",
+      "config_file": "~/.openclaw/openclaw.json",
+      "notes": "OpenClaw 2026.4.x. Uses X-API-Key header. Tool/MCP transport is HTTP JSON-RPC via /v1/mcp."
+    },
+    "hermes": {
+      "id": "hermes",
+      "name": "Hermes Agent",
+      "icon": "⚕️",
+      "repo": "https://github.com/hermes-agent/hermes",
+      "probe": {
+        "urls": [
+          "http://localhost:8765",
+          "http://localhost:8765/health",
+          "http://localhost:8765/api/health"
+        ],
+        "timeoutMs": 1500,
+        "success_match": "status_code < 500"
+      },
+      "envelope": {
+        "baseUrl": "http://localhost:8765",
+        "auth": {
+          "type": "bearer",
+          "header": "Authorization",
+          "value": "Bearer ${HERMES_API_KEY:-}"
+        },
+        "agent_run": {
+          "method": "POST",
+          "path": "/api/agent/run",
+          "body": {
+            "prompt": "{prompt}",
+            "system": "{system}",
+            "model": "{model}",
+            "sessionId": "{sessionId}"
+          },
+          "response": {
+            "output": "output || content || text || body",
+            "session_id": "session_id || sessionId"
+          }
+        },
+        "mcp_proxy": {
+          "method": "POST",
+          "path": "/api/mcp/call",
+          "body": {
+            "name": "{harness}",
+            "method": "tools/call",
+            "params": "{params}"
+          }
+        },
+        "skill_load": {
+          "method": "GET",
+          "path": "/api/skills/{name}"
+        },
+        "memory": {
+          "read": { "method": "GET", "path": "/api/memory/{key}" },
+          "write": { "method": "PUT", "path": "/api/memory/{key}", "body": "{content}" }
+        }
+      },
+      "skill_format": "hermes-skill",
+      "skill_dir": "~/AppData/Local/hermes/skills",
+      "config_file": "~/AppData/Local/hermes/config.yaml",
+      "notes": "Hermes Agent gateway. Uses Bearer auth. Skill format is YAML frontmatter + markdown."
+    }
+  },
+  "detection_order": ["openclaw", "hermes"],
+  "cross_compat": {
+    "skill_dual_format": true,
+    "memory_dual_format": true,
+    "trace_format": "agent-teams-v1",
+    "trace_dir_shared": true
+  }
+}

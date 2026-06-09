@@ -1,0 +1,279 @@
+{
+  "$schema": "https://agent-teams.local/schemas/harness-registry.v1.json",
+  "version": "1.0.0",
+  "description": "Pluggable code-harness registry. The hermes-subagent-bridge reads this file at startup to discover and use any harness the operator has installed. Add a new harness by dropping an entry below — no code changes required.",
+  "selection_strategy": "capability-first",
+  "default_harness": "codingharness",
+  "fallback_chain": ["codingharness", "opencode", "claude-code", "codex", "grok-build"],
+  "harnesses": {
+    "codingharness": {
+      "id": "codingharness",
+      "name": "Custom Code Harness",
+      "binary": "ch",
+      "version_check": "ch --version",
+      "repo": "https://github.com/Franzferdinan51/Custom-Code-Harness",
+      "homepage": "https://github.com/Franzferdinan51/Custom-Code-Harness",
+      "modes": ["mcp", "headless-cli", "tui", "web-ui", "electron"],
+      "capabilities": {
+        "code_edit": true,
+        "code_review": true,
+        "code_search": true,
+        "goal_mode": true,
+        "loop_mode": true,
+        "sessions": true,
+        "memory": true,
+        "cron": true,
+        "mcp_tools": true,
+        "mcp_servers": true,
+        "tui": true,
+        "web_ui": true,
+        "electron": true,
+        "sub_agents": true,
+        "model_select": true,
+        "multi_model": true,
+        "skills": true,
+        "openapi": true,
+        "long_running": true
+      },
+      "mcp": {
+        "command": "ch",
+        "args": ["mcp", "--stdio"],
+        "transport": "stdio",
+        "notes": "Native MCP server. Spawned per session."
+      },
+      "headless": {
+        "command": "ch",
+        "args": ["agent", "--prompt", "{prompt}", "--model", "{model}"],
+        "argsTemplate": {
+          "prompt": "{prompt}",
+          "model": "{model}",
+          "sessionId": "{sessionId}"
+        },
+        "outputFormat": "json",
+        "notes": "ch agent — non-interactive single-turn. Use ch loop for multi-turn."
+      },
+      "selection": {
+        "preferred_for": ["code-edit", "code-review", "multi-step", "long-running"],
+        "fallback_priority": 1,
+        "max_concurrent": 3,
+        "best_with": ["grok-code-fast-1", "claude-sonnet-4-5", "gpt-5.1", "qwen3-coder-next"]
+      }
+    },
+    "opencode": {
+      "id": "opencode",
+      "name": "OpenCode",
+      "binary": "opencode",
+      "version_check": "opencode --version",
+      "repo": "https://github.com/sst/opencode",
+      "homepage": "https://opencode.ai/docs/cli/",
+      "modes": ["mcp", "headless-cli", "tui", "web"],
+      "capabilities": {
+        "code_edit": true,
+        "code_review": true,
+        "code_search": true,
+        "goal_mode": false,
+        "loop_mode": false,
+        "sessions": true,
+        "memory": false,
+        "cron": false,
+        "mcp_tools": true,
+        "mcp_servers": true,
+        "tui": true,
+        "web_ui": true,
+        "electron": false,
+        "sub_agents": true,
+        "model_select": true,
+        "multi_model": true,
+        "skills": false,
+        "openapi": false,
+        "long_running": true
+      },
+      "mcp": {
+        "command": "opencode",
+        "args": ["mcp"],
+        "transport": "stdio",
+        "notes": "OpenCode serves its own MCP server (tools + resources)."
+      },
+      "headless": {
+        "command": "opencode",
+        "args": ["run", "--model", "{model}", "{prompt}"],
+        "argsTemplate": {
+          "prompt": "{prompt}",
+          "model": "{model}",
+          "sessionId": "--session {sessionId}"
+        },
+        "outputFormat": "text",
+        "notes": "opencode run — single-shot, returns text or JSON depending on flags."
+      },
+      "selection": {
+        "preferred_for": ["model-flexibility", "vertex-ai", "ollama-local", "deepseek"],
+        "fallback_priority": 2,
+        "max_concurrent": 4,
+        "best_with": ["google/gemini-2.5-pro", "anthropic/claude-sonnet-4-5", "deepseek/deepseek-coder", "ollama/qwen2.5-coder"]
+      }
+    },
+    "claude-code": {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "binary": "claude",
+      "version_check": "claude --version",
+      "repo": "https://github.com/anthropics/claude-code",
+      "homepage": "https://docs.anthropic.com/en/docs/claude-code",
+      "modes": ["mcp", "headless-cli", "tui"],
+      "capabilities": {
+        "code_edit": true,
+        "code_review": true,
+        "code_search": true,
+        "goal_mode": true,
+        "loop_mode": false,
+        "sessions": true,
+        "memory": true,
+        "cron": true,
+        "mcp_tools": true,
+        "mcp_servers": true,
+        "tui": true,
+        "web_ui": false,
+        "electron": false,
+        "sub_agents": true,
+        "model_select": true,
+        "multi_model": false,
+        "skills": true,
+        "openapi": false,
+        "long_running": true
+      },
+      "mcp": {
+        "command": "claude",
+        "args": ["mcp", "serve"],
+        "transport": "stdio",
+        "notes": "Built-in MCP server."
+      },
+      "headless": {
+        "command": "claude",
+        "args": ["--print", "--output-format", "stream-json", "--verbose", "--permission-prompt-tool", "stdio", "-p", "{prompt}"],
+        "argsTemplate": {
+          "prompt": "{prompt}",
+          "model": "--model {model}",
+          "sessionId": "--resume {sessionId}"
+        },
+        "outputFormat": "stream-json",
+        "notes": "claude --print — non-interactive. stream-json is the SDK protocol."
+      },
+      "selection": {
+        "preferred_for": ["deep-reasoning", "large-refactor", "codebase-qa", "anthropic-models"],
+        "fallback_priority": 3,
+        "max_concurrent": 2,
+        "best_with": ["claude-sonnet-4-5", "claude-opus-4-7"]
+      }
+    },
+    "codex": {
+      "id": "codex",
+      "name": "OpenAI Codex CLI",
+      "binary": "codex",
+      "version_check": "codex --version",
+      "repo": "https://github.com/openai/codex",
+      "homepage": "https://developers.openai.com/codex/cli/reference",
+      "modes": ["mcp", "headless-cli", "tui"],
+      "capabilities": {
+        "code_edit": true,
+        "code_review": true,
+        "code_search": true,
+        "goal_mode": true,
+        "loop_mode": false,
+        "sessions": true,
+        "memory": false,
+        "cron": false,
+        "mcp_tools": true,
+        "mcp_servers": true,
+        "tui": true,
+        "web_ui": false,
+        "electron": false,
+        "sub_agents": true,
+        "model_select": true,
+        "multi_model": false,
+        "skills": false,
+        "openapi": false,
+        "long_running": true
+      },
+      "mcp": {
+        "command": "codex",
+        "args": ["mcp-server"],
+        "transport": "stdio",
+        "notes": "codex mcp-server — experimental. Codex also supports external MCP via config."
+      },
+      "headless": {
+        "command": "codex",
+        "args": ["exec", "--model", "{model}", "{prompt}"],
+        "argsTemplate": {
+          "prompt": "{prompt}",
+          "model": "{model}",
+          "sessionId": "--session {sessionId}"
+        },
+        "outputFormat": "text",
+        "notes": "codex exec — non-interactive single-turn."
+      },
+      "selection": {
+        "preferred_for": ["openai-models", "codex-optimized", "gpt-5.1"],
+        "fallback_priority": 4,
+        "max_concurrent": 2,
+        "best_with": ["gpt-5.1", "gpt-5.1-codex", "o4-mini"]
+      }
+    },
+    "grok-build": {
+      "id": "grok-build",
+      "name": "Grok Build (xAI)",
+      "binary": "grok",
+      "version_check": "grok --version",
+      "repo": "https://github.com/xai-org/grok-build",
+      "homepage": "https://docs.x.ai/docs/grok-build",
+      "modes": ["headless-cli"],
+      "capabilities": {
+        "code_edit": true,
+        "code_review": true,
+        "code_search": true,
+        "goal_mode": false,
+        "loop_mode": false,
+        "sessions": false,
+        "memory": false,
+        "cron": false,
+        "mcp_tools": false,
+        "mcp_servers": false,
+        "tui": false,
+        "web_ui": false,
+        "electron": false,
+        "sub_agents": false,
+        "model_select": true,
+        "multi_model": false,
+        "skills": false,
+        "openapi": false,
+        "long_running": false
+      },
+      "mcp": null,
+      "headless": {
+        "command": "grok",
+        "args": ["build", "--model", "{model}", "{prompt}"],
+        "argsTemplate": {
+          "prompt": "{prompt}",
+          "model": "{model}"
+        },
+        "outputFormat": "text",
+        "notes": "grok build — xAI's new build-mode harness. Headless only; no MCP."
+      },
+      "selection": {
+        "preferred_for": ["xai-models", "fast-iteration", "grok-code-fast-1"],
+        "fallback_priority": 5,
+        "max_concurrent": 5,
+        "best_with": ["grok-4.3", "grok-code-fast-1", "grok-imagine"]
+      }
+    }
+  },
+  "task_routing": {
+    "code_edit_multi_file": ["codingharness", "claude-code", "opencode"],
+    "code_review_pr": ["claude-code", "codex", "opencode"],
+    "quick_fix_one_liner": ["grok-build", "codingharness", "opencode"],
+    "long_running_agent": ["codingharness", "opencode", "claude-code"],
+    "multi_model_orchestration": ["codingharness", "opencode"],
+    "external_mcp_tools": ["codingharness", "opencode", "claude-code", "codex"],
+    "deep_reasoning": ["claude-code", "codex", "codingharness"],
+    "fast_iteration": ["grok-build", "opencode", "codingharness"]
+  }
+}

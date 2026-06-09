@@ -70,15 +70,53 @@ The skill at `execution-layer/SKILL.md` works in **both**:
 
 Verified by `hermes-skills/scripts/verify-compliance.sh` ✅
 
-## 🎯 CodingHarness Integration
+## 🛠️ Code Harnesses — Pluggable
 
-The `hermes-subagent-bridge.js` can delegate to **CodingHarness** (https://github.com/Franzferdinan51/Custom-Code-Harness) via its `ch mcp` server on port 3456 (JSON-RPC 2.0 over HTTP+SSE, 13 tools). This is the **preferred mode for code work** — CodingHarness already has:
-- Multi-provider support (OpenAI, Anthropic, MiniMax, LM Studio, OpenRouter)
-- Sub-agents, skills, memory, sessions, cron
-- TUI, web UI, Electron desktop
-- Goal mode, loop mode, agent mode
+The `hermes-subagent-bridge.js` (v2.0.0) delegates to **any code harness** via `hive-swarm-enhancements/integration/harness-registry.json`. To add a new harness, drop an entry — no code changes needed.
 
-When a sub-task is code-heavy, the bridge auto-detects CodingHarness and uses `ch mcp` for delegation. Falls back to Hermes CLI / HTTP / file mode if unavailable.
+| Harness | Binary | When to use |
+|---|---|---|
+| **CodingHarness** | `ch` | Default. Multi-provider, sub-agents, goal/loop modes. Mature. |
+| **Claude Code** | `claude` | Deep reasoning, large refactors, codebase Q&A. |
+| **OpenCode** | `opencode` | Model flexibility (Vertex AI, Ollama, DeepSeek, Kimi, etc.). |
+| **Codex** | `codex` | OpenAI-optimized, GPT-5.1, sandboxed. |
+| **Grok Build** | `grok` | Fast xAI iteration, grok-code-fast-1. |
+| **(your custom)** | `<bin>` | Add an entry to `harness-registry.json`. |
+
+Selection is **capability-first**:
+- `task.kind` → `task_routing` table → preferred harness
+- `task.capabilities` → capability intersection → highest-score harness
+- fallback chain in registry
+
+```js
+const { delegate, status } = require('./hive-swarm-enhancements/execution-layer/integration/hermes-subagent-bridge.js');
+
+// Doctor
+const s = await status();
+// → { runtime: 'openclaw', harness: {id:'opencode', ...}, installed_harnesses: [...] }
+
+// Delegate — picks the best installed harness for the kind
+const r = await delegate({
+  prompt: 'Refactor the auth module to use JWT',
+  kind: 'code_edit_multi_file',
+  model: 'minimax/MiniMax-M2.7',
+});
+// → { output, sessionId, durationMs, runtime, harness, mode, meta }
+```
+
+## 🌐 Dual-Runtime — OpenClaw + Hermes
+
+The bridge also auto-detects **which agent runtime is hosting it** and adapts the envelope. Same code, two environments:
+
+| Runtime | Gateway | Auth | MCP proxy | Skill dir |
+|---|---|---|---|---|
+| **OpenClaw** (🦞) | `:18789` | `X-API-Key` | `/v1/mcp/tools/call` | `~/.openclaw/skills` |
+| **Hermes Agent** (⚕️) | `:8765` | `Authorization: Bearer` | `/api/mcp/call` | `~/AppData/Local/hermes/skills` |
+| **(standalone)** | — | — | direct stdio | n/a |
+
+Configured in `hive-swarm-enhancements/integration/runtime-registry.json`. The bridge probes both, picks the first healthy one, and templates the right envelope per call. Traces record `runtime` + `harness` + `mode` for every delegation.
+
+**Verified by** `npm run test:harness-bridge` → 15/15 pass.
 
 ## 🌙 Overnight Build
 

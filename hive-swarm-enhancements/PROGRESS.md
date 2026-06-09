@@ -366,3 +366,34 @@ None. Execution-layer fully integrated.
 - **Updated `CHANGELOG.md`** — new `[Unreleased]` section documenting everything shipped today
 - **Updated overnight cron prompt** — tells future sub-agents to USE CodingHarness for code-heavy work
 - Pushed to main: `e07cf00` ✅
+
+### Tick 1.3 (~18:00 EST 2026-06-09) — Multi-Harness + Dual-Runtime refactor
+- **Duckets asked**: "we want to allow other code harnesses as well as configuring the code harness we like the new Grok build and openclaude and opencode even codex"
+- **Duckets also asked**: "make sure it stays working for both OpenClaw AND Hermes agents"
+- **Refactored `hermes-subagent-bridge.js` v1.1.0 → v2.0.0** (complete rewrite):
+  - Extracted `Registry`, `RuntimeDetector`, `HarnessResolver` classes
+  - Added `status()` doctor method
+  - Same `delegate()` API, returns `{ output, sessionId, durationMs, runtime, harness, mode, meta }`
+  - Lazy `init()` — no harness errors when no harness installed
+- **Added `integration/harness-registry.json`** (v1.0.0):
+  - 5 pre-registered harnesses: codingharness, opencode, claude-code, codex, grok-build
+  - Capability schema: `code_edit`, `goal_mode`, `mcp_tools`, `sessions`, `memory`, `tui`, `web_ui`, `sub_agents`, etc.
+  - Per-harness `mcp` + `headless` + `selection` blocks
+  - Top-level `task_routing` table for kind-based selection
+  - Add a new harness = 1 JSON entry, no code changes
+- **Added `integration/runtime-registry.json`** (v1.0.0):
+  - 2 runtimes: `openclaw` (🦞, :18789, X-API-Key) and `hermes` (⚕️, :8765, Bearer)
+  - Full envelope per runtime: `agent_run`, `mcp_proxy`, `skill_load`, `memory`
+  - Cross-compat flags: `skill_dual_format`, `trace_format`
+  - `RuntimeDetector._probe()` checks each runtime's health URLs in parallel
+- **Tests** (`tests/e2e/harness-bridge.test.js`): **15/15 pass**
+  - Plain Node script, no mocha dep
+  - Auto-detects installed harnesses, auto-skips live test if none
+  - Cross-runtime envelope validation
+- **Package scripts** (`package.json`):
+  - `npm run test:harness-bridge`
+  - `npm run test:all` (both bridge + loop)
+  - `npm run harness:status` — `require('./hive-swarm-enhancements/execution-layer/integration/hermes-subagent-bridge.js').status()`
+- **Updated cron prompt** (`92572fc7b439`) — new priority list starts with `npm run test:harness-bridge` to verify, then proceeds with skill building + cross-runtime tests
+- **Updated docs**: `CHANGELOG.md [Unreleased]`, `hive-swarm-enhancements/README.md` (new "Code Harnesses — Pluggable" + "Dual-Runtime" sections)
+- Pending: commit + push

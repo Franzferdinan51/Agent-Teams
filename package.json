@@ -19,7 +19,11 @@
     "council:mcp-tools": "curl -s http://localhost:3007/api/mcp/tools | jq .",
     "council:cli": "node council-cli.js --help",
     "mcp:status": "curl -s http://localhost:3007/api/health | jq .",
-    "mcp:tools": "curl -s http://localhost:3007/mcp/tools | jq ."
+    "mcp:tools": "curl -s http://localhost:3007/mcp/tools | jq .",
+    "test:harness-bridge": "node tests/e2e/harness-bridge.test.js",
+    "test:loop": "node tests/e2e/loop.test.js",
+    "test:all": "node tests/e2e/loop.test.js && node tests/e2e/harness-bridge.test.js",
+    "harness:status": "node -e \"require('./hive-swarm-enhancements/execution-layer/integration/hermes-subagent-bridge.js').status().then(console.log)\""
   },
   "engines": {
     "node": ">=18.0.0"
