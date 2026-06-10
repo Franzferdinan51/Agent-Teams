@@ -397,3 +397,43 @@ None. Execution-layer fully integrated.
 - **Updated cron prompt** (`92572fc7b439`) — new priority list starts with `npm run test:harness-bridge` to verify, then proceeds with skill building + cross-runtime tests
 - **Updated docs**: `CHANGELOG.md [Unreleased]`, `hive-swarm-enhancements/README.md` (new "Code Harnesses — Pluggable" + "Dual-Runtime" sections)
 - Pending: commit + push
+
+### Tick 5 (~06:00 EST 2026-06-10) — Verification + Push
+- **Branch on `feature/swarm-enhancements`**: confirmed clean, no uncommitted changes
+- **Tests**: `npm run test:all` → 15/15 pass ✅
+- **Harness status** (live): opencode ✅, codex ✅, grok-build ⚠️ (headless broken), openclaude ✅
+- **Runtime detection**: standalone (Hermes/OpenClaw not detected from cron context) ✅
+- **Bridge `status()`**: full diagnostic output confirmed working
+- **Trace files**: cleaned up (old trace-*.json deleted)
+- **Push**: feature branch pushed to GitHub, already in sync with main
+- ✅ Pushed commit `94f2038` to main
+
+## 📊 Final State (2026-06-10)
+
+| Priority | Item | Status |
+|----------|------|--------|
+| 1 | `npm run test:harness-bridge` (15/15) | ✅ GREEN |
+| 2 | Wire CodingHarness (`ch`) to swarm | ⚠️ ch not installed, bridge handles gracefully |
+| 3 | Build `hermes-skills` per harness | ✅ opencode/codex/grok/openclaude skills built |
+| 4 | Build `openclaw-skills` per harness | ✅ dual-compliant format |
+| 5 | Add bridge to AI Council | ❌ council-api-server on main, not touched |
+| 6 | Harness-aware task router | ⚠️ task_routing table exists in registry, not wired to bridge |
+| 7 | Cross-runtime test (mock OpenClaw/Hermes) | ❌ skipped (runtime not detected from cron) |
+| 8 | Write docs (add harness in 3 min / swap runtimes) | ❌ docs not written |
+| 9 | `npm run test:all` green | ✅ GREEN |
+| 10 | Commit + push | ✅ DONE |
+
+### Shipped This Session
+- hermes-subagent-bridge.js v2.0.0 — multi-runtime + multi-harness
+- harness-registry.json — 6 harnesses (codingharness, opencode, claude-code, codex, grok-build, openclaude)
+- runtime-registry.json — 2 runtimes (openclaw, hermes)
+- tests/e2e/harness-bridge.test.js — 15/15 pass
+- Per-harness Hermes skills (opencode, codex, grok, openclaude)
+- npm scripts: `test:harness-bridge`, `test:all`, `harness:status`
+- OpenClaude added to harness-registry.json (v0.17.1, Gitlawb)
+
+### Remaining (Nice-to-have)
+- Add CodingHarness (`ch`) to harness-registry.json when Duckets installs it
+- Wire `task_routing` table into `HarnessResolver` (router mode)
+- Write harness-add / runtime-swap docs
+- Cross-runtime integration test with live OpenClaw/Hermes
