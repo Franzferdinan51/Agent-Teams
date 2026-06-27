@@ -4,11 +4,33 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
-**The ultimate multi-agent government framework.** Spawn, coordinate, and orchestrate multiple specialized agents for complex tasks — with a three-branch AI Government, Senate Decrees, Agent Teams, and hive mind intelligence.
-
-**Now with built-in LLM-powered Council deliberation and Mixture of Agents (MoA)!** No separate servers or repos needed.
+**Multi-Agent Orchestration powered by Mixture of Agents (MoA).** Multiple specialized models analyze your task in parallel, an aggregator synthesizes their perspectives, and you get one high-quality response. No separate servers needed.
 
 Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https://github.com/Franzferdinan51/duck-cli).
+
+---
+
+## ⚡ Get Started (30 seconds)
+
+```bash
+# 1. Clone
+git clone https://github.com/Franzferdinan51/Agent-Teams.git && cd Agent-Teams
+
+# 2. Install
+npm install
+
+# 3. Run MoA — ask anything, multiple models answer at once
+node council-cli.js moa "should I refactor auth as microservices?"
+```
+
+**Or via REST:**
+```bash
+curl -X POST http://localhost:3007/api/moa/run \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "your question", "preset": "default"}'
+```
+
+**That's it.** No config required to try it. See [docs/MOA.md](docs/MOA.md) for full setup, presets, and integration guides.
 
 ---
 
@@ -106,11 +128,11 @@ npm run start:webui
 
 | Component | Description | Port |
 |-----------|-------------|------|
+| **Mixture of Agents (MoA)** | Multiple reference models analyze in parallel, aggregator synthesizes | 3007 |
 | **Council Server** | LLM-powered deliberation with 46 councilors | 3007 |
-| **Mixture of Agents** | Parallel reference fan-out + aggregator synthesis | 3007 |
+| **Multi-Provider LLM** | MiniMax, LM Studio (local), OpenRouter | - |
 | **WebUI** | Live dashboard with real-time updates | 3131 |
 | **46 Councilors** | Diverse AI perspectives (Technocrat, Ethicist, etc.) | - |
-| **Multi-Provider LLM** | MiniMax, LM Studio (local), OpenRouter | - |
 | **Senate (94)** | Binding decrees from Council recommendations | - |
 | **Agent Teams** | Spawn specialized agents for tasks | - |
 | **Hive Mesh** | P2P agent communication | 4000 |
@@ -125,34 +147,28 @@ npm run start:webui
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  COUNCIL SERVER (Built-in, port 3007)                       │   │
-│  │  - 46 diverse councilors with LLM integration              │   │
-│  │  - Real AI-generated debate (MiniMax, LM Studio, etc.)     │   │
-│  │  - 9 deliberation modes (adversarial, consensus, swarm...)  │   │
-│  │  - Live SSE streaming to WebUI                              │   │
-│  │  - Auto-voting based on deliberation content               │   │
+│  │  🤖 MIXTURE OF AGENTS (MoA) — PRIMARY INTERFACE         │   │
+│  │  - Reference models fan out in parallel (Promise.all)        │   │
+│  │  - Aggregator synthesizes all perspectives into one response│   │
+│  │  - 3 presets: default, coding, security                     │   │
+│  │  - REST: POST /api/moa/run  |  CLI: council moa          │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 │                              ↓                                      │
 │  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  SENATE (94 senators, 3 parties)                            │   │
-│  │  - Convert Council recommendations into binding DECREES    │   │
+│  │  COUNCIL SERVER — 46 diverse LLM-powered councilors        │   │
+│  │  - 9 deliberation modes: adversarial, consensus, swarm...     │   │
+│  │  - Live SSE streaming | Auto-voting                           │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                              ↓                                      │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  SENATE — 94 senators, 3 parties                          │   │
+│  │  - Converts recommendations → binding DECREES               │   │
 │  │  - MUST/SHALL/NEVER enforcement language                   │   │
-│  │  - Democratic elections, weighted voting                   │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 │                              ↓                                      │
 │  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  EXECUTIVE (Meta-Agent)                                     │   │
-│  │  - Execute Council/Senate decisions                         │   │
-│  │  - Spawn agent teams for implementation                    │   │
-│  │  - Monitor and report results                               │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                              ↓                                      │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  MOA — Mixture of Agents (v2.2.0)                          │   │
-│  │  - Reference models fan out in parallel (Promise.all)       │   │
-│  │  - Aggregator synthesizes advice into one response          │   │
-│  │  - 3 presets: default, coding, security                   │   │
-│  │  - REST: POST /api/moa/run  |  CLI: council moa             │   │
+│  │  EXECUTIVE — Meta-Agent executes decrees                   │   │
+│  │  - Spawns agent teams | Monitors results                    │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -169,15 +185,15 @@ npm run start:webui
 
 | File | Purpose |
 |------|---------|
-| `council-server.js` | LLM-powered Council + MoA REST API |
-| `council-cli.js` | CLI — Council + MoA commands |
+| `council-cli.js` | CLI — MoA commands (`council moa "..."`) |
+| `council-server.js` | REST API server — MoA + Council endpoints (port 3007) |
+| `moa/moa-runtime.js` | Core MoA engine — parallel reference fan-out + aggregator |
+| `moa/config.json` | MoA presets — default, coding, security |
 | `councilors.json` | 46 councilor definitions |
-| `moa/moa-runtime.js` | Mixture of Agents engine |
-| `moa/config.json` | MoA presets (default, coding, security) |
 | `webui/server.js` | Web dashboard |
 | `webui/public/index.html` | WebUI frontend |
 | `scripts/hive-*.js` | 80+ Hive scripts |
-| `start-all.sh` | Start everything |
+| `docs/MOA.md` | Full MoA guide (setup, API, integration) |
 
 ---
 
