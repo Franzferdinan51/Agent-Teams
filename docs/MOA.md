@@ -26,7 +26,7 @@
 
 ### What Is MoA?
 
-**Mixture of Agents (MoA)** is a virtual-model pattern where multiple "reference" models independently analyze the same task in parallel, then a single "aggregator" model synthesizes all of their perspectives into one high-quality response.
+**Mixture of Agents (MoA)** is a virtual-model pattern where multiple "reference" models independently analyze the same task in parallel, then a single "aggregator" model synthesizes all of their perspectives into one high-quality response. This implementation is based on the [Hermes Agent MoA](https://hermes-agent.nousresearch.com) design by [Nous Research](https://nousresearch.com).
 
 The core insight is simple: different models see problems differently. A technical model, a security-focused model, and a pragmatic business model will each notice things the others miss. Rather than running a slow multi-round deliberation (as the Council does), MoA collects those perspectives in a single parallel pass, then has the aggregator do the synthesis.
 

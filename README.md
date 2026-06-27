@@ -4,13 +4,13 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
-**Multi-Agent Orchestration powered by Mixture of Agents (MoA).** Multiple specialized models analyze your task in parallel, an aggregator synthesizes their perspectives, and you get one high-quality response. No separate servers needed.
-
-Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https://github.com/Franzferdinan51/duck-cli).
+**Multi-Agent Orchestration powered by Mixture of Agents (MoA).** Multiple specialized models analyze your task in parallel, an aggregator synthesizes their perspectives, and you get one high-quality response. Based on [Hermes Agent MoA](https://hermes-agent.nousresearch.com) by [Nous Research](https://nousresearch.com).
 
 ---
 
 ## ⚡ Get Started (30 seconds)
+
+> **MoA is based on [Hermes Agent](https://hermes-agent.nousresearch.com) by [Nous Research](https://nousresearch.com).** Reference models run in parallel, an aggregator synthesizes their advice into one response.
 
 ```bash
 # 1. Clone
@@ -147,7 +147,7 @@ npm run start:webui
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  🤖 MIXTURE OF AGENTS (MoA) — PRIMARY INTERFACE         │   │
+│  │  🤖 MIXTURE OF AGENTS (MoA) — PRIMARY INTERFACE [Hermes/Nous] │   │
 │  │  - Reference models fan out in parallel (Promise.all)        │   │
 │  │  - Aggregator synthesizes all perspectives into one response│   │
 │  │  - 3 presets: default, coding, security                     │   │
