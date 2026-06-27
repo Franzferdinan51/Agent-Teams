@@ -415,8 +415,15 @@ async function runMoaCLI(args) {
     return;
   }
 
-  // Default: run MoA with prompt (join all remaining args as prompt)
-  const prompt = args.join(' ');
+  // Default: run MoA with prompt
+  // Parse --preset first, then build prompt from remaining args
+  const preset = args.includes('--preset') ? args[args.indexOf('--preset') + 1] : 'default';
+  const promptArgs = args.filter((a, i) => {
+    if (a === '--preset') return false;                   // drop --preset flag
+    if (args[i - 1] === '--preset') return false;        // drop its value
+    return true;
+  });
+  const prompt = promptArgs.join(' ');
   if (!prompt) {
     console.log('Usage: council moa "<prompt>" [--preset <name>]');
     console.log('       council moa list');
@@ -424,8 +431,6 @@ async function runMoaCLI(args) {
     console.log('       council moa delete <name>');
     return;
   }
-
-  const preset = args.includes('--preset') ? args[args.indexOf('--preset') + 1] : 'default';
   console.log(`\n\uD83D\uDC80 Running MoA (preset: ${preset})...\n`);
   const result = await MoA.runMoA(prompt, preset, []);
 
