@@ -1,0 +1,31 @@
+{
+  "id": "agent-teams-mo",
+  "name": "Agent Teams MoA",
+  "description": "Run Mixture of Agents (MoA) — multiple reference models analyze in parallel, an aggregator synthesizes their advice. Based on Hermes Agent MoA by Nous Research. Requires council-server.js running (default: localhost:3007).",
+  "version": "0.1.0",
+  "activation": {
+    "onStartup": true
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "councilUrl": {
+        "type": "string",
+        "description": "Council server URL. Default: http://localhost:3007"
+      },
+      "defaultPreset": {
+        "type": "string",
+        "description": "Default MoA preset. Default: 'default'"
+      }
+    }
+  },
+  "contracts": {
+    "tools": [
+      "moa_run",
+      "moa_list_presets",
+      "moa_get_preset",
+      "moa_save_preset",
+      "moa_delete_preset"
+    ]
+  }
+}

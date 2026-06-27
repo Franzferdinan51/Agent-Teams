@@ -1041,6 +1041,67 @@ If you set `enabled: false` but still see reference calls, the server may have c
 
 ---
 
+## 12. OpenClaw Plugin
+
+An OpenClaw plugin (`agent-teams-mo`) exposes MoA as native agent tools — no CLI, no HTTP, agents call MoA directly as a tool.
+
+### Install
+
+```bash
+cd /path/to/Agent-Teams
+openclaw plugins install --link ./moa/openclaw-plugin
+openclaw gateway restart
+```
+
+### Plugin Tools
+
+| Tool | What it does |
+|------|--------------|
+| `moa_run` | Run MoA — specify prompt, preset, optional history |
+| `moa_list_presets` | List all presets |
+| `moa_get_preset` | Inspect a preset's full config |
+| `moa_save_preset` | Create or update a preset |
+| `moa_delete_preset` | Delete a preset |
+
+### Example: Agent uses MoA as a tool
+
+```
+User: How should I structure the auth module?
+
+Agent calls: moa_run({ prompt: "How should I structure the auth module?", preset: "coding" })
+→ References + aggregator synthesis returned as tool result
+```
+
+### Configuration
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "agent-teams-mo": {
+        "enabled": true,
+        "config": {
+          "councilUrl": "http://localhost:3007",
+          "defaultPreset": "default"
+        }
+      }
+    }
+  }
+}
+```
+
+### Build from source
+
+```bash
+cd moa/openclaw-plugin
+npm install
+npm run plugin:build          # compile TS + generate manifest
+openclaw plugins install --link ./moa/openclaw-plugin
+openclaw gateway restart
+```
+
+---
+
 ## 12. File Reference
 
 | File | Purpose |

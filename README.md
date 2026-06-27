@@ -129,6 +129,7 @@ npm run start:webui
 | Component | Description | Port |
 |-----------|-------------|------|
 | **Mixture of Agents (MoA)** | Multiple reference models analyze in parallel, aggregator synthesizes | 3007 |
+| **OpenClaw Plugin** | Native MoA tools (`moa_run`, etc.) as OpenClaw agent tools | — |
 | **Council Server** | LLM-powered deliberation with 46 councilors | 3007 |
 | **Multi-Provider LLM** | MiniMax, LM Studio (local), OpenRouter | - |
 | **WebUI** | Live dashboard with real-time updates | 3131 |
@@ -188,7 +189,9 @@ npm run start:webui
 | `council-cli.js` | CLI — MoA commands (`council moa "..."`) |
 | `council-server.js` | REST API server — MoA + Council endpoints (port 3007) |
 | `moa/moa-runtime.js` | Core MoA engine — parallel reference fan-out + aggregator |
-| `moa/config.json` | MoA presets — default, coding, security |
+| `moa/config.json` | MoA presets — default, coding, security, tiny |
+| `moa/index.js` | Public API entry point |
+| `moa/openclaw-plugin/` | OpenClaw plugin — native MoA tools (`moa_run`, etc.) |
 | `councilors.json` | 46 councilor definitions |
 | `webui/server.js` | Web dashboard |
 | `webui/public/index.html` | WebUI frontend |
