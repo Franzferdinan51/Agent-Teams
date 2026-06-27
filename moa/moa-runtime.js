@@ -22,8 +22,16 @@ function slotLabel(slot) {
 
 function extractText(response) {
   try {
-    const content = response?.choices?.[0]?.message?.content || '';
-    return (content || '').trim();
+    // Provider adapter returns { status, content, usage } — extract from there
+    if (typeof response === 'object' && response !== null) {
+      if (response.status === 'error') return '';
+      const text = (response.content || '').trim();
+      if (text) return text;
+      // Also check raw API response shape (choices[0].message.content)
+      const raw = response.choices?.[0]?.message?.content || '';
+      return (raw || '').trim();
+    }
+    return '';
   } catch { return ''; }
 }
 
