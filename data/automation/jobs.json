@@ -1,0 +1,50 @@
+{
+  "pending": [
+    {
+      "id": 1,
+      "type": "shell",
+      "name": "Test Job 1",
+      "payload": {
+        "command": "echo hello"
+      },
+      "priority": "normal",
+      "retry": 0,
+      "maxRetries": 3,
+      "failChain": [],
+      "status": "pending",
+      "created": "2026-04-19T22:00:35.538Z",
+      "scheduled": null,
+      "cron": null,
+      "trigger": null,
+      "createdBy": "system",
+      "result": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "id": 2,
+      "type": "shell",
+      "name": "Test Job 2",
+      "payload": {
+        "command": "echo world"
+      },
+      "priority": "high",
+      "retry": 0,
+      "maxRetries": 3,
+      "failChain": [],
+      "status": "pending",
+      "created": "2026-04-19T22:00:35.539Z",
+      "scheduled": null,
+      "cron": null,
+      "trigger": null,
+      "createdBy": "system",
+      "result": null,
+      "error": null,
+      "attempts": 0
+    }
+  ],
+  "running": [],
+  "completed": [],
+  "failed": [],
+  "id": 3
+}

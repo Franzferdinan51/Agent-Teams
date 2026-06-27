@@ -1,0 +1,60 @@
+{
+  "name": "AI Council Chamber",
+  "short_name": "AI Council",
+  "description": "Multi-agent deliberation engine powered by Gemini API. 45 councilors + specialists debate any topic.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0a0f",
+  "theme_color": "#8b5cf6",
+  "lang": "en-US",
+  "categories": ["productivity", "utilities"],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "New Deliberation",
+      "short_name": "Deliberate",
+      "description": "Start a new council deliberation",
+      "url": "/?action=new",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Councilors",
+      "short_name": "Council",
+      "description": "Browse all 45 councilors",
+      "url": "/?tab=councilors",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Legislative Record",
+      "short_name": "Records",
+      "description": "View past deliberations",
+      "url": "/?tab=consensus",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "related_applications": [],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}

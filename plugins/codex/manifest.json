@@ -1,0 +1,14 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Hive Nation",
+  "name_for_model": "hive_nation",
+  "description_for_human": "Multi-agent government framework with Senate, Voting, Teams, and Hive Mind intelligence.",
+  "description_for_model": "Integrates with Hive Nation multi-agent system. Provides access to Senate decrees, agent voting, team spawning, memory store, and workflow automation. Use this to coordinate multi-agent tasks through democratic governance.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "http://localhost:3131/api/openapi.yaml"
+  }
+}

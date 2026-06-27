@@ -1,0 +1,24 @@
+{
+  "name": "Hive Nation",
+  "version": "1.6.1",
+  "description": "Multi-agent government framework with duck/bee/lobster mascots",
+  
+  "models": {
+    "primary": "gpt-4o",
+    "vision": "gpt-4o",
+    "reasoning": "claude-3-5-sonnet"
+  },
+
+  "government": {
+    "branches": ["senate", "house", "executive", "judicial"],
+    "mascots": ["duck", "bee", "lobster"]
+  },
+
+  "features": {
+    "scoring": "scripts/hive-scoring.js",
+    "memory": "scripts/hive-memory.js",
+    "trace": "scripts/hive-trace.js",
+    "budget": "scripts/hive-budget.js",
+    "modelConfig": "scripts/hive-model-config.js"
+  }
+}

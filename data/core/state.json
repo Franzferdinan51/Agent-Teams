@@ -1,0 +1,18 @@
+{
+  "teams": [],
+  "messages": [],
+  "memories": [],
+  "decrees": [],
+  "votes": [],
+  "agents": [],
+  "history": [],
+  "pendingActions": [
+    {
+      "id": "action-1776638379816",
+      "title": "Test Action",
+      "description": "Testing OpenClaw integration",
+      "created": "2026-04-19T22:39:39.816Z",
+      "completed": false
+    }
+  ]
+}

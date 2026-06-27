@@ -1,0 +1,49 @@
+{
+  "name": "agent-teams",
+  "version": "2.1.0",
+  "description": "Multi-Agent Collaboration System — The Hive Senate with 46 councilors, P2P mesh, live LLM deliberation, and hive mind intelligence",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "start:council": "node council-server.js",
+    "start:webui": "node webui/server.js",
+    "start:all": "./start-all.sh",
+    "start:council-api": "node council-api-server.cjs",
+    "start:mcp": "node council-server.js",
+    "start:cli": "node council-cli.js",
+    "council:status": "curl -s http://localhost:3007/api/health | jq .",
+    "council:test": "curl -s -X POST http://localhost:3007/api/llm/test | jq .",
+    "council:providers": "curl -s http://localhost:3007/api/llm/providers | jq .",
+    "council:deliberate": "curl -s -X POST http://localhost:3007/api/session/start -H \"Content-Type: application/json\" -d \"{\"topic\":\"Test deliberation\",\"mode\":\"proposal\"}\" | jq .",
+    "council:list": "curl -s http://localhost:3007/api/councilors | jq \".councilors | length\"",
+    "council:mcp-tools": "curl -s http://localhost:3007/api/mcp/tools | jq .",
+    "council:cli": "node council-cli.js --help",
+    "mcp:status": "curl -s http://localhost:3007/api/health | jq .",
+    "mcp:tools": "curl -s http://localhost:3007/mcp/tools | jq ."
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "peerDependencies": {},
+  "keywords": [
+    "multi-agent",
+    "ai-council",
+    "hive-mind",
+    "collaboration",
+    "coordination",
+    "agent",
+    "p2p",
+    "decentralized",
+    "federation",
+    "deliberation"
+  ],
+  "author": "AgentTeams",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Franzferdinan51/Agent-Teams.git"
+  }
+}

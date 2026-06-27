@@ -1,0 +1,1 @@
+/Users/duckets/.openclaw/workspace/skills/agent-teams/hive-teams.sh

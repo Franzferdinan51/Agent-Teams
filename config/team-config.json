@@ -1,0 +1,48 @@
+{
+    "name": "AgentTeam",
+    "version": "1.0.0",
+    "team_dir": "~/Desktop/AgentTeam",
+    "workspace": "~/Desktop/AgentTeam/workspace",
+    
+    "paths": {
+        "workspace": "~/Desktop/AgentTeam/workspace",
+        "tasks": "~/Desktop/AgentTeam/workspace/tasks",
+        "memory": "~/Desktop/AgentTeam/workspace/memory",
+        "artifacts": "~/Desktop/AgentTeam/workspace/artifacts",
+        "logs": "~/Desktop/AgentTeam/workspace/logs",
+        "agents": "~/Desktop/AgentTeam/workspace/agents"
+    },
+    
+    "roles": {
+        "researcher": {
+            "description": "Web search, summarize, gather info",
+            "default_model": "minimax/MiniMax-M2.7",
+            "skills": ["agent-researcher"]
+        },
+        "coder": {
+            "description": "Write code, implement features",
+            "default_model": "minimax/MiniMax-M2.7",
+            "skills": ["agent-coder"]
+        },
+        "reviewer": {
+            "description": "Code review, quality check",
+            "default_model": "minimax/MiniMax-M2.7",
+            "skills": ["agent-reviewer"]
+        },
+        "writer": {
+            "description": "Documentation, reports",
+            "default_model": "minimax/MiniMax-M2.7",
+            "skills": ["agent-writer"]
+        }
+    },
+    
+    "team_lead": {
+        "description": "Main agent that coordinates the team",
+        "prompt_template": "You are the team lead coordinating a multi-agent team. Team context is in {workspace}/"
+    },
+    
+    "openclaw": {
+        "skill_dir": "~/Desktop/AgentTeam/skills",
+        "agents_dir": "~/Desktop/AgentTeam/agents"
+    }
+}

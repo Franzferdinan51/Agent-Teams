@@ -1,0 +1,69 @@
+{
+  "name": "hive-nation",
+  "version": "2.0.1",
+  "description": "Multi-agent governance system with Senate, Council, and Teams",
+  "author": "DuckBot",
+  "license": "MIT",
+  
+  "openclaw": {
+    "compatibility": ">=2026.1.0",
+    "pluginType": "skill"
+  },
+  
+  "commands": [
+    {
+      "name": "hive",
+      "description": "Hive Nation multi-agent governance",
+      "subcommands": [
+        {
+          "name": "status",
+          "description": "Check Hive status"
+        },
+        {
+          "name": "spawn",
+          "description": "Spawn a team",
+          "args": ["template", "name"]
+        },
+        {
+          "name": "decree",
+          "description": "Issue a Senate decree",
+          "args": ["content"]
+        },
+        {
+          "name": "vote",
+          "description": "Cast a Senate vote",
+          "args": ["bill"]
+        },
+        {
+          "name": "memory",
+          "description": "Store a memory",
+          "args": ["content"]
+        },
+        {
+          "name": "recall",
+          "description": "Search memories",
+          "args": ["query"]
+        }
+      ]
+    }
+  ],
+  
+  "endpoints": {
+    "hive": "http://localhost:3131",
+    "council": "http://localhost:3006",
+    "mcp": "http://localhost:3456"
+  },
+  
+  "features": [
+    "governance-pipeline",
+    "llm-integration",
+    "persistent-state",
+    "inter-agent-messaging",
+    "mcp-tools"
+  ],
+  
+  "permissions": [
+    "network:local",
+    "filesystem:data"
+  ]
+}

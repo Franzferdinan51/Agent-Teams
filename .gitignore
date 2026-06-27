@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Workspace data (private)
+workspace/tasks/*.json
+workspace/memory/*.md
+workspace/artifacts/*
+workspace/logs/*.log
+workspace/session.json
+workspace/agents/*.json
+
+# OS files
+.DS_Store
+*.log
+
+# Environment
+.env
+*.local

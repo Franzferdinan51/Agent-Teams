@@ -1,0 +1,44 @@
+{
+  "moa": {
+    "default_preset": "default",
+    "presets": {
+      "default": {
+        "description": "General-purpose MoA: technical + security + pragmatic perspectives",
+        "reference_models": [
+          { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" },
+          { "provider": "lmstudio", "model": "supergemma4-26b-uncensored-v2" },
+          { "provider": "lmstudio", "model": "qwen3.5-9b" }
+        ],
+        "aggregator": { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" },
+        "reference_temperature": 0.6,
+        "aggregator_temperature": 0.4,
+        "reference_max_tokens": 1024,
+        "enabled": true
+      },
+      "coding": {
+        "description": "Coding-focused MoA: architecture + implementation perspectives",
+        "reference_models": [
+          { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" },
+          { "provider": "lmstudio", "model": "qwen3.5-9b" }
+        ],
+        "aggregator": { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" },
+        "reference_temperature": 0.5,
+        "aggregator_temperature": 0.3,
+        "reference_max_tokens": 768,
+        "enabled": true
+      },
+      "security": {
+        "description": "Security-focused MoA: adversarial + technical review",
+        "reference_models": [
+          { "provider": "lmstudio", "model": "supergemma4-26b-uncensored-v2" },
+          { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" }
+        ],
+        "aggregator": { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" },
+        "reference_temperature": 0.7,
+        "aggregator_temperature": 0.4,
+        "reference_max_tokens": 512,
+        "enabled": true
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "trigger-1776638375783",
+    "name": "Research Complete → Review",
+    "type": "event",
+    "condition": "job.completed",
+    "job": {
+      "name": "Auto Review",
+      "type": "workflow",
+      "payload": {
+        "workflow": "review",
+        "topic": "Automated review from previous task"
+      }
+    },
+    "enabled": false,
+    "created": "2026-04-19T22:39:35.783Z",
+    "lastTriggered": null,
+    "triggerCount": 0
+  },
+  {
+    "id": "trigger-1776638375784",
+    "name": "Security Decree → Audit",
+    "type": "decree",
+    "condition": "security",
+    "job": {
+      "name": "Security Audit",
+      "type": "workflow",
+      "payload": {
+        "workflow": "security-audit"
+      }
+    },
+    "enabled": false,
+    "created": "2026-04-19T22:39:35.784Z",
+    "lastTriggered": null,
+    "triggerCount": 0
+  },
+  {
+    "id": "trigger-1776638379813",
+    "name": "Research Complete → Review",
+    "type": "event",
+    "condition": "job.completed",
+    "job": {
+      "name": "Auto Review",
+      "type": "workflow",
+      "payload": {
+        "workflow": "review",
+        "topic": "Automated review from previous task"
+      }
+    },
+    "enabled": false,
+    "created": "2026-04-19T22:39:39.813Z",
+    "lastTriggered": null,
+    "triggerCount": 0
+  },
+  {
+    "id": "trigger-1776638379814",
+    "name": "Security Decree → Audit",
+    "type": "decree",
+    "condition": "security",
+    "job": {
+      "name": "Security Audit",
+      "type": "workflow",
+      "payload": {
+        "workflow": "security-audit"
+      }
+    },
+    "enabled": false,
+    "created": "2026-04-19T22:39:39.814Z",
+    "lastTriggered": null,
+    "triggerCount": 0
+  }
+]
