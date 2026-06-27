@@ -25,7 +25,7 @@ node council-cli.js moa "should I refactor auth as microservices?"
 
 **Or via REST:**
 ```bash
-curl -X POST http://localhost:3007/api/moa/run \
+curl -X POST http://localhost:3003/api/moa/run \
   -H "Content-Type: application/json" \
   -d '{"prompt": "your question", "preset": "default"}'
 ```
@@ -120,7 +120,7 @@ npm run start:webui
 
 **WebUI:** http://localhost:3131
 
-**Council API:** http://localhost:3007/api/health
+**Council API:** http://localhost:3003/api/health
 
 ---
 
@@ -215,7 +215,7 @@ node council-cli.js moa "audit this code" --preset security
 node council-cli.js moa list
 
 # Via REST API
-curl -X POST http://localhost:3007/api/moa/run \
+curl -X POST http://localhost:3003/api/moa/run \
   -H "Content-Type: application/json" \
   -d '{"prompt": "explain this code", "preset": "coding"}'
 
@@ -227,7 +227,7 @@ node -e "const {runMoA}=require('./moa/runtime'); runMoA('your prompt','default'
 
 ```bash
 # Via API
-curl -X POST http://localhost:3007/api/session/start \
+curl -X POST http://localhost:3003/api/session/start \
   -H "Content-Type: application/json" \
   -d '{"topic":"Should AI have rights?","mode":"proposal"}'
 
@@ -247,12 +247,12 @@ open http://localhost:3131
 
 ```bash
 # Use LM Studio (local)
-curl -X POST http://localhost:3007/api/llm/provider \
+curl -X POST http://localhost:3003/api/llm/provider \
   -H "Content-Type: application/json" \
   -d '{"provider":"lmstudio"}'
 
 # Check status
-curl http://localhost:3007/api/llm/status
+curl http://localhost:3003/api/llm/status
 ```
 
 ### CLI Commands
@@ -299,14 +299,14 @@ Agent-Teams/
 ./start-all.sh
 
 # Check services
-curl http://localhost:3007/api/health
+curl http://localhost:3003/api/health
 curl http://localhost:3131/api/health
 
 # Test LLM
-curl -X POST http://localhost:3007/api/llm/test
+curl -X POST http://localhost:3003/api/llm/test
 
 # List providers
-curl http://localhost:3007/api/llm/providers | jq .
+curl http://localhost:3003/api/llm/providers | jq .
 ```
 
 ---
@@ -330,23 +330,23 @@ node council-cli.js moa list
 node council-cli.js moa "What is 2+2?"
 
 # Test MoA REST API
-curl -X POST http://localhost:3007/api/moa/run \
+curl -X POST http://localhost:3003/api/moa/run \
   -H "Content-Type: application/json" \
   -d '{"prompt": "hello world in python", "preset": "coding"}'
 
 # Test Council
-curl http://localhost:3007/api/councilors | jq '.councilors | length'
+curl http://localhost:3003/api/councilors | jq '.councilors | length'
 
 # Test LLM
-curl -X POST http://localhost:3007/api/llm/test | jq '.content'
+curl -X POST http://localhost:3003/api/llm/test | jq '.content'
 
 # Test deliberation
-curl -X POST http://localhost:3007/api/session/start \
+curl -X POST http://localhost:3003/api/session/start \
   -H "Content-Type: application/json" \
   -d '{"topic":"Test","mode":"proposal"}'
 
 sleep 20
-curl http://localhost:3007/api/session | jq '{phase, stats}'
+curl http://localhost:3003/api/session | jq '{phase, stats}'
 ```
 
 ---
