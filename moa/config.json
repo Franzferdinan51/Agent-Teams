@@ -2,8 +2,19 @@
   "moa": {
     "default_preset": "default",
     "presets": {
+      "tiny": {
+        "description": "TESTING — single model, no parallel loading. Verify MoA wiring works before running larger presets.",
+        "reference_models": [
+          { "provider": "lmstudio", "model": "qwythos-9b-claude-mythos-5-1m" }
+        ],
+        "aggregator": { "provider": "lmstudio", "model": "qwythos-9b-claude-mythos-5-1m" },
+        "reference_temperature": 0.6,
+        "aggregator_temperature": 0.4,
+        "reference_max_tokens": 128,
+        "enabled": true
+      },
       "default": {
-        "description": "General-purpose MoA: ornith (35B) aggregator with qwen3.5-9b + gemma-4-26b as references",
+        "description": "General-purpose MoA: qwen3.5-9b + gemma-4-26b + gemma-4-12b references, ornith 35B aggregates",
         "reference_models": [
           { "provider": "lmstudio", "model": "qwen3.5-9b" },
           { "provider": "lmstudio", "model": "google/gemma-4-26b-a4b-qat" },
@@ -16,7 +27,7 @@
         "enabled": true
       },
       "coding": {
-        "description": "Coding-focused MoA: qwopus coder + qwen3.5-9b references, ornith aggregator",
+        "description": "Coding-focused MoA: qwopus coder + qwen3.5-9b references, ornith 35B aggregates",
         "reference_models": [
           { "provider": "lmstudio", "model": "qwopus3.5-9b-coder-mtp" },
           { "provider": "lmstudio", "model": "qwen3.5-9b" }
@@ -28,7 +39,7 @@
         "enabled": true
       },
       "security": {
-        "description": "Security-focused MoA: gemma-26b + ornith references, ornith aggregator",
+        "description": "Security-focused MoA: gemma-26b + ornith references, ornith 35B aggregates",
         "reference_models": [
           { "provider": "lmstudio", "model": "google/gemma-4-26b-a4b-qat" },
           { "provider": "lmstudio", "model": "qwen3.6-35b-a3b-mtp" }
