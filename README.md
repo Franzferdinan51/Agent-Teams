@@ -1,12 +1,12 @@
-# 🏛️ Hive Nation v2.1.0
+# 🏛️ Hive Nation v2.2.0
 
-[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](https://github.com/Franzferdinan51/Agent-Teams)
+[![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](https://github.com/Franzferdinan51/Agent-Teams)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
 **The ultimate multi-agent government framework.** Spawn, coordinate, and orchestrate multiple specialized agents for complex tasks — with a three-branch AI Government, Senate Decrees, Agent Teams, and hive mind intelligence.
 
-**Now with built-in LLM-powered Council deliberation!** No separate servers or repos needed.
+**Now with built-in LLM-powered Council deliberation and Mixture of Agents (MoA)!** No separate servers or repos needed.
 
 Built for [OpenClaw](https://github.com/openclaw/openclaw) and [Duck CLI](https://github.com/Franzferdinan51/duck-cli).
 
@@ -107,6 +107,7 @@ npm run start:webui
 | Component | Description | Port |
 |-----------|-------------|------|
 | **Council Server** | LLM-powered deliberation with 46 councilors | 3007 |
+| **Mixture of Agents** | Parallel reference fan-out + aggregator synthesis | 3007 |
 | **WebUI** | Live dashboard with real-time updates | 3131 |
 | **46 Councilors** | Diverse AI perspectives (Technocrat, Ethicist, etc.) | - |
 | **Multi-Provider LLM** | MiniMax, LM Studio (local), OpenRouter | - |
@@ -116,11 +117,11 @@ npm run start:webui
 
 ---
 
-## 🏛️ Architecture (v2.1.0)
+## 🏛️ Architecture (v2.2.0)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    🏛️ HIVE NATION v2.1.0 🏛️                       │
+│                    🏛️ HIVE NATION v2.2.0 🏛️                       │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
@@ -145,6 +146,14 @@ npm run start:webui
 │  │  - Spawn agent teams for implementation                    │   │
 │  │  - Monitor and report results                               │   │
 │  └─────────────────────────────────────────────────────────────┘   │
+│                              ↓                                      │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  MOA — Mixture of Agents (v2.2.0)                          │   │
+│  │  - Reference models fan out in parallel (Promise.all)       │   │
+│  │  - Aggregator synthesizes advice into one response          │   │
+│  │  - 3 presets: default, coding, security                   │   │
+│  │  - REST: POST /api/moa/run  |  CLI: council moa             │   │
+│  └─────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -160,8 +169,11 @@ npm run start:webui
 
 | File | Purpose |
 |------|---------|
-| `council-server.js` | LLM-powered deliberation server |
+| `council-server.js` | LLM-powered Council + MoA REST API |
+| `council-cli.js` | CLI — Council + MoA commands |
 | `councilors.json` | 46 councilor definitions |
+| `moa/moa-runtime.js` | Mixture of Agents engine |
+| `moa/config.json` | MoA presets (default, coding, security) |
 | `webui/server.js` | Web dashboard |
 | `webui/public/index.html` | WebUI frontend |
 | `scripts/hive-*.js` | 80+ Hive scripts |
@@ -170,6 +182,27 @@ npm run start:webui
 ---
 
 ## 🎮 Usage
+
+### Run Mixture of Agents (MoA)
+
+```bash
+# Via CLI — ask anything
+node council-cli.js moa "should I refactor the auth system?"
+
+# With a specific preset
+node council-cli.js moa "audit this code" --preset security
+
+# List all presets
+node council-cli.js moa list
+
+# Via REST API
+curl -X POST http://localhost:3007/api/moa/run \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "explain this code", "preset": "coding"}'
+
+# Via JavaScript
+node -e "const {runMoA}=require('./moa/runtime'); runMoA('your prompt','default',[]).then(console.log)"
+```
 
 ### Start a Deliberation
 
@@ -182,6 +215,14 @@ curl -X POST http://localhost:3007/api/session/start \
 # Watch in WebUI
 open http://localhost:3131
 ```
+
+### MoA Presets
+
+| Preset | References | Aggregator | Best For |
+|--------|-----------|------------|----------|
+| `default` | qwen3.5-9b, gemma-26b, gemma-12b | ornith 35B | General analysis |
+| `coding` | qwopus coder, qwen3.5-9b | ornith 35B | Architecture, code review |
+| `security` | gemma-26b, ornith 35B | ornith 35B | Security audits |
 
 ### Switch LLM Provider
 
@@ -255,6 +296,7 @@ curl http://localhost:3007/api/llm/providers | jq .
 
 - [START-HERE.md](START-HERE.md) - Getting started
 - [docs/](docs/) - Full documentation
+- [docs/MOA.md](docs/MOA.md) - **Mixture of Agents guide** (setup, presets, API, integration)
 - [scripts/](scripts/) - Hive scripts reference
 
 ---
@@ -262,6 +304,17 @@ curl http://localhost:3007/api/llm/providers | jq .
 ## 🧪 Testing
 
 ```bash
+# Test MoA presets load
+node council-cli.js moa list
+
+# Test MoA end-to-end
+node council-cli.js moa "What is 2+2?"
+
+# Test MoA REST API
+curl -X POST http://localhost:3007/api/moa/run \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "hello world in python", "preset": "coding"}'
+
 # Test Council
 curl http://localhost:3007/api/councilors | jq '.councilors | length'
 

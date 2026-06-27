@@ -3,40 +3,40 @@
     "default_preset": "default",
     "presets": {
       "default": {
-        "description": "General-purpose MoA: technical + security + pragmatic perspectives",
+        "description": "General-purpose MoA: ornith (35B) aggregator with qwen3.5-9b + gemma-4-26b as references",
         "reference_models": [
-          { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" },
-          { "provider": "lmstudio", "model": "supergemma4-26b-uncensored-v2" },
-          { "provider": "lmstudio", "model": "qwen3.5-9b" }
+          { "provider": "lmstudio", "model": "qwen3.5-9b" },
+          { "provider": "lmstudio", "model": "google/gemma-4-26b-a4b-qat" },
+          { "provider": "lmstudio", "model": "gemma-4-12b-it-qat" }
         ],
-        "aggregator": { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" },
+        "aggregator": { "provider": "lmstudio", "model": "qwen3.6-35b-a3b-mtp" },
         "reference_temperature": 0.6,
         "aggregator_temperature": 0.4,
         "reference_max_tokens": 1024,
         "enabled": true
       },
       "coding": {
-        "description": "Coding-focused MoA: architecture + implementation perspectives",
+        "description": "Coding-focused MoA: qwopus coder + qwen3.5-9b references, ornith aggregator",
         "reference_models": [
-          { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" },
+          { "provider": "lmstudio", "model": "qwopus3.5-9b-coder-mtp" },
           { "provider": "lmstudio", "model": "qwen3.5-9b" }
         ],
-        "aggregator": { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" },
+        "aggregator": { "provider": "lmstudio", "model": "qwen3.6-35b-a3b-mtp" },
         "reference_temperature": 0.5,
         "aggregator_temperature": 0.3,
-        "reference_max_tokens": 768,
+        "reference_max_tokens": 1024,
         "enabled": true
       },
       "security": {
-        "description": "Security-focused MoA: adversarial + technical review",
+        "description": "Security-focused MoA: gemma-26b + ornith references, ornith aggregator",
         "reference_models": [
-          { "provider": "lmstudio", "model": "supergemma4-26b-uncensored-v2" },
-          { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" }
+          { "provider": "lmstudio", "model": "google/gemma-4-26b-a4b-qat" },
+          { "provider": "lmstudio", "model": "qwen3.6-35b-a3b-mtp" }
         ],
-        "aggregator": { "provider": "lmstudio", "model": "qwen3.6-35b-a3b" },
+        "aggregator": { "provider": "lmstudio", "model": "ornith-1.0-35b" },
         "reference_temperature": 0.7,
         "aggregator_temperature": 0.4,
-        "reference_max_tokens": 512,
+        "reference_max_tokens": 768,
         "enabled": true
       }
     }
