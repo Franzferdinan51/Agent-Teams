@@ -25,6 +25,7 @@ const defaultSettings = {
   providers: {
     openrouter: { apiKey: '', endpoint: '' },
     lmstudio: { endpoint: process.env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1' },
+    decision: { endpoint: process.env.DECISION_URL || 'http://127.0.0.1:1234/v1', model: process.env.DECISION_MODEL || 'd1-2b' },
     google: { apiKey: '' },
     anthropic: { apiKey: '' },
   },
@@ -333,6 +334,222 @@ let sessionState = {
 
 let visionSessions = new Map();
 
+// ============ DECISION SERVICE (D1 / SystemOne protocol) ============
+// D1 is NOT a chat model: POST {endpoint}/systemone with
+// {model, state, questions{}} returns typed answers (choice / noul / score)
+// with calibrated probabilities in a single readout — no generated text.
+// Provider failure is a hard error (v2.2.2 rule): never fabricate a verdict.
+
+function getDecisionConfig() {
+  const settings = loadSettings();
+  const cfg = settings?.providers?.decision || {};
+  return {
+    endpoint: String(cfg.endpoint || process.env.DECISION_URL || 'http://127.0.0.1:1234/v1').replace(/\/+$/, ''),
+    model: cfg.model || process.env.DECISION_MODEL || 'd1-2b',
+  };
+}
+
+function validationError(message) {
+  const err = new Error(message);
+  err.isValidation = true;
+  return err;
+}
+
+// Spreadsheet-style default option ids: A, B, …, Z, AA, AB, …
+function defaultOptionId(index) {
+  let id = '';
+  let n = index;
+  do {
+    id = String.fromCharCode(65 + (n % 26)) + id;
+    n = Math.floor(n / 26) - 1;
+  } while (n >= 0);
+  return id;
+}
+
+function validateDecisionInput({ question, context, options, criteria, thresholds } = {}) {
+  if (typeof question !== 'string' || !question.trim()) {
+    throw validationError('question is required and must be a non-empty string');
+  }
+  if (!Array.isArray(options) || options.length < 2 || options.length > 50) {
+    throw validationError('options must be an array of 2-50 options');
+  }
+  const seen = new Set();
+  const normalizedOptions = options.map((opt, i) => {
+    if (!opt || typeof opt !== 'object' || typeof opt.label !== 'string' || !opt.label.trim()) {
+      throw validationError(`options[${i}] must be an object with a non-empty label`);
+    }
+    const id = opt.id !== undefined && opt.id !== null && String(opt.id).trim() !== ''
+      ? String(opt.id)
+      : defaultOptionId(i);
+    if (id === '__defer__') throw validationError(`options[${i}] uses the reserved id '__defer__'`);
+    if (seen.has(id)) throw validationError(`duplicate option id: ${id}`);
+    seen.add(id);
+    return {
+      id,
+      label: opt.label,
+      description: typeof opt.description === 'string' ? opt.description : undefined,
+    };
+  });
+
+  let criteriaText = '';
+  if (typeof criteria === 'string') {
+    criteriaText = criteria.trim();
+  } else if (criteria && typeof criteria === 'object') {
+    criteriaText = Object.entries(criteria).map(([k, v]) => `${k}: ${v}`).join('; ');
+  }
+
+  const act = thresholds && typeof thresholds.act === 'number' && Number.isFinite(thresholds.act) ? thresholds.act : 0.85;
+  const review = thresholds && typeof thresholds.review === 'number' && Number.isFinite(thresholds.review) ? thresholds.review : 0.60;
+
+  return {
+    question: question.trim(),
+    context: typeof context === 'string' ? context : '',
+    criteriaText,
+    options: normalizedOptions,
+    thresholds: { act, review },
+  };
+}
+
+async function runDecision({ question, context, options, criteria, deliberationText, thresholds } = {}) {
+  const norm = validateDecisionInput({ question, context, options, criteria, thresholds });
+  const { endpoint, model } = getDecisionConfig();
+
+  const stateParts = [norm.question];
+  if (norm.criteriaText) stateParts.push(`Decision criteria: ${norm.criteriaText}`);
+  if (norm.context) stateParts.push(norm.context);
+  if (deliberationText) stateParts.push(`Council deliberation:\n${deliberationText}`);
+  const state = stateParts.join('\n\n');
+
+  const criteriaMap = {};
+  for (const opt of norm.options) {
+    criteriaMap[opt.id] = opt.description ? `${opt.label} — ${opt.description}` : opt.label;
+  }
+  criteriaMap['__defer__'] = 'Defer judgment — none of these options fit, or there is not enough information to decide';
+
+  const started = Date.now();
+  let data;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    let res;
+    try {
+      res = await fetch(`${endpoint}/systemone`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model,
+          state,
+          questions: {
+            pick: {
+              type: 'choice',
+              instructions: 'Choose the option that best satisfies the decision criteria. Choose __defer__ if none of the options fit or there is not enough information to decide.',
+              criteria: criteriaMap,
+            },
+            ready: {
+              type: 'noul',
+              instructions: 'The information provided is sufficient to make this decision now.',
+            },
+          },
+        }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      throw new Error(`Decision provider error ${res.status}: ${errText.slice(0, 300)}`);
+    }
+    data = await res.json();
+  } catch (e) {
+    if (e.isValidation) throw e;
+    throw new Error(`Decision provider request failed: ${e.name === 'AbortError' ? 'timed out after 30s' : e.message}`);
+  }
+  const latencyMs = Date.now() - started;
+
+  const pick = data?.answers?.pick;
+  if (!pick || typeof pick !== 'object') {
+    throw new Error('Decision provider returned no answers.pick');
+  }
+  const choice = pick.choice;
+  if (typeof choice !== 'string' || !Object.prototype.hasOwnProperty.call(criteriaMap, choice)) {
+    throw new Error(`Decision provider returned an unknown choice: ${JSON.stringify(choice)}`);
+  }
+  const probabilities = pick.probabilities;
+  if (!probabilities || typeof probabilities !== 'object' || Array.isArray(probabilities)) {
+    throw new Error('Decision provider returned no probabilities object');
+  }
+  const probValues = Object.values(probabilities);
+  if (probValues.length === 0 || probValues.some((v) => typeof v !== 'number' || !Number.isFinite(v))) {
+    throw new Error('Decision provider probabilities must all be numbers');
+  }
+  const probSum = probValues.reduce((a, b) => a + b, 0);
+  if (Math.abs(probSum - 1) > 0.05) {
+    throw new Error(`Decision provider probabilities do not sum to ~1 (got ${probSum})`);
+  }
+
+  const confidence = typeof pick.confidence === 'number' ? pick.confidence : probabilities[choice];
+  // Real D1 noul shape (pinned live 2026-11-26): answers.ready =
+  // {type: 'noul', noul: <P(yes) number>} — no probabilities/confidence fields.
+  const readyAnswer = data?.answers?.ready;
+  let readiness = null;
+  if (readyAnswer && typeof readyAnswer.noul === 'number') readiness = readyAnswer.noul;
+  else if (readyAnswer && typeof readyAnswer.probability === 'number') readiness = readyAnswer.probability;
+  else if (typeof readyAnswer === 'number') readiness = readyAnswer;
+
+  const deferred = choice === '__defer__';
+  const labelById = new Map(norm.options.map((o) => [o.id, o.label]));
+  const scores = norm.options
+    .map((o) => ({ id: o.id, label: o.label, probability: typeof probabilities[o.id] === 'number' ? probabilities[o.id] : 0 }))
+    .sort((a, b) => b.probability - a.probability);
+  const deferProbability = typeof probabilities['__defer__'] === 'number' ? probabilities['__defer__'] : null;
+
+  let band;
+  if (deferred) band = 'escalate';
+  else if (confidence >= norm.thresholds.act) band = 'act';
+  else if (confidence >= norm.thresholds.review) band = 'review';
+  else band = 'escalate';
+
+  return {
+    question: norm.question,
+    model,
+    backend: 'd1',
+    chosen: deferred ? null : { id: choice, label: labelById.get(choice) },
+    deferred,
+    scores,
+    deferProbability,
+    confidence,
+    readiness,
+    band,
+    latencyMs,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+// Shared by POST /api/decide and the MCP council_decide tool: validate first
+// (400-class errors), optionally deliberate, then let D1 decide.
+async function decideWithOptionalCouncil(args = {}) {
+  const norm = validateDecisionInput(args);
+  let deliberation = null;
+  let deliberationText = '';
+  if (args.council) {
+    const mode = args.mode || 'deliberation';
+    const responses = await deliberate(norm.question, norm.question, mode, args.councilors);
+    deliberation = { mode, responses };
+    deliberationText = Object.entries(responses).map(([k, v]) => `${k}: ${v}`).join('\n');
+  }
+  const verdict = await runDecision({
+    question: norm.question,
+    context: args.context,
+    options: args.options,
+    criteria: args.criteria,
+    deliberationText,
+    thresholds: args.thresholds,
+  });
+  if (deliberation) verdict.deliberation = deliberation;
+  return verdict;
+}
+
 // ============ MCP TOOLS REGISTRY ============
 
 const mcpTools = [
@@ -470,6 +687,42 @@ const mcpTools = [
         councilors: { type: 'array', items: { type: 'string' }, description: 'Specific councilors to involve' },
       },
       required: ['question'],
+    },
+  },
+
+  // ============ DECISION (D1) ============
+  {
+    name: 'council_decide',
+    description: 'Decide between options with the D1 decision model (SystemOne protocol), optionally after council deliberation. Returns a verdict with chosen option, per-option probabilities, confidence, readiness, and an act/review/escalate band.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        question: { type: 'string', description: 'The decision question' },
+        context: { type: 'string', description: 'Additional context for the decision state' },
+        options: {
+          type: 'array',
+          description: 'Options to choose between (2-50)',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', description: 'Optional option id (defaults to A, B, C, …)' },
+              label: { type: 'string', description: 'Option label' },
+              description: { type: 'string', description: 'Optional option description' },
+            },
+            required: ['label'],
+          },
+        },
+        criteria: { type: 'string', description: 'Decision criteria the choice should satisfy' },
+        council: { type: 'boolean', description: 'Run council deliberation first and fold it into the decision state' },
+        councilors: { type: 'array', items: { type: 'string' }, description: 'Specific councilors to involve when council is true' },
+        mode: { type: 'string', description: 'Deliberation mode when council is true' },
+        thresholds: {
+          type: 'object',
+          description: 'Confidence band thresholds',
+          properties: { act: { type: 'number' }, review: { type: 'number' } },
+        },
+      },
+      required: ['question', 'options'],
     },
   },
 
@@ -937,6 +1190,10 @@ async function handleMCPTool(name, args = {}) {
         timestamp: new Date().toISOString(),
       };
     
+    // Decision (D1)
+    case 'council_decide':
+      return await decideWithOptionalCouncil(args);
+
     // Vision
     case 'vision_analyze': {
       const visionId = `vision_${Date.now()}`;
@@ -1193,6 +1450,45 @@ app.post('/mcp', async (req, res) => {
   }
 });
 
+// ============ COUNCIL MEMORY STORE ============
+// Server-side key/value memory, persisted as JSON at data/council-memory.json
+// (override with COUNCIL_MEMORY_FILE). Shape on disk and on the wire:
+//   { "<key>": { "value": <any JSON>, "updatedAt": "<ISO timestamp>" } }
+// GET /api/memory returns { entries: { <that map> } }.
+// Loaded lazily; a missing file means an empty store, and a corrupt file is
+// logged and treated as empty (never a crash). Writes are atomic: the new
+// contents go to a temp file in the same directory, then rename over.
+
+const MEMORY_FILE = process.env.COUNCIL_MEMORY_FILE || path.join(__dirname, 'data', 'council-memory.json');
+const MEMORY_MAX_VALUE_BYTES = 256 * 1024;
+let memoryCache = null;
+
+function loadMemoryStore() {
+  if (memoryCache !== null) return memoryCache;
+  memoryCache = {};
+  try {
+    if (fs.existsSync(MEMORY_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(MEMORY_FILE, 'utf8'));
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        memoryCache = parsed;
+      } else {
+        console.error(`council memory: ${MEMORY_FILE} is not a JSON object — starting empty`);
+      }
+    }
+  } catch (e) {
+    console.error(`council memory: could not load ${MEMORY_FILE} (${e.message}) — starting empty`);
+    memoryCache = {};
+  }
+  return memoryCache;
+}
+
+function saveMemoryStore() {
+  fs.mkdirSync(path.dirname(MEMORY_FILE), { recursive: true });
+  const tmp = `${MEMORY_FILE}.tmp-${process.pid}`;
+  fs.writeFileSync(tmp, JSON.stringify(memoryCache, null, 2));
+  fs.renameSync(tmp, MEMORY_FILE);
+}
+
 // ============ REST API ROUTES ============
 
 // Health
@@ -1305,6 +1601,73 @@ ${liveContext}`;
     // Hard-fail when no LLM provider answers (v2.2.2) — never fabricate responses.
     res.status(502).json({ error: e.message, question, timestamp: new Date().toISOString() });
   }
+});
+
+// Decide (D1 decision model; optional council deliberation folded into state)
+app.post('/api/decide', async (req, res) => {
+  try {
+    const verdict = await decideWithOptionalCouncil(req.body || {});
+    res.json(verdict);
+  } catch (e) {
+    if (e.isValidation) {
+      return res.status(400).json({ error: e.message });
+    }
+    // Deliberation failure and decision-provider failure are both hard 502s
+    // (v2.2.2 rule) — never a fabricated verdict.
+    res.status(502).json({ error: e.message, timestamp: new Date().toISOString() });
+  }
+});
+
+// Council memory (server-side store; see COUNCIL MEMORY STORE above)
+app.get('/api/memory', (req, res) => {
+  res.json({ entries: loadMemoryStore() });
+});
+
+app.get('/api/memory/:key', (req, res) => {
+  const entry = loadMemoryStore()[req.params.key];
+  if (!entry) return res.status(404).json({ error: `memory key not found: ${req.params.key}` });
+  res.json({ key: req.params.key, value: entry.value, updatedAt: entry.updatedAt });
+});
+
+app.put('/api/memory/:key', (req, res) => {
+  if (!req.body || !Object.prototype.hasOwnProperty.call(req.body, 'value')) {
+    return res.status(400).json({ error: 'body must be JSON with a "value" field' });
+  }
+  let serialized;
+  try {
+    serialized = JSON.stringify(req.body.value);
+  } catch {
+    return res.status(400).json({ error: 'value is not JSON-serializable' });
+  }
+  if (serialized === undefined) {
+    return res.status(400).json({ error: 'value is not JSON-serializable' });
+  }
+  if (Buffer.byteLength(serialized, 'utf8') > MEMORY_MAX_VALUE_BYTES) {
+    return res.status(413).json({ error: `value exceeds ${MEMORY_MAX_VALUE_BYTES} bytes serialized` });
+  }
+  const store = loadMemoryStore();
+  const entry = { value: req.body.value, updatedAt: new Date().toISOString() };
+  store[req.params.key] = entry;
+  try {
+    saveMemoryStore();
+  } catch (e) {
+    return res.status(500).json({ error: `could not persist memory: ${e.message}` });
+  }
+  res.json({ key: req.params.key, value: entry.value, updatedAt: entry.updatedAt });
+});
+
+app.delete('/api/memory/:key', (req, res) => {
+  const store = loadMemoryStore();
+  if (!Object.prototype.hasOwnProperty.call(store, req.params.key)) {
+    return res.status(404).json({ error: `memory key not found: ${req.params.key}` });
+  }
+  delete store[req.params.key];
+  try {
+    saveMemoryStore();
+  } catch (e) {
+    return res.status(500).json({ error: `could not persist memory: ${e.message}` });
+  }
+  res.json({ ok: true });
 });
 
 // Settings

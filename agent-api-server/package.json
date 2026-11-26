@@ -1,6 +1,6 @@
 {
   "name": "ai-council-agent-api",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "Agent API Server for AI Council Chamber",
   "main": "server.js",
   "type": "module",

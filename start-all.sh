@@ -1,5 +1,5 @@
 #!/bin/bash
-# start-all.sh - Start ALL Agent-Teams v2.2.2 services
+# start-all.sh - Start ALL Agent-Teams v2.3.0 services
 # Usage:
 #   ./start-all.sh        Start all services (stops this script's prior PIDs first)
 #   ./start-all.sh stop   Stop only the PIDs recorded in ./.agent-teams.pids
@@ -51,7 +51,7 @@ if [ "${1:-}" = "stop" ]; then
     exit 0
 fi
 
-echo "🚀 Starting Agent-Teams v2.2.2 (Full Stack)"
+echo "🚀 Starting Agent-Teams v2.3.0 (Full Stack)"
 echo "============================================"
 
 GREEN='\033[0;32m'
@@ -88,7 +88,7 @@ sleep 2
 
 echo -e "\n"
 echo "╔═══════════════════════════════════════════════════════════════╗"
-echo "║              ✅ Agent-Teams v2.2.2 Started!                   ║"
+echo "║              ✅ Agent-Teams v2.3.0 Started!                   ║"
 echo "╠═══════════════════════════════════════════════════════════════╣"
 echo "║  Service              Port   PID    URL                       ║"
 echo "╠═══════════════════════════════════════════════════════════════╣"

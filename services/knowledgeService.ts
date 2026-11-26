@@ -1,25 +1,31 @@
 /**
  * knowledgeService.ts — Chamber memory / knowledge store.
  *
- * Backend reality (verified in council-api-server.cjs and council-server.js):
- * neither council server exposes a memory or knowledge API. The :3001 MCP
- * surface has session/settings/councilor tools only — no memory_* tools —
- * and settings persistence (settings.json) carries bots/providers/ui/audio,
- * not precedents or per-bot memories. The standalone mcp-server.js memory_*
- * tools proxy a separate agent-api service that is not part of the council
- * backends and is not running for the Chamber.
+ * Server-first (v2.3.0): council-api-server.cjs now exposes a persistent
+ * memory API (GET/PUT/DELETE /api/memory/:key, file-backed at
+ * data/council-memory.json). This service stores its two collections under
+ * the server keys `chamber.memories.v1` and `chamber.botMemories.v1`.
  *
- * So this service is the Chamber's client-side store, persisted in
- * localStorage — the same persistence model council-app.tsx already uses
- * for messages and settings. Data is real (entered by the user / saved from
- * actual passed proposals) and survives reloads; it is NOT synced to a
- * server, and nothing here fabricates entries.
+ * The exported API stays synchronous (the app's call sites read it inline),
+ * so the flow is: in-memory caches seeded from localStorage (exactly the
+ * pre-2.3.0 behavior), an async hydration fetch on first use — when the
+ * server answers, its data becomes the source of truth and replaces the
+ * cache; when the server has no entry yet, the local cache is pushed up so
+ * existing local data migrates. Mutations update the cache + localStorage
+ * immediately and write through to the server. When the server is
+ * unreachable, everything silently falls back to the localStorage behavior
+ * — offline use is unchanged and no error is surfaced to the user.
+ *
+ * The /api path is relative: the vite dev/preview proxy maps /api to the
+ * council API on :3001, the same base the rest of the app uses.
  */
 
 import { BotMemory, MemoryEntry, RAGDocument } from '../council-types';
 
 const MEMORIES_KEY = 'ai_council_memories_v1';
 const BOT_MEMORIES_KEY = 'ai_council_bot_memories_v1';
+const SERVER_MEMORIES_KEY = 'chamber.memories.v1';
+const SERVER_BOT_MEMORIES_KEY = 'chamber.botMemories.v1';
 
 function readJson<T>(key: string, fallback: T): T {
   try {
@@ -49,23 +55,119 @@ function scoreText(text: string, queryTerms: string[]): number {
   return queryTerms.reduce((acc, t) => acc + (lower.includes(t) ? 1 : 0), 0);
 }
 
+// ─── Server sync layer ──────────────────────────────────────────────────────
+
+type ServerState = 'unknown' | 'online' | 'offline';
+let serverState: ServerState = 'unknown';
+
+interface MemoryResponse {
+  key: string;
+  value: unknown;
+  updatedAt: string;
+}
+
+async function serverGet(key: string): Promise<{ found: boolean; value?: unknown }> {
+  const res = await fetch(`/api/memory/${encodeURIComponent(key)}`);
+  if (res.status === 404) return { found: false };
+  if (!res.ok) throw new Error(`memory GET ${key} -> ${res.status}`);
+  const body = (await res.json()) as MemoryResponse;
+  return { found: true, value: body.value };
+}
+
+async function serverPut(key: string, value: unknown): Promise<void> {
+  const res = await fetch(`/api/memory/${encodeURIComponent(key)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ value }),
+  });
+  if (!res.ok) throw new Error(`memory PUT ${key} -> ${res.status}`);
+}
+
+/**
+ * One server-backed collection: a synchronous in-memory cache mirrored to
+ * localStorage, hydrated from (and written through to) the council API.
+ */
+class ServerCollection<T> {
+  private cache: T[];
+  private hydrated = false;
+  private hydrating = false;
+
+  constructor(
+    private localKey: string,
+    private serverKey: string,
+  ) {
+    const seeded = readJson<T[]>(localKey, []);
+    this.cache = Array.isArray(seeded) ? seeded : [];
+  }
+
+  /** Kick off the one-time server hydration; safe to call on every read. */
+  private hydrate(): void {
+    if (this.hydrated || this.hydrating || serverState === 'offline') return;
+    this.hydrating = true;
+    serverGet(this.serverKey)
+      .then(({ found, value }) => {
+        serverState = 'online';
+        this.hydrated = true;
+        if (found && Array.isArray(value)) {
+          // Server is the source of truth once it answers with data.
+          this.cache = value as T[];
+          writeJson(this.localKey, this.cache);
+        } else if (!found && this.cache.length > 0) {
+          // Server has nothing yet: migrate the local data up.
+          void this.push();
+        }
+      })
+      .catch(() => {
+        // Unreachable: stay on the localStorage-backed cache, silently.
+        serverState = 'offline';
+      })
+      .finally(() => {
+        this.hydrating = false;
+      });
+  }
+
+  private async push(): Promise<void> {
+    if (serverState === 'offline') return;
+    try {
+      await serverPut(this.serverKey, this.cache);
+      serverState = 'online';
+      this.hydrated = true;
+    } catch {
+      serverState = 'offline';
+    }
+  }
+
+  get(): T[] {
+    this.hydrate();
+    return this.cache;
+  }
+
+  set(next: T[]): void {
+    this.cache = next;
+    writeJson(this.localKey, next);
+    void this.push();
+  }
+}
+
+const memoriesCollection = new ServerCollection<MemoryEntry>(MEMORIES_KEY, SERVER_MEMORIES_KEY);
+const botMemoriesCollection = new ServerCollection<BotMemory>(BOT_MEMORIES_KEY, SERVER_BOT_MEMORIES_KEY);
+
 // ─── Global memories (laws / precedents) ────────────────────────────────────
 
 export function getMemories(): MemoryEntry[] {
-  const list = readJson<MemoryEntry[]>(MEMORIES_KEY, []);
-  return Array.isArray(list) ? list : [];
+  return memoriesCollection.get();
 }
 
 export function saveMemory(entry: MemoryEntry): void {
-  const list = getMemories();
+  const list = [...memoriesCollection.get()];
   const idx = list.findIndex(m => m.id === entry.id);
   if (idx >= 0) list[idx] = entry;
   else list.push(entry);
-  writeJson(MEMORIES_KEY, list);
+  memoriesCollection.set(list);
 }
 
 export function deleteMemory(id: string): void {
-  writeJson(MEMORIES_KEY, getMemories().filter(m => m.id !== id));
+  memoriesCollection.set(memoriesCollection.get().filter(m => m.id !== id));
 }
 
 /** Keyword search over saved precedents. Returns best matches first. */
@@ -109,12 +211,10 @@ export function searchDocuments(documents: RAGDocument[], query: string): string
 // ─── Per-bot memories ───────────────────────────────────────────────────────
 
 export function getBotMemories(botId: string): BotMemory[] {
-  const all = readJson<BotMemory[]>(BOT_MEMORIES_KEY, []);
-  return (Array.isArray(all) ? all : []).filter(m => m.botId === botId);
+  return botMemoriesCollection.get().filter(m => m.botId === botId);
 }
 
 export function addBotMemory(botId: string, content: string, type: BotMemory['type']): BotMemory {
-  const all = readJson<BotMemory[]>(BOT_MEMORIES_KEY, []);
   const entry: BotMemory = {
     id: `botmem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     botId,
@@ -122,11 +222,10 @@ export function addBotMemory(botId: string, content: string, type: BotMemory['ty
     content,
     timestamp: Date.now(),
   };
-  writeJson(BOT_MEMORIES_KEY, [...(Array.isArray(all) ? all : []), entry]);
+  botMemoriesCollection.set([...botMemoriesCollection.get(), entry]);
   return entry;
 }
 
 export function deleteBotMemory(id: string): void {
-  const all = readJson<BotMemory[]>(BOT_MEMORIES_KEY, []);
-  writeJson(BOT_MEMORIES_KEY, (Array.isArray(all) ? all : []).filter(m => m.id !== id));
+  botMemoriesCollection.set(botMemoriesCollection.get().filter(m => m.id !== id));
 }

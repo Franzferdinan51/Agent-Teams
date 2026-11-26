@@ -5,6 +5,11 @@
  * Serves:
  *   GET  /v1/models            (and /models)
  *   POST /v1/chat/completions  (and /chat/completions) — canned assistant reply
+ *   POST /v1/systemone         (and /systemone) — canned D1 decision answers,
+ *                                shaped like the real LM Studio D1 readout
+ *                                (pinned live 2026-11-26: choice answers carry
+ *                                type/choice/probabilities/confidence; noul
+ *                                answers carry only {type:'noul', noul:P(yes)})
  *   GET  /health
  *
  * Run standalone:  STUB_LLM_PORT=4899 node test/stub-llm.js
@@ -20,6 +25,8 @@ const STUB_MODELS = [
   'qwen3.5-9b',
   'qwen3.5-0.8b',
   'qwythos-9b-claude-mythos-5-1m',
+  'd1-2b',
+  'd1-omni-2b',
 ];
 
 const CANNED_REPLY =
@@ -63,6 +70,44 @@ function createStubLlm() {
             },
           ],
           usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+        });
+      });
+      return;
+    }
+
+    if (req.method === 'POST' && (req.url === '/v1/systemone' || req.url === '/systemone')) {
+      let body = '';
+      req.on('data', (chunk) => (body += chunk));
+      req.on('end', () => {
+        let parsed = {};
+        try { parsed = JSON.parse(body || '{}'); } catch { /* fall through with no questions */ }
+        const answers = {};
+        for (const [name, q] of Object.entries(parsed.questions || {})) {
+          if (q && q.type === 'choice') {
+            const keys = Object.keys(q.criteria || {});
+            const nonDefer = keys.filter((k) => k !== '__defer__');
+            const first = nonDefer[0] || keys[0];
+            const others = keys.filter((k) => k !== first);
+            const probabilities = {};
+            probabilities[first] = others.length ? 0.9 : 1;
+            for (const k of others) probabilities[k] = 0.1 / others.length;
+            answers[name] = {
+              type: 'choice',
+              choice: first,
+              probabilities,
+              confidence: probabilities[first],
+            };
+          } else if (q && q.type === 'noul') {
+            // Real D1 noul shape: {type:'noul', noul:<P(yes)>} and nothing else.
+            answers[name] = { type: 'noul', noul: 0.88 };
+          } else if (q && q.type === 'score') {
+            answers[name] = { type: 'score', score: 0.5 };
+          }
+        }
+        sendJson(200, {
+          model: parsed.model || 'd1-2b',
+          answers,
+          usage: { input_tokens: 10, output_tokens: 0 },
         });
       });
       return;

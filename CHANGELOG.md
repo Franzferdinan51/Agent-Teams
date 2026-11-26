@@ -4,6 +4,22 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.3.0] - 2026-11-26 - Decision service (D1), server-side council memory, fleet deployment
+
+### Added
+- **Decision service:** `POST /api/decide` on council-api and the MCP tool **`council_decide`** (MCP `tools/list` 55 → **56**). Implements the System One pattern (code owns the workflow, the model owns one judgment): one POST to the decision provider's native `POST /v1/systemone` carrying two atomic questions — a `pick` choice question (caller options plus an explicit `__defer__` catch-all) and a `ready` noul readiness question. Default provider is Liquid AI's **d1-2b** via LM Studio (`providers.decision`, env `DECISION_URL` / `DECISION_MODEL`, runtime-repointable via `PUT /api/providers/decision`). Verdicts carry the full per-option probability distribution (`scores`), `deferProbability`, `confidence`, `readiness`, and a gating `band` (act ≥ 0.85, review ≥ 0.60, else escalate; deferred → escalate; thresholds overridable per call). With `council: true` the council deliberates first and its text is folded into the decision state — council advises, decider decides; the numbers come only from D1. Provider failure or a malformed answer is a hard **502**, never a fabricated verdict; input validation errors are 400.
+- **Server-side council memory:** `GET /api/memory` → `{entries: {key: {value, updatedAt}}}`, `GET /api/memory/:key` → `{key, value, updatedAt}` (404 `{error}` when absent), `PUT /api/memory/:key` with `{value: <any JSON>}` (missing `value` → 400; serialized value > 256 KB → 413), `DELETE /api/memory/:key` → `{ok: true}` (404 when absent). Persisted to `data/council-memory.json` (override `COUNCIL_MEMORY_FILE`, now gitignored) with atomic tmp-file + rename writes; loaded lazily; a missing or corrupt file starts empty (corruption is logged, never a crash).
+- **Fleet integration:** council-api deployed to Robin (tailnet `100.88.161.36`) as the systemd user service `agent-teams-council` (deploy dir `~/agent-teams`, port 3001, decision/chat providers reached via Robin's local LM Studio tunnel), and registered in Hermes' default profile on the Mac as MCP server `agent-teams-council` (`http://100.88.161.36:3001/mcp`). README gains Decision Models and Fleet integration sections, including a worked agent quickstart whose curl examples were run live against the Robin service.
+
+### Changed
+- **Chamber knowledge is server-first:** `services/knowledgeService.ts` now hydrates its collections from the council memory API on first use (server is the source of truth; existing local data migrates up when the server has none), writes through on every mutation, and silently falls back to the previous localStorage behavior when the server is unreachable. All exported signatures unchanged (synchronous, cache-backed); offline use unaffected. `./scripts/build-chamber.sh` passes clean (strict tsc + Vite build).
+- Version unified at 2.3.0 (`VERSION`, root/council/agent-api/MoA-plugin `package.json` files and their lockfiles, council-server health response, `start-all.sh` banners, `.env.example` header, README version line). Component-internal API versions (council-api health `3.1.0`) are not release stamps and stay.
+
+### Verified
+- `npm test` **31/31** (26 previous + 5 new): `/api/decide` happy path, `council: true` deliberation trace, decision-provider-down → 502, MCP tools/list = 56 incl. `council_decide`, MCP `council_decide` verdict, and memory PUT → GET round-trip / list / on-disk file / DELETE → 404. The test stub (`test/stub-llm.js`) serves a deterministic `/v1/systemone` in the real pinned D1 wire shape.
+- **Live on Robin:** service restarted on the new build; `/api/health` ok, MCP tools/list = 56, memory PUT/GET round-trip against the service (persisted to `~/agent-teams/data/council-memory.json`), and a real `POST /api/decide` ticket question returned a D1 verdict (chosen A "Cheap simple route", confidence 0.982, band act) through Robin's tunnel to the Mac's LM Studio.
+- **Live on the Mac (read-only):** `hermes mcp test agent-teams-council` connects and discovers 56 tools incl. `council_decide`. No Hermes config changes in this release. The decide calls JIT-loaded `d1-2b` on the Mac; it was the only loaded model and was unloaded afterwards, restoring the empty resting state. Maya :8086 untouched.
+
 ## [2.2.2] - 2026-11-26 - /api/ask hard-fails when no LLM provider answers
 
 ### Changed

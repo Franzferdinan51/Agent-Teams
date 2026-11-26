@@ -29,3 +29,6 @@ council-dist/
 
 # Runtime settings written by council-api-server.cjs at repo root
 settings.json
+
+# Server-side council memory store (runtime data, council-api-server.cjs)
+data/council-memory.json

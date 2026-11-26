@@ -15,6 +15,7 @@
 const { spawn, execFile } = require('child_process');
 const fs = require('fs');
 const net = require('net');
+const os = require('os');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
@@ -81,10 +82,13 @@ async function waitForHealth(url, timeoutMs = 20000) {
   return false;
 }
 
+const MEMORY_TEST_FILE = path.join(os.tmpdir(), `council-memory-test-${process.pid}.json`);
+
 function cleanup(settingsBackup) {
   for (const child of children) {
     try { child.kill('SIGTERM'); } catch { /* already dead */ }
   }
+  try { if (fs.existsSync(MEMORY_TEST_FILE)) fs.unlinkSync(MEMORY_TEST_FILE); } catch { /* best effort */ }
   // Restore settings.json to its pre-test state (runtime state of the api server)
   try {
     if (settingsBackup === null) {
@@ -110,7 +114,7 @@ async function main() {
   // council-server.js appends /v1 itself (LMSTUDIO_URL) and moa-runtime reads
   // LM_STUDIO_URL the same way — both get the stub root WITHOUT /v1.
   start('council', ['council-server.js'], { LMSTUDIO_URL: stubRoot, LM_STUDIO_URL: stubRoot });
-  start('api', ['council-api-server.cjs'], { PORT: String(apiPort), LMSTUDIO_URL: `${stubRoot}/v1` });
+  start('api', ['council-api-server.cjs'], { PORT: String(apiPort), LMSTUDIO_URL: `${stubRoot}/v1`, DECISION_URL: `${stubRoot}/v1`, COUNCIL_MEMORY_FILE: MEMORY_TEST_FILE });
 
   try {
     // ── Boot / health ──────────────────────────────────────────────
@@ -242,6 +246,71 @@ async function main() {
       body: JSON.stringify({ endpoint: `${stubRoot}/v1`, model: 'stub-model' }),
     });
 
+    // ── Decision service (D1 / SystemOne protocol, stub-backed) ────
+    const decideOptions = [
+      { label: 'Cheap simple route', description: 'Handle with the cheap simple route' },
+      { label: 'Escalate to expensive expert route', description: 'Escalate to the expensive expert route' },
+    ];
+    const decide = await fetchJson(`${apiBase}/api/decide`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: 'How should this support ticket be handled?',
+        context: 'A support ticket says: my password reset email never arrived. It is not urgent and needs a simple standard fix.',
+        options: decideOptions,
+        criteria: 'Prefer the cheap simple route when the fix is simple and standard.',
+      }),
+    });
+    const decideScoresSum = (decide.json?.scores || []).reduce((a, s) => a + s.probability, 0);
+    check('/api/decide happy path returns a D1 verdict',
+      decide.status === 200 && decide.json?.backend === 'd1'
+        && decide.json?.chosen?.id === 'A' && decide.json?.chosen?.label === 'Cheap simple route'
+        && decide.json?.scores?.length === decideOptions.length
+        && Math.abs(decideScoresSum + (decide.json?.deferProbability || 0) - 1) < 0.02
+        && typeof decide.json?.confidence === 'number'
+        && decide.json?.band === 'act'
+        && typeof decide.json?.readiness === 'number',
+      `status=${decide.status} chosen=${decide.json?.chosen?.id} confidence=${decide.json?.confidence} readiness=${decide.json?.readiness} band=${decide.json?.band}`);
+
+    const decideCouncil = await fetchJson(`${apiBase}/api/decide`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: 'Unique council decide probe: should we adopt the phased rollout plan?',
+        council: true,
+        options: [
+          { label: 'Adopt the phased rollout' },
+          { label: 'Ship everything at once' },
+        ],
+      }),
+    });
+    const deliberationKeys = Object.keys(decideCouncil.json?.deliberation?.responses || {});
+    check('/api/decide with council:true includes deliberation trace and verdict',
+      decideCouncil.status === 200
+        && ['speaker', 'technocrat', 'ethicist', 'pragmatist', 'skeptic'].every((k) => deliberationKeys.includes(k))
+        && !!decideCouncil.json?.chosen && Array.isArray(decideCouncil.json?.scores),
+      `status=${decideCouncil.status} responders=${deliberationKeys.join(',')} chosen=${decideCouncil.json?.chosen?.id}`);
+
+    // Decision provider down → 502 with error, never a fabricated verdict.
+    await fetchJson(`${apiBase}/api/providers/decision`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint: 'http://127.0.0.1:1/v1', model: 'd1-2b' }),
+    });
+    const deadDecide = await fetchJson(`${apiBase}/api/decide`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: 'How should this ticket be handled?', options: decideOptions }),
+    });
+    check('/api/decide hard-fails when the decision provider is down',
+      deadDecide.status === 502 && typeof deadDecide.json?.error === 'string' && !deadDecide.json?.chosen,
+      `status=${deadDecide.status} error=${(deadDecide.json?.error || '').slice(0, 60)}`);
+    await fetchJson(`${apiBase}/api/providers/decision`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint: `${stubRoot}/v1`, model: 'd1-2b' }),
+    });
+
     const mcp = await fetchJson(`${apiBase}/mcp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -249,6 +318,60 @@ async function main() {
     });
     const toolCount = mcp.json?.result?.tools?.length || 0;
     check('MCP tools/list count > 0', toolCount > 0, `tools=${toolCount}`);
+
+    const toolNames = (mcp.json?.result?.tools || []).map((t) => t.name);
+    check('MCP tools/list is 56 and includes council_decide',
+      toolCount === 56 && toolNames.includes('council_decide'),
+      `tools=${toolCount} council_decide=${toolNames.includes('council_decide')}`);
+
+    const mcpDecide = await fetchJson(`${apiBase}/mcp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 2,
+        method: 'tools/call',
+        params: {
+          name: 'council_decide',
+          arguments: { question: 'How should this support ticket be handled?', options: decideOptions },
+        },
+      }),
+    });
+    let mcpVerdict = null;
+    try { mcpVerdict = JSON.parse(mcpDecide.json?.result?.content?.[0]?.text || 'null'); } catch { /* leave null */ }
+    check('MCP council_decide returns a verdict',
+      !!mcpVerdict?.chosen && Array.isArray(mcpVerdict?.scores) && mcpVerdict.scores.length === decideOptions.length,
+      `chosen=${mcpVerdict?.chosen?.id} scores=${mcpVerdict?.scores?.length} band=${mcpVerdict?.band}`);
+
+    // ── Council memory store (server-side, file-backed) ───────────
+    const memValue = { topic: 'test precedent', tags: ['alpha', 'beta'], nested: { n: 42 } };
+    const memPut = await fetchJson(`${apiBase}/api/memory/test-key`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value: memValue }),
+    });
+    check('memory PUT saves an entry',
+      memPut.status === 200 && memPut.json?.key === 'test-key' && typeof memPut.json?.updatedAt === 'string',
+      `status=${memPut.status} updatedAt=${memPut.json?.updatedAt}`);
+
+    const memGet = await fetchJson(`${apiBase}/api/memory/test-key`);
+    check('memory GET round-trips the PUT value',
+      memGet.status === 200 && JSON.stringify(memGet.json?.value) === JSON.stringify(memValue),
+      `status=${memGet.status} value=${JSON.stringify(memGet.json?.value)}`);
+
+    const memList = await fetchJson(`${apiBase}/api/memory`);
+    check('memory list contains the key',
+      memList.status === 200 && !!memList.json?.entries?.['test-key']
+        && JSON.stringify(memList.json.entries['test-key'].value) === JSON.stringify(memValue),
+      `keys=${Object.keys(memList.json?.entries || {}).join(',')}`);
+
+    check('memory file exists on disk after PUT', fs.existsSync(MEMORY_TEST_FILE), MEMORY_TEST_FILE);
+
+    const memDel = await fetchJson(`${apiBase}/api/memory/test-key`, { method: 'DELETE' });
+    const memGetAfterDel = await fetchJson(`${apiBase}/api/memory/test-key`);
+    check('memory DELETE then GET is 404',
+      memDel.status === 200 && memDel.json?.ok === true && memGetAfterDel.status === 404 && typeof memGetAfterDel.json?.error === 'string',
+      `delete=${memDel.status} getAfter=${memGetAfterDel.status}`);
 
     // ── CLI smoke (COUNCIL_API env points the CLI at the api server) ──
     const cliEnv = { ...process.env, COUNCIL_API: apiBase };
