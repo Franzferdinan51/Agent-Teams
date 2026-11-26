@@ -3,7 +3,7 @@
  * Redesigned: command center with councilor status panel + live chamber
  */
 import React, { useRef, useEffect, useState } from 'react';
-import { Message, BotConfig, SessionMode, SessionStatus, AuthorType } from '../types';
+import { Message, BotConfig, SessionMode, SessionStatus, AuthorType } from '../council-types';
 import ChatMessage from './ChatMessage';
 import MessageInput from './MessageInput';
 
@@ -451,7 +451,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1">
                           <span className="text-[9px] font-bold text-slate-300 truncate">{msg.author}</span>
-                          {thinkingBotIds.includes(msg.authorId || '') && (
+                          {thinkingBotIds.includes(activeBots.find(b => b.name === msg.author)?.id || '') && (
                             <span className="w-1 h-1 rounded-full bg-amber-400 animate-pulse shrink-0" />
                           )}
                         </div>

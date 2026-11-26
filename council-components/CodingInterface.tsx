@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Message, SessionMode, Attachment, BotConfig } from '../types';
+import { Message, SessionMode, Attachment, BotConfig } from '../council-types';
 import MessageInput from './MessageInput';
 
 interface CodingInterfaceProps {
@@ -77,7 +77,7 @@ const CodingInterface: React.FC<CodingInterfaceProps> = ({
         });
 
         setFiles(Array.from(fileMap.values()));
-        if (!activeFile && fileMap.size > 0) setActiveFile(fileMap.values().next().value);
+        if (!activeFile && fileMap.size > 0) setActiveFile(fileMap.values().next().value ?? null);
 
     }, [messages]);
 

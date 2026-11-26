@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BotConfig } from '../types';
+import { BotConfig } from '../council-types';
 
 interface CouncilorDeckProps {
   councilors: BotConfig[];

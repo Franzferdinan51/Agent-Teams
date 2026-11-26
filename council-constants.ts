@@ -1,4 +1,4 @@
-import { BotConfig, AuthorType, Settings, MCPTool } from './types';
+import { BotConfig, AuthorType, Settings, MCPTool } from './council-types';
 import { Type } from '@google/genai';
 
 export const OPENROUTER_MODELS = [
@@ -875,7 +875,7 @@ export const DEFAULT_SETTINGS: Settings = {
         geminiApiKey: "",
         openRouterKey: "",
         ollamaEndpoint: "http://localhost:11434/v1/chat/completions",
-        lmStudioEndpoint: "http://100.74.88.40:1234/v1/chat/completions",
+        lmStudioEndpoint: "http://127.0.0.1:1234/v1",
         janAiEndpoint: "http://localhost:1337/v1/chat/completions",
         genericOpenAIEndpoint: "",
         genericOpenAIKey: "",

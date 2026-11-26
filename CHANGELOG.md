@@ -4,6 +4,30 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.2.1] - 2026-11-26 - Completion Pass: Chamber Rework, Councilor Unification, Swarm Verification
+
+### Added
+- **Chamber UI services layer:** `services/aiService.ts` (per-bot OpenAI-compatible chat with SSE streaming + JSON fallback; Gemini TTS with Web Speech fallback; Gemini transcription that fails visibly without a key), `services/knowledgeService.ts` (honest browser-local store — neither server has a memory API), `services/CouncilOrchestrationService.ts` (client-side orchestration executing real chat turns), and `hooks/useLiveSession.ts` (polls council-api sessions/councilors).
+- **Chamber build:** `scripts/build-chamber.sh` — one-command clean build (staged install → strict `tsc` via `tsconfig.chamber.json` → Vite) emitting `council-dist/`; `@types/react`/`@types/react-dom` added; Tailwind v4 (`@tailwindcss/vite`) wired with a safelist for interpolated classes — previously no CSS was linked at all.
+- **Roster-parity tests:** `npm test` now also verifies both council servers serve the canonical `councilors.json` id set (20 checks total).
+
+### Changed
+- **Chamber UI reworked:** imports reconciled to the canonical `council-types.ts` / `council-constants.ts` / `council-components/` layout; the app loads the real councilor registry (86) and modes from council-api on mount with a visible error state when the API is down; Vite dev/preview proxy `/api` → council-api.
+- **Councilor data unified:** `councilors.json` is now the single canonical dataset (86 councilors — the merged superset of the engine's 53, the API's 24, and the old file's 62) loaded by both servers (`COUNCILORS_PATH` override; clear fatal error if missing). Entries carry display + persona fields; every legacy id is preserved under `alias`/`aliases` and the API's `get_councilor` resolves them. Engine prompt/banner councilor counts are dynamic instead of hardcoded ("45"/"53").
+- Version unified at 2.2.1 (`VERSION`, all `package.json` files, council health response).
+
+### Fixed
+- **Chamber UI:** 4 strict-TypeScript errors (including a ChatWindow thinking indicator keyed on a nonexistent message field); the app's session-event emitter POSTed to `/api/session/event`, which exists on neither server — removed with all its call sites; the shipped default AI endpoint was a dead tailnet IP, corrected to `127.0.0.1:1234/v1`.
+- **Swarm orchestrator:** `--help`/`-h` was treated as a task and wrote a junk plan file (now prints usage, exit 0); `--count` crashed with a traceback on non-numeric input (now a clean error, exit 2) and accepted out-of-range values (0 produced an empty plan, −1 produced 49 agents — now clamped to the documented 1–15); `--domain` is validated against the seven real domains.
+
+### Removed
+- Proven-dead `council-components/LiveSession.tsx` (zero importers) and the Chamber's fake-data paths. `OrchestrationPanel` remains unmounted (pre-existing), now backed by a real service.
+
+### Verified
+- Chamber clean build passes; HTTP-level smoke against stub-backed servers: page/bundle/CSS 200, councilors (86, correct shape), modes (11), session start, and a completed deliberation on the engine.
+- `npm test` 20/20, including deliberation against the stub LLM and the new roster-parity checks.
+- Swarm orchestrator boot-tested in an isolated venv (stdlib-only): all entry flows pass post-fix; it is a planner that writes `plans/plan-<id>.json` — it does not dispatch agents. Full verdicts in `agent-swarm-system/README.md`.
+
 ## [2.2.0] - 2026-11-25 - Security, Ports & Test Overhaul
 
 ### Security

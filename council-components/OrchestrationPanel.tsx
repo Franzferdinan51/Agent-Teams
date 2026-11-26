@@ -12,7 +12,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { BotConfig, Settings, SessionMode, Message } from '../types';
+import { BotConfig, Settings, SessionMode, Message } from '../council-types';
 import { CoordinationPattern, OrchestratorSession } from '../services/CouncilOrchestrationService';
 import { CouncilOrchestrationService } from '../services/CouncilOrchestrationService';
 
@@ -196,7 +196,7 @@ const OrchestrationPanel: React.FC<OrchestrationPanelProps> = ({
           {(Object.entries(PATTERN_DESCRIPTIONS) as [string, { icon: string; label: string; desc: string; best: string }][]).map(([key, p]) => (
             <button
               key={key}
-              onClick={() => setPattern(key)}
+              onClick={() => setPattern(key as CoordinationPattern)}
               className={`text-left px-3 py-2 rounded-lg border transition-all text-xs ${
                 pattern === key
                   ? 'bg-cyan-500/20 border-cyan-500/50 text-white'

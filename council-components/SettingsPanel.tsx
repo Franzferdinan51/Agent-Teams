@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Message, Settings, BotConfig, AuthorType, MCPTool, RAGDocument, BotMemory } from '../types';
-import { MCP_PRESETS, PERSONA_PRESETS, PUBLIC_MCP_REGISTRY } from '../constants';
+import { Message, Settings, BotConfig, AuthorType, MCPTool, RAGDocument, BotMemory } from '../council-types';
+import { MCP_PRESETS, PERSONA_PRESETS, PUBLIC_MCP_REGISTRY } from '../council-constants';
 import { getMemories, getBotMemories, addBotMemory, deleteBotMemory } from '../services/knowledgeService';
 
 interface SettingsPanelProps {

@@ -122,6 +122,24 @@ async function main() {
     const councilors = await fetchJson(`${councilBase}/api/councilors`);
     check('councilors count > 0', (councilors.json?.count || 0) > 0, `count=${councilors.json?.count}`);
 
+    // ── Roster parity: both servers must serve the canonical councilors.json ──
+    // council-api returns a bare array; council-server returns {councilors, count}.
+    // (Runs before any test adds custom bots to the api server's settings.)
+    const apiCouncilors = await fetchJson(`${apiBase}/api/councilors`);
+    const canonicalIds = JSON.parse(fs.readFileSync(path.join(ROOT, 'councilors.json'), 'utf8'))
+      .map((c) => c.id).sort();
+    const engineIds = (councilors.json?.councilors || []).map((c) => c.id).sort();
+    const apiIds = (Array.isArray(apiCouncilors.json) ? apiCouncilors.json : []).map((c) => c.id).sort();
+    check('roster parity: engine serves canonical councilors.json ids',
+      JSON.stringify(engineIds) === JSON.stringify(canonicalIds),
+      `engine=${engineIds.length} canonical=${canonicalIds.length}`);
+    check('roster parity: api serves canonical councilors.json ids',
+      JSON.stringify(apiIds) === JSON.stringify(canonicalIds),
+      `api=${apiIds.length} canonical=${canonicalIds.length}`);
+    check('roster parity: engine and api id sets identical',
+      JSON.stringify(engineIds) === JSON.stringify(apiIds),
+      `engine=${engineIds.length} api=${apiIds.length}`);
+
     const providers = await fetchJson(`${councilBase}/api/providers`);
     check('council providers list', Array.isArray(providers.json?.providers) && providers.json.providers.includes('lmstudio'),
       `providers=${JSON.stringify(providers.json?.providers)}`);

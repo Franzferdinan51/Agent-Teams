@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Message, AuthorType } from '../types';
+import { Message, AuthorType } from '../council-types';
 import { 
   BarChart, 
   Bar, 

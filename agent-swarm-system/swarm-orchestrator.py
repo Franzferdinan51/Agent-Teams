@@ -519,22 +519,35 @@ def print_plan(plan: dict, plan_file: Path):
     return plan
 
 
+VALID_DOMAINS = ('game', 'build', 'research', 'audit', 'mobile', 'data', 'general')
+
+
+def print_usage():
+    print("Usage: python3 swarm-orchestrator.py '<task>' [--count N] [--domain domain]")
+    print()
+    print("Options:")
+    print("  --count N   Number of agents (default: 5, max: 15)")
+    print("  --domain    Force domain: game, build, research, audit, mobile, data, general")
+    print()
+    print("Examples:")
+    print("  python3 swarm-orchestrator.py 'build a REST API for task management'")
+    print("  python3 swarm-orchestrator.py 'make a 2D roguelike platformer' --count 8")
+    print("  python3 swarm-orchestrator.py 'research AI agent frameworks'")
+    print("  python3 swarm-orchestrator.py 'audit our codebase for security' --domain audit")
+    print("  python3 swarm-orchestrator.py 'build a Flutter mobile app' --domain mobile --count 5")
+    print("  python3 swarm-orchestrator.py 'build a data pipeline for analytics' --domain data")
+
+
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python3 swarm-orchestrator.py '<task>' [--count N] [--domain domain]")
-        print()
-        print("Options:")
-        print("  --count N   Number of agents (default: 5, max: 15)")
-        print("  --domain    Force domain: game, build, research, audit, mobile, data, general")
-        print()
-        print("Examples:")
-        print("  python3 swarm-orchestrator.py 'build a REST API for task management'")
-        print("  python3 swarm-orchestrator.py 'make a 2D roguelike platformer' --count 8")
-        print("  python3 swarm-orchestrator.py 'research AI agent frameworks'")
-        print("  python3 swarm-orchestrator.py 'audit our codebase for security' --domain audit")
-        print("  python3 swarm-orchestrator.py 'build a Flutter mobile app' --domain mobile --count 5")
-        print("  python3 swarm-orchestrator.py 'build a data pipeline for analytics' --domain data")
+        print_usage()
         sys.exit(1)
+
+    # Boot fix (2026-11-26): --help/-h was previously treated as a task
+    # and generated a junk plan file.
+    if sys.argv[1] in ('-h', '--help'):
+        print_usage()
+        sys.exit(0)
 
     task = sys.argv[1]
     count = 5
@@ -543,10 +556,25 @@ def main():
     i = 2
     while i < len(sys.argv):
         if sys.argv[i] == '--count' and i + 1 < len(sys.argv):
-            count = min(int(sys.argv[i + 1]), 15)
+            # Boot fix (2026-11-26): non-numeric --count crashed with an
+            # unhandled ValueError traceback; negative/zero counts produced
+            # 0 agents or, in the general domain, a negative slice yielding
+            # 49 agents (over the documented max of 15). Parse cleanly and
+            # clamp to 1..15.
+            try:
+                count = int(sys.argv[i + 1])
+            except ValueError:
+                print(f"Error: --count must be an integer, got '{sys.argv[i + 1]}'", file=sys.stderr)
+                sys.exit(2)
+            count = max(1, min(count, 15))
             i += 2
         elif sys.argv[i] == '--domain' and i + 1 < len(sys.argv):
             domain = sys.argv[i + 1].lower()
+            # Boot fix (2026-11-26): an unknown domain was silently stored
+            # in the plan (e.g. "bogus") while general agents were selected.
+            if domain not in VALID_DOMAINS:
+                print(f"Error: --domain must be one of: {', '.join(VALID_DOMAINS)}", file=sys.stderr)
+                sys.exit(2)
             i += 2
         else:
             i += 1

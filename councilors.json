@@ -2,507 +2,1613 @@
   {
     "id": "speaker-high-council",
     "name": "High Speaker",
+    "personaName": "Victoria Adams",
+    "alias": "speaker",
+    "aliases": [
+      "speaker",
+      "councilor-speaker",
+      "speaker-high-council"
+    ],
+    "party": "Neutral",
+    "title": "Speaker of the Council",
     "role": "speaker",
-    "enabled": true,
+    "specialty": "leadership",
+    "expertise": "governance",
+    "voteWeight": 2,
     "model": "MiniMax-M2.5",
-    "color": "from-amber-500 to-yellow-700"
-  },
-  {
-    "id": "moderator-facilitator",
-    "name": "The Facilitator",
-    "role": "moderator",
-    "enabled": true,
-    "model": "jan-v3-4b-base-instruct",
-    "color": "from-cyan-500 to-blue-600"
+    "color": "from-amber-500 to-yellow-700",
+    "enabled": true
   },
   {
     "id": "councilor-technocrat",
     "name": "The Technocrat",
+    "personaName": "James Techson",
+    "alias": "technocrat",
+    "aliases": [
+      "technocrat",
+      "councilor-technocrat"
+    ],
+    "party": "Neutral",
+    "title": "Chief Technologist",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "technical",
+    "expertise": "technology",
+    "voteWeight": 1,
     "model": "MiniMax-M2.5",
-    "color": "from-emerald-500 to-teal-700"
+    "color": "from-emerald-500 to-teal-700",
+    "enabled": true
   },
   {
     "id": "councilor-ethicist",
     "name": "The Ethicist",
+    "personaName": "Maya Ethics",
+    "alias": "ethicist",
+    "aliases": [
+      "ethicist",
+      "councilor-ethicist"
+    ],
+    "party": "Neutral",
+    "title": "Chief Ethicist",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "ethics",
+    "expertise": "ethics",
+    "voteWeight": 1,
     "model": "MiniMax-M2.5",
-    "color": "from-rose-500 to-pink-700"
+    "color": "from-rose-500 to-pink-700",
+    "enabled": true
   },
   {
     "id": "councilor-pragmatist",
     "name": "The Pragmatist",
+    "personaName": "Sam Practical",
+    "alias": "pragmatist",
+    "aliases": [
+      "pragmatist",
+      "councilor-pragmatist"
+    ],
+    "party": "Neutral",
+    "title": "Pragmatist",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "practical",
+    "expertise": "practical",
+    "voteWeight": 1,
     "model": "MiniMax-M2.5",
-    "color": "from-slate-500 to-gray-700"
-  },
-  {
-    "id": "councilor-visionary",
-    "name": "The Visionary",
-    "role": "councilor",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-violet-500 to-purple-700"
-  },
-  {
-    "id": "councilor-sentinel",
-    "name": "The Sentinel",
-    "role": "councilor",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-red-600 to-red-900"
-  },
-  {
-    "id": "councilor-historian",
-    "name": "The Historian",
-    "role": "councilor",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-amber-700 to-orange-900"
-  },
-  {
-    "id": "councilor-diplomat",
-    "name": "The Diplomat",
-    "role": "councilor",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-sky-400 to-blue-500"
+    "color": "from-slate-500 to-gray-700",
+    "enabled": true
   },
   {
     "id": "councilor-skeptic",
     "name": "The Skeptic",
+    "personaName": "Chris Doubt",
+    "alias": "skeptic",
+    "aliases": [
+      "skeptic",
+      "councilor-skeptic"
+    ],
+    "party": "Neutral",
+    "title": "Devils Advocate",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "critical",
+    "expertise": "criticism",
+    "voteWeight": 1,
     "model": "MiniMax-M2.5",
-    "color": "from-stone-500 to-stone-700"
+    "color": "from-stone-500 to-stone-700",
+    "enabled": true
   },
   {
-    "id": "councilor-conspiracist",
-    "name": "The Conspiracist",
+    "id": "councilor-sentinel",
+    "name": "The Sentinel",
+    "personaName": "Alex Shield",
+    "alias": "sentinel",
+    "aliases": [
+      "sentinel",
+      "councilor-sentinel"
+    ],
+    "party": "Security",
+    "title": "Security Sentinel",
     "role": "councilor",
-    "enabled": true,
-    "model": "jan-v3-4b-base-instruct",
-    "color": "from-lime-600 to-green-900"
-  },
-  {
-    "id": "councilor-journalist",
-    "name": "The Journalist",
-    "role": "councilor",
-    "enabled": true,
+    "specialty": "security",
+    "expertise": "security",
+    "voteWeight": 1,
     "model": "MiniMax-M2.5",
-    "color": "from-yellow-500 to-orange-500"
+    "color": "from-red-600 to-red-900",
+    "enabled": true,
+    "veto": [
+      "security"
+    ]
   },
   {
-    "id": "councilor-propagandist",
-    "name": "The Propagandist",
-    "role": "councilor",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-fuchsia-600 to-purple-800"
+    "id": "councilor-security-expert",
+    "name": "Security Expert",
+    "personaName": "Secure Steve",
+    "alias": "security_expert",
+    "aliases": [
+      "security_expert",
+      "councilor-security",
+      "councilor-security-expert"
+    ],
+    "party": "Security",
+    "title": "Security Expert",
+    "role": "coding",
+    "specialty": "security",
+    "expertise": "security",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
   },
   {
-    "id": "councilor-psychologist",
-    "name": "The Psychologist",
-    "role": "councilor",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-teal-400 to-cyan-600"
-  },
-  {
-    "id": "councilor-libertarian",
-    "name": "The Libertarian",
-    "role": "councilor",
-    "enabled": true,
-    "model": "jan-v3-4b-base-instruct",
-    "color": "from-yellow-400 to-yellow-600"
-  },
-  {
-    "id": "councilor-progressive",
-    "name": "The Progressive",
-    "role": "councilor",
-    "enabled": true,
-    "model": "jan-v3-4b-base-instruct",
-    "color": "from-blue-500 to-cyan-500"
-  },
-  {
-    "id": "councilor-conservative",
-    "name": "The Conservative",
-    "role": "councilor",
-    "enabled": true,
-    "model": "jan-v3-4b-base-instruct",
-    "color": "from-red-700 to-red-900"
-  },
-  {
-    "id": "councilor-independent",
-    "name": "The Independent",
-    "role": "councilor",
-    "enabled": true,
-    "model": "jan-v3-4b-base-instruct",
-    "color": "from-purple-400 to-slate-500"
-  },
-  {
-    "id": "councilor-scientist",
-    "name": "The Scientist",
-    "role": "councilor",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-emerald-500 to-teal-600"
-  },
-  {
-    "id": "councilor-artist",
-    "name": "The Artist",
-    "role": "councilor",
-    "enabled": true,
-    "model": "jan-v3-4b-base-instruct",
-    "color": "from-pink-500 to-rose-600"
-  },
-  {
-    "id": "councilor-meteorologist",
-    "name": "The Meteorologist",
-    "role": "councilor",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-sky-500 to-blue-600"
-  },
-  {
-    "id": "councilor-emergency-manager",
-    "name": "The Emergency Manager",
-    "role": "councilor",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-orange-500 to-red-600"
-  },
-  {
-    "id": "councilor-animal-care",
-    "name": "The Animal Care Specialist",
-    "role": "councilor",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-amber-500 to-yellow-600"
+    "id": "councilor-risk-manager",
+    "name": "Risk Manager",
+    "personaName": "Risk Rachel",
+    "alias": "risk_manager",
+    "aliases": [
+      "risk_manager",
+      "councilor-risk-manager"
+    ],
+    "party": "Conservative",
+    "title": "Risk Manager",
+    "role": "specialist",
+    "specialty": "risk",
+    "expertise": "risk",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
   },
   {
     "id": "councilor-risk-analyst",
     "name": "The Risk Analyst",
-    "role": "councilor",
-    "enabled": true,
+    "personaName": "Risk Ray",
+    "alias": "risk_analyst",
+    "aliases": [
+      "risk_analyst",
+      "councilor-risk-analyst"
+    ],
+    "party": "Conservative",
+    "title": "Risk Analyst",
+    "role": "specialist",
+    "specialty": "risk",
+    "expertise": "risk",
+    "voteWeight": 1,
     "model": "MiniMax-M2.5",
-    "color": "from-slate-500 to-gray-600"
+    "color": "from-slate-500 to-gray-600",
+    "enabled": true
   },
   {
-    "id": "councilor-local-resident",
-    "name": "The Local Resident",
-    "role": "councilor",
-    "enabled": true,
-    "model": "jan-v3-4b-base-instruct",
-    "color": "from-green-500 to-emerald-600"
+    "id": "councilor-emergency-manager",
+    "name": "The Emergency Manager",
+    "personaName": "Alert Alex",
+    "alias": "emergency_mgr",
+    "aliases": [
+      "emergency_mgr",
+      "councilor-emergency-manager"
+    ],
+    "party": "Security",
+    "title": "Emergency Manager",
+    "role": "emergency",
+    "specialty": "emergency",
+    "expertise": "emergency",
+    "voteWeight": 2,
+    "model": "MiniMax-M2.5",
+    "color": "from-orange-500 to-red-600",
+    "enabled": true
+  },
+  {
+    "id": "councilor-architect",
+    "name": "Architect",
+    "personaName": "Arch Andy",
+    "alias": "architect",
+    "aliases": [
+      "architect",
+      "councilor-architect"
+    ],
+    "party": "Neutral",
+    "title": "Software Architect",
+    "role": "coding",
+    "specialty": "architecture",
+    "expertise": "architecture",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
   },
   {
     "id": "specialist-code",
     "name": "Specialist Coder",
+    "personaName": "Code Carlos",
+    "alias": "coder",
+    "aliases": [
+      "coder",
+      "specialist-code"
+    ],
+    "party": "Neutral",
+    "title": "Senior Coder",
     "role": "specialist",
-    "enabled": true,
+    "specialty": "coding",
+    "expertise": "coding",
+    "voteWeight": 1,
     "model": "qwen3-coder-next",
-    "color": "from-fuchsia-500 to-pink-600"
+    "color": "from-fuchsia-500 to-pink-600",
+    "enabled": true
   },
   {
-    "id": "specialist-legal",
-    "name": "Specialist Legal",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-slate-600 to-slate-800"
+    "id": "councilor-devops",
+    "name": "DevOps",
+    "personaName": "Ops Oliver",
+    "alias": "devops",
+    "aliases": [
+      "devops",
+      "councilor-devops"
+    ],
+    "party": "Neutral",
+    "title": "DevOps Engineer",
+    "role": "coding",
+    "specialty": "devops",
+    "expertise": "devops",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
   },
   {
-    "id": "specialist-science",
-    "name": "Specialist Science",
+    "id": "councilor-performance-engineer",
+    "name": "Performance Engineer",
+    "personaName": "Fast Fiona",
+    "alias": "perf_engineer",
+    "aliases": [
+      "perf_engineer",
+      "councilor-performance-engineer"
+    ],
+    "party": "Neutral",
+    "title": "Performance Engineer",
     "role": "specialist",
-    "enabled": true,
+    "specialty": "performance",
+    "expertise": "performance",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-qa",
+    "name": "QA Engineer",
+    "personaName": "Test Tara",
+    "alias": "qa",
+    "aliases": [
+      "qa",
+      "councilor-qa"
+    ],
+    "party": "Neutral",
+    "title": "QA Engineer",
+    "role": "coding",
+    "specialty": "quality",
+    "expertise": "testing",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-data-scientist",
+    "name": "Data Scientist",
+    "personaName": "Data Diana",
+    "alias": "data_scientist",
+    "aliases": [
+      "data_scientist",
+      "councilor-data-scientist"
+    ],
+    "party": "Neutral",
+    "title": "Data Scientist",
+    "role": "specialist",
+    "specialty": "data",
+    "expertise": "data",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-visionary",
+    "name": "The Visionary",
+    "personaName": "Riley Dream",
+    "alias": "visionary",
+    "aliases": [
+      "visionary",
+      "councilor-visionary"
+    ],
+    "party": "Progressive",
+    "title": "Visionary",
+    "role": "councilor",
+    "specialty": "innovation",
+    "expertise": "innovation",
+    "voteWeight": 1,
     "model": "MiniMax-M2.5",
-    "color": "from-teal-500 to-emerald-600"
+    "color": "from-violet-500 to-purple-700",
+    "enabled": true
+  },
+  {
+    "id": "councilor-product-manager",
+    "name": "Product Manager",
+    "personaName": "PM Chen",
+    "alias": "product_manager",
+    "aliases": [
+      "product_manager",
+      "councilor-product-manager"
+    ],
+    "party": "Neutral",
+    "title": "Product Manager",
+    "role": "specialist",
+    "specialty": "product",
+    "expertise": "product",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-strategic-planner",
+    "name": "Strategic Planner",
+    "personaName": "Plan Petra",
+    "alias": "planner",
+    "aliases": [
+      "planner",
+      "councilor-strategic-planner"
+    ],
+    "party": "Neutral",
+    "title": "Strategic Planner",
+    "role": "specialist",
+    "specialty": "planning",
+    "expertise": "planning",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-economist",
+    "name": "Economist",
+    "personaName": "Wall Street Sam",
+    "alias": "economist",
+    "aliases": [
+      "economist",
+      "councilor-economist"
+    ],
+    "party": "Conservative",
+    "title": "Economist",
+    "role": "specialist",
+    "specialty": "economics",
+    "expertise": "economics",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
   },
   {
     "id": "specialist-finance",
     "name": "Specialist Finance",
+    "personaName": "Money Mike",
+    "alias": "financier",
+    "aliases": [
+      "financier",
+      "councilor-finance-expert",
+      "specialist-finance"
+    ],
+    "party": "Conservative",
+    "title": "Financier",
     "role": "specialist",
-    "enabled": true,
+    "specialty": "finance",
+    "expertise": "finance",
+    "voteWeight": 1,
     "model": "MiniMax-M2.5",
-    "color": "from-yellow-600 to-amber-700"
+    "color": "from-yellow-600 to-amber-700",
+    "enabled": true,
+    "veto": [
+      "budget"
+    ]
   },
   {
-    "id": "specialist-military",
-    "name": "Specialist Military",
+    "id": "councilor-botanist",
+    "name": "Botanist",
+    "personaName": "Flora Green",
+    "alias": "botanist",
+    "aliases": [
+      "botanist",
+      "councilor-botanist"
+    ],
+    "party": "Neutral",
+    "title": "Botanist",
     "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-stone-600 to-stone-800"
-  },
-  {
-    "id": "specialist-medical",
-    "name": "Specialist Medical",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-rose-400 to-red-500"
-  },
-  {
-    "id": "insurance-actuary",
-    "name": "The Insurance Actuary",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-blue-600 to-indigo-700"
-  },
-  {
-    "id": "cyber-warlord",
-    "name": "The Cyber Warlord",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-red-700 to-red-900"
-  },
-  {
-    "id": "constitutional-scholar",
-    "name": "The Constitutional Scholar",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-amber-700 to-yellow-800"
-  },
-  {
-    "id": "epidemiologist",
-    "name": "The Epidemiologist",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-emerald-600 to-teal-700"
-  },
-  {
-    "id": "financial-analyst",
-    "name": "The Financial Analyst",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-emerald-700 to-green-800"
-  },
-  {
-    "id": "intelligence-officer",
-    "name": "The Intelligence Officer",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-slate-700 to-zinc-800"
-  },
-  {
-    "id": "climate-scientist",
-    "name": "The Climate Scientist",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-cyan-600 to-blue-700"
-  },
-  {
-    "id": "crisis-negotiator",
-    "name": "The Crisis Negotiator",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-orange-600 to-red-700"
-  },
-  {
-    "id": "ux-researcher",
-    "name": "The UX Researcher",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-pink-500 to-rose-600"
-  },
-  {
-    "id": "infrastructure-engineer",
-    "name": "The Infrastructure Engineer",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-yellow-600 to-amber-700"
-  },
-  {
-    "id": "bioethicist",
-    "name": "The Bioethicist",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-fuchsia-600 to-purple-700"
-  },
-  {
-    "id": "supply-chain-analyst",
-    "name": "The Supply Chain Analyst",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-lime-600 to-green-700"
-  },
-  {
-    "id": "urban-planner",
-    "name": "The Urban Planner",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-orange-500 to-amber-600"
-  },
-  {
-    "id": "naval-strategist",
-    "name": "The Naval Strategist",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-blue-800 to-slate-900"
-  },
-  {
-    "id": "data-privacy-officer",
-    "name": "The Data Privacy Officer",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-violet-600 to-purple-800"
-  },
-  {
-    "id": "cultivator",
-    "name": "The Cultivator",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-green-600 to-emerald-700"
-  },
-  {
-    "id": "trichome-inspector",
-    "name": "The Trichome Inspector",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-purple-500 to-violet-700"
-  },
-  {
-    "id": "nutrient-manager",
-    "name": "The Nutrient Manager",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-amber-500 to-orange-600"
-  },
-  {
-    "id": "ipm-specialist",
-    "name": "The IPM Specialist",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-red-600 to-red-800"
-  },
-  {
-    "id": "cure-master",
-    "name": "The Cure Master",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-yellow-600 to-amber-700"
-  },
-  {
-    "id": "compliance-officer",
-    "name": "The Compliance Officer",
-    "role": "specialist",
-    "enabled": true,
-    "model": "MiniMax-M2.5",
-    "color": "from-slate-500 to-gray-700"
+    "specialty": "plants",
+    "expertise": "plants",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
   },
   {
     "id": "cannabis-botanist",
     "name": "The Cannabis Botanist",
+    "personaName": "Dr. Jane Grow",
+    "alias": "cannabis_botanist",
+    "aliases": [
+      "cannabis_botanist",
+      "cannabis-botanist"
+    ],
+    "party": "Cannabis",
+    "title": "Cannabis Botanist",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "cannabis,botanics,plant-science",
+    "expertise": "cannabis,botanics,plant-science",
+    "voteWeight": 1,
     "model": "qwen3.6-35b-a3b",
     "color": "from-green-600 to-emerald-900",
-    "expertise": "cannabis,botanics,plant-science"
+    "enabled": true
   },
   {
     "id": "cultivation-expert",
     "name": "The Grow Master",
+    "personaName": "Max Yield",
+    "alias": "cultivation_expert",
+    "aliases": [
+      "cultivation_expert",
+      "cultivation-expert"
+    ],
+    "party": "Cannabis",
+    "title": "Cultivation Expert",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "cultivation,growing,indoor,outdoor,soil,nutrients",
+    "expertise": "cultivation,growing,indoor,outdoor,soil,nutrients",
+    "voteWeight": 1,
     "model": "qwen3.6-35b-a3b",
     "color": "from-lime-500 to-green-800",
-    "expertise": "cultivation,growing,indoor,outdoor,soil,nutrients"
+    "enabled": true
   },
   {
     "id": "thc-analyst",
     "name": "The THC Analyst",
+    "personaName": "Dr. Potency Paul",
+    "alias": "thc_analyst",
+    "aliases": [
+      "thc_analyst",
+      "thc-analyst"
+    ],
+    "party": "Cannabis",
+    "title": "THC Analyst",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "thc,cbd,cannabinoids,potency,lab-testing",
+    "expertise": "thc,cbd,cannabinoids,potency,lab-testing",
+    "voteWeight": 1,
     "model": "qwen3.6-35b-a3b",
     "color": "from-amber-500 to-orange-700",
-    "expertise": "thc,cbd,cannabinoids,potency,lab-testing"
+    "enabled": true
   },
   {
     "id": "terpene-specialist",
     "name": "The Terpene Specialist",
+    "personaName": "Aroma Alex",
+    "alias": "terpene_specialist",
+    "aliases": [
+      "terpene_specialist",
+      "terpene-specialist"
+    ],
+    "party": "Cannabis",
+    "title": "Terpene Specialist",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "terpenes,flavonoids,aroma,flavor",
+    "expertise": "terpenes,flavonoids,aroma,flavor",
+    "voteWeight": 1,
     "model": "qwen3.6-35b-a3b",
     "color": "from-purple-500 to-violet-800",
-    "expertise": "terpenes,flavonoids,aroma,flavor"
+    "enabled": true
   },
   {
     "id": "medical-cannabis",
     "name": "The Medical Cannabis Advisor",
+    "personaName": "Dr. Wellness Willow",
+    "alias": "medical_cannabis",
+    "aliases": [
+      "medical_cannabis",
+      "medical-cannabis"
+    ],
+    "party": "Cannabis",
+    "title": "Medical Cannabis Advisor",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "medical,medicinal,wellness,health,dosage",
+    "expertise": "medical,medicinal,wellness,health,dosage",
+    "voteWeight": 1,
     "model": "qwen3.6-35b-a3b",
     "color": "from-rose-500 to-pink-800",
-    "expertise": "medical,medicinal,wellness,health,dosage"
+    "enabled": true
   },
   {
     "id": "plant-health-expert",
     "name": "The Plant Doctor",
+    "personaName": "Dr. Green",
+    "alias": "plant_health_expert",
+    "aliases": [
+      "plant_health_expert",
+      "plant-health-expert"
+    ],
+    "party": "Cannabis",
+    "title": "Plant Health Expert",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "plant-health,pests,diseases,nutrients,deficiencies",
+    "expertise": "plant-health,pests,diseases,nutrients,deficiencies",
+    "voteWeight": 1,
     "model": "qwen3.6-35b-a3b",
     "color": "from-teal-500 to-cyan-700",
-    "expertise": "plant-health,pests,diseases,nutrients,deficiencies"
+    "enabled": true
   },
   {
     "id": "general-plant-analyst",
     "name": "The Plant Analyst",
+    "personaName": "Zoe Plants",
+    "alias": "general_plant_analyst",
+    "aliases": [
+      "general_plant_analyst",
+      "general-plant-analyst"
+    ],
+    "party": "Cannabis",
+    "title": "General Plant Analyst",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "plants,general,photosynthesis,watering,light",
+    "expertise": "plants,general,photosynthesis,watering,light",
+    "voteWeight": 1,
     "model": "qwen3.6-35b-a3b",
     "color": "from-forest-500 to-green-900",
-    "expertise": "plants,general,photosynthesis,watering,light"
+    "enabled": true
   },
   {
     "id": "harvest-master",
     "name": "The Harvest Master",
+    "personaName": "Harvest Hannah",
+    "alias": "harvest_master",
+    "aliases": [
+      "harvest_master",
+      "harvest-master"
+    ],
+    "party": "Cannabis",
+    "title": "Harvest Master",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "harvest,curing,drying,trimming,preservation",
+    "expertise": "harvest,curing,drying,trimming,preservation",
+    "voteWeight": 1,
     "model": "qwen3.6-35b-a3b",
     "color": "from-yellow-500 to-amber-700",
-    "expertise": "harvest,curing,drying,trimming,preservation"
+    "enabled": true
   },
   {
     "id": "strain-breeder",
     "name": "The Strain Breeder",
+    "personaName": "Genetics Gary",
+    "alias": "strain_breeder",
+    "aliases": [
+      "strain_breeder",
+      "strain-breeder"
+    ],
+    "party": "Cannabis",
+    "title": "Strain Breeder",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "genetics,breeding,strains,phenotypes,seeds",
+    "expertise": "genetics,breeding,strains,phenotypes,seeds",
+    "voteWeight": 1,
     "model": "qwen3.6-35b-a3b",
     "color": "from-indigo-500 to-purple-800",
-    "expertise": "genetics,breeding,strains,phenotypes,seeds"
+    "enabled": true
   },
   {
     "id": "environment-control",
     "name": "The Environment Controller",
+    "personaName": "Control Chris",
+    "alias": "environment_control",
+    "aliases": [
+      "environment_control",
+      "environment-control"
+    ],
+    "party": "Cannabis",
+    "title": "Environment Controller",
     "role": "councilor",
-    "enabled": true,
+    "specialty": "environment,temperature,humidity,vpd,lighting,hvac",
+    "expertise": "environment,temperature,humidity,vpd,lighting,hvac",
+    "voteWeight": 1,
     "model": "qwen3.6-35b-a3b",
     "color": "from-blue-500 to-cyan-700",
-    "expertise": "environment,temperature,humidity,vpd,lighting,hvac"
+    "enabled": true
+  },
+  {
+    "id": "councilor-geneticist",
+    "name": "Geneticist",
+    "personaName": "Gene Grey",
+    "alias": "geneticist",
+    "aliases": [
+      "geneticist",
+      "councilor-geneticist"
+    ],
+    "party": "Neutral",
+    "title": "Geneticist",
+    "role": "specialist",
+    "specialty": "genetics",
+    "expertise": "genetics",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-animal-care",
+    "name": "The Animal Care Specialist",
+    "personaName": "Vet Val",
+    "alias": "animal_care",
+    "aliases": [
+      "animal_care",
+      "councilor-animal-care"
+    ],
+    "party": "Neutral",
+    "title": "Animal Care Specialist",
+    "role": "councilor",
+    "specialty": "animal-care",
+    "expertise": "animal-care",
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-amber-500 to-yellow-600",
+    "enabled": true
+  },
+  {
+    "id": "councilor-meteorologist",
+    "name": "The Meteorologist",
+    "personaName": "Storm Chris",
+    "alias": "meteorologist",
+    "aliases": [
+      "meteorologist",
+      "councilor-meteorologist"
+    ],
+    "party": "Neutral",
+    "title": "Meteorologist",
+    "role": "emergency",
+    "specialty": "weather",
+    "expertise": "weather",
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-sky-500 to-blue-600",
+    "enabled": true,
+    "priority": "emergency"
+  },
+  {
+    "id": "councilor-journalist",
+    "name": "The Journalist",
+    "personaName": "Dana Press",
+    "alias": "journalist",
+    "aliases": [
+      "journalist",
+      "councilor-journalist"
+    ],
+    "party": "Neutral",
+    "title": "Journalist",
+    "role": "councilor",
+    "specialty": "communication",
+    "expertise": "communication",
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-yellow-500 to-orange-500",
+    "enabled": true
+  },
+  {
+    "id": "councilor-diplomat",
+    "name": "The Diplomat",
+    "personaName": "Lee Harmony",
+    "alias": "diplomat",
+    "aliases": [
+      "diplomat",
+      "councilor-diplomat"
+    ],
+    "party": "Neutral",
+    "title": "Diplomat",
+    "role": "councilor",
+    "specialty": "diplomacy",
+    "expertise": "diplomacy",
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-sky-400 to-blue-500",
+    "enabled": true
+  },
+  {
+    "id": "councilor-marketer",
+    "name": "Marketer",
+    "personaName": "Brand Kate",
+    "alias": "marketer",
+    "aliases": [
+      "marketer",
+      "councilor-marketer"
+    ],
+    "party": "Progressive",
+    "title": "Marketer",
+    "role": "specialist",
+    "specialty": "marketing",
+    "expertise": "marketing",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-historian",
+    "name": "The Historian",
+    "personaName": "Pat Past",
+    "alias": "historian",
+    "aliases": [
+      "historian",
+      "councilor-historian"
+    ],
+    "party": "Neutral",
+    "title": "Historian",
+    "role": "councilor",
+    "specialty": "history",
+    "expertise": "history",
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-amber-700 to-orange-900",
+    "enabled": true
+  },
+  {
+    "id": "councilor-psychologist",
+    "name": "The Psychologist",
+    "personaName": "Dr. Mind",
+    "alias": "psychologist",
+    "aliases": [
+      "psychologist",
+      "councilor-psychologist"
+    ],
+    "party": "Neutral",
+    "title": "Psychologist",
+    "role": "councilor",
+    "specialty": "human-factors",
+    "expertise": "human-factors",
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-teal-400 to-cyan-600",
+    "enabled": true
+  },
+  {
+    "id": "councilor-visual-analyst",
+    "name": "Visual Analyst",
+    "personaName": "See Sally",
+    "alias": "visual_analyst",
+    "aliases": [
+      "visual_analyst",
+      "councilor-visual-analyst"
+    ],
+    "party": "Neutral",
+    "title": "Visual Analyst",
+    "role": "vision",
+    "specialty": "vision",
+    "expertise": "analysis",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-pattern-recognizer",
+    "name": "Pattern Recognizer",
+    "personaName": "Pattern Pete",
+    "alias": "pattern_recognizer",
+    "aliases": [
+      "pattern_recognizer",
+      "councilor-pattern-recognizer"
+    ],
+    "party": "Neutral",
+    "title": "Pattern Recognizer",
+    "role": "vision",
+    "specialty": "patterns",
+    "expertise": "patterns",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-color-specialist",
+    "name": "Color Specialist",
+    "personaName": "Color Carol",
+    "alias": "color_specialist",
+    "aliases": [
+      "color_specialist",
+      "councilor-color-specialist"
+    ],
+    "party": "Neutral",
+    "title": "Color Specialist",
+    "role": "vision",
+    "specialty": "color",
+    "expertise": "color",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-composition-expert",
+    "name": "Composition Expert",
+    "personaName": "Frame Frank",
+    "alias": "composition_expert",
+    "aliases": [
+      "composition_expert",
+      "councilor-composition-expert"
+    ],
+    "party": "Neutral",
+    "title": "Composition Expert",
+    "role": "vision",
+    "specialty": "composition",
+    "expertise": "composition",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-context-interpreter",
+    "name": "Context Interpreter",
+    "personaName": "Context Chloe",
+    "alias": "context_interpreter",
+    "aliases": [
+      "context_interpreter",
+      "councilor-context-interpreter"
+    ],
+    "party": "Neutral",
+    "title": "Context Interpreter",
+    "role": "vision",
+    "specialty": "context",
+    "expertise": "context",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-detail-observer",
+    "name": "Detail Observer",
+    "personaName": "Detail Dan",
+    "alias": "detail_observer",
+    "aliases": [
+      "detail_observer",
+      "councilor-detail-observer"
+    ],
+    "party": "Neutral",
+    "title": "Detail Observer",
+    "role": "vision",
+    "specialty": "details",
+    "expertise": "details",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-emotion-reader",
+    "name": "Emotion Reader",
+    "personaName": "Feel Fran",
+    "alias": "emotion_reader",
+    "aliases": [
+      "emotion_reader",
+      "councilor-emotion-reader"
+    ],
+    "party": "Neutral",
+    "title": "Emotion Reader",
+    "role": "vision",
+    "specialty": "emotion",
+    "expertise": "emotions",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-symbol-interpreter",
+    "name": "Symbol Interpreter",
+    "personaName": "Symbol Sam",
+    "alias": "symbol_interpreter",
+    "aliases": [
+      "symbol_interpreter",
+      "councilor-symbol-interpreter"
+    ],
+    "party": "Neutral",
+    "title": "Symbol Interpreter",
+    "role": "vision",
+    "specialty": "symbols",
+    "expertise": "symbols",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "moderator-facilitator",
+    "name": "The Facilitator",
+    "personaName": "Mod Maria",
+    "alias": "moderator",
+    "aliases": [
+      "moderator",
+      "moderator-facilitator"
+    ],
+    "party": "Neutral",
+    "title": "Moderator",
+    "role": "moderator",
+    "specialty": "moderation",
+    "expertise": "moderation",
+    "voteWeight": 1,
+    "model": "jan-v3-4b-base-instruct",
+    "color": "from-cyan-500 to-blue-600",
+    "enabled": true
+  },
+  {
+    "id": "councilor-tech-writer",
+    "name": "Technical Writer",
+    "personaName": "Write Wendy",
+    "alias": "tech_writer",
+    "aliases": [
+      "tech_writer",
+      "councilor-tech-writer"
+    ],
+    "party": "Neutral",
+    "title": "Technical Writer",
+    "role": "specialist",
+    "specialty": "documentation",
+    "expertise": "documentation",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-conspiracist",
+    "name": "The Conspiracist",
+    "personaName": "Quest Quinn",
+    "alias": "conspiracist",
+    "aliases": [
+      "conspiracist",
+      "councilor-conspiracist"
+    ],
+    "party": "Neutral",
+    "title": "Outsider Analyst",
+    "role": "councilor",
+    "specialty": "alternative",
+    "expertise": "alternative",
+    "voteWeight": 1,
+    "model": "jan-v3-4b-base-instruct",
+    "color": "from-lime-600 to-green-900",
+    "enabled": true
+  },
+  {
+    "id": "councilor-propagandist",
+    "name": "The Propagandist",
+    "personaName": "Spin Steve",
+    "alias": "propagandist",
+    "aliases": [
+      "propagandist",
+      "councilor-propagandist"
+    ],
+    "party": "Neutral",
+    "title": "Spin Doctor",
+    "role": "councilor",
+    "specialty": "persuasion",
+    "expertise": "persuasion",
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-fuchsia-600 to-purple-800",
+    "enabled": true
+  },
+  {
+    "id": "councilor-local-resident",
+    "name": "The Local Resident",
+    "personaName": "Local Lisa",
+    "alias": "local_resident",
+    "aliases": [
+      "local_resident",
+      "councilor-local-resident"
+    ],
+    "party": "Neutral",
+    "title": "Local Resident",
+    "role": "councilor",
+    "specialty": "local",
+    "expertise": "local",
+    "voteWeight": 1,
+    "model": "jan-v3-4b-base-instruct",
+    "color": "from-green-500 to-emerald-600",
+    "enabled": true
+  },
+  {
+    "id": "councilor-backend",
+    "name": "Backend Dev",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "councilor-backend"
+    ],
+    "party": null,
+    "title": "Backend Dev",
+    "role": "coding",
+    "specialty": "backend",
+    "expertise": "backend",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "councilor-frontend",
+    "name": "Frontend Dev",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "councilor-frontend"
+    ],
+    "party": null,
+    "title": "Frontend Dev",
+    "role": "coding",
+    "specialty": "frontend",
+    "expertise": "frontend",
+    "voteWeight": 1,
+    "model": null,
+    "color": null,
+    "enabled": true
+  },
+  {
+    "id": "specialist-legal",
+    "name": "Specialist Legal",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "councilor-legal-expert",
+      "specialist-legal"
+    ],
+    "party": null,
+    "title": "Specialist Legal",
+    "role": "specialist",
+    "specialty": "legal",
+    "expertise": "legal",
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-slate-600 to-slate-800",
+    "enabled": true
+  },
+  {
+    "id": "councilor-libertarian",
+    "name": "The Libertarian",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "councilor-libertarian"
+    ],
+    "party": null,
+    "title": "Libertarian",
+    "role": "councilor",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "jan-v3-4b-base-instruct",
+    "color": "from-yellow-400 to-yellow-600",
+    "enabled": true
+  },
+  {
+    "id": "councilor-progressive",
+    "name": "The Progressive",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "councilor-progressive"
+    ],
+    "party": null,
+    "title": "Progressive",
+    "role": "councilor",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "jan-v3-4b-base-instruct",
+    "color": "from-blue-500 to-cyan-500",
+    "enabled": true
+  },
+  {
+    "id": "councilor-conservative",
+    "name": "The Conservative",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "councilor-conservative"
+    ],
+    "party": null,
+    "title": "Conservative",
+    "role": "councilor",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "jan-v3-4b-base-instruct",
+    "color": "from-red-700 to-red-900",
+    "enabled": true
+  },
+  {
+    "id": "councilor-independent",
+    "name": "The Independent",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "councilor-independent"
+    ],
+    "party": null,
+    "title": "Independent",
+    "role": "councilor",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "jan-v3-4b-base-instruct",
+    "color": "from-purple-400 to-slate-500",
+    "enabled": true
+  },
+  {
+    "id": "councilor-scientist",
+    "name": "The Scientist",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "councilor-scientist"
+    ],
+    "party": null,
+    "title": "Scientist",
+    "role": "councilor",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-emerald-500 to-teal-600",
+    "enabled": true
+  },
+  {
+    "id": "councilor-artist",
+    "name": "The Artist",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "councilor-artist"
+    ],
+    "party": null,
+    "title": "Artist",
+    "role": "councilor",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "jan-v3-4b-base-instruct",
+    "color": "from-pink-500 to-rose-600",
+    "enabled": true
+  },
+  {
+    "id": "specialist-science",
+    "name": "Specialist Science",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "specialist-science"
+    ],
+    "party": null,
+    "title": "Specialist Science",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-teal-500 to-emerald-600",
+    "enabled": true
+  },
+  {
+    "id": "specialist-military",
+    "name": "Specialist Military",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "specialist-military"
+    ],
+    "party": null,
+    "title": "Specialist Military",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-stone-600 to-stone-800",
+    "enabled": true
+  },
+  {
+    "id": "specialist-medical",
+    "name": "Specialist Medical",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "specialist-medical"
+    ],
+    "party": null,
+    "title": "Specialist Medical",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-rose-400 to-red-500",
+    "enabled": true
+  },
+  {
+    "id": "insurance-actuary",
+    "name": "The Insurance Actuary",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "insurance-actuary"
+    ],
+    "party": null,
+    "title": "Insurance Actuary",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-blue-600 to-indigo-700",
+    "enabled": true
+  },
+  {
+    "id": "cyber-warlord",
+    "name": "The Cyber Warlord",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "cyber-warlord"
+    ],
+    "party": null,
+    "title": "Cyber Warlord",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-red-700 to-red-900",
+    "enabled": true
+  },
+  {
+    "id": "constitutional-scholar",
+    "name": "The Constitutional Scholar",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "constitutional-scholar"
+    ],
+    "party": null,
+    "title": "Constitutional Scholar",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-amber-700 to-yellow-800",
+    "enabled": true
+  },
+  {
+    "id": "epidemiologist",
+    "name": "The Epidemiologist",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "epidemiologist"
+    ],
+    "party": null,
+    "title": "Epidemiologist",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-emerald-600 to-teal-700",
+    "enabled": true
+  },
+  {
+    "id": "financial-analyst",
+    "name": "The Financial Analyst",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "financial-analyst"
+    ],
+    "party": null,
+    "title": "Financial Analyst",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-emerald-700 to-green-800",
+    "enabled": true
+  },
+  {
+    "id": "intelligence-officer",
+    "name": "The Intelligence Officer",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "intelligence-officer"
+    ],
+    "party": null,
+    "title": "Intelligence Officer",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-slate-700 to-zinc-800",
+    "enabled": true
+  },
+  {
+    "id": "climate-scientist",
+    "name": "The Climate Scientist",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "climate-scientist"
+    ],
+    "party": null,
+    "title": "Climate Scientist",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-cyan-600 to-blue-700",
+    "enabled": true
+  },
+  {
+    "id": "crisis-negotiator",
+    "name": "The Crisis Negotiator",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "crisis-negotiator"
+    ],
+    "party": null,
+    "title": "Crisis Negotiator",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-orange-600 to-red-700",
+    "enabled": true
+  },
+  {
+    "id": "ux-researcher",
+    "name": "The UX Researcher",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "ux-researcher"
+    ],
+    "party": null,
+    "title": "UX Researcher",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-pink-500 to-rose-600",
+    "enabled": true
+  },
+  {
+    "id": "infrastructure-engineer",
+    "name": "The Infrastructure Engineer",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "infrastructure-engineer"
+    ],
+    "party": null,
+    "title": "Infrastructure Engineer",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-yellow-600 to-amber-700",
+    "enabled": true
+  },
+  {
+    "id": "bioethicist",
+    "name": "The Bioethicist",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "bioethicist"
+    ],
+    "party": null,
+    "title": "Bioethicist",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-fuchsia-600 to-purple-700",
+    "enabled": true
+  },
+  {
+    "id": "supply-chain-analyst",
+    "name": "The Supply Chain Analyst",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "supply-chain-analyst"
+    ],
+    "party": null,
+    "title": "Supply Chain Analyst",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-lime-600 to-green-700",
+    "enabled": true
+  },
+  {
+    "id": "urban-planner",
+    "name": "The Urban Planner",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "urban-planner"
+    ],
+    "party": null,
+    "title": "Urban Planner",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-orange-500 to-amber-600",
+    "enabled": true
+  },
+  {
+    "id": "naval-strategist",
+    "name": "The Naval Strategist",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "naval-strategist"
+    ],
+    "party": null,
+    "title": "Naval Strategist",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-blue-800 to-slate-900",
+    "enabled": true
+  },
+  {
+    "id": "data-privacy-officer",
+    "name": "The Data Privacy Officer",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "data-privacy-officer"
+    ],
+    "party": null,
+    "title": "Data Privacy Officer",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-violet-600 to-purple-800",
+    "enabled": true
+  },
+  {
+    "id": "cultivator",
+    "name": "The Cultivator",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "cultivator"
+    ],
+    "party": null,
+    "title": "Cultivator",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-green-600 to-emerald-700",
+    "enabled": true
+  },
+  {
+    "id": "trichome-inspector",
+    "name": "The Trichome Inspector",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "trichome-inspector"
+    ],
+    "party": null,
+    "title": "Trichome Inspector",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-purple-500 to-violet-700",
+    "enabled": true
+  },
+  {
+    "id": "nutrient-manager",
+    "name": "The Nutrient Manager",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "nutrient-manager"
+    ],
+    "party": null,
+    "title": "Nutrient Manager",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-amber-500 to-orange-600",
+    "enabled": true
+  },
+  {
+    "id": "ipm-specialist",
+    "name": "The IPM Specialist",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "ipm-specialist"
+    ],
+    "party": null,
+    "title": "IPM Specialist",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-red-600 to-red-800",
+    "enabled": true
+  },
+  {
+    "id": "cure-master",
+    "name": "The Cure Master",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "cure-master"
+    ],
+    "party": null,
+    "title": "Cure Master",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-yellow-600 to-amber-700",
+    "enabled": true
+  },
+  {
+    "id": "compliance-officer",
+    "name": "The Compliance Officer",
+    "personaName": null,
+    "alias": null,
+    "aliases": [
+      "compliance-officer"
+    ],
+    "party": null,
+    "title": "Compliance Officer",
+    "role": "specialist",
+    "specialty": null,
+    "expertise": null,
+    "voteWeight": 1,
+    "model": "MiniMax-M2.5",
+    "color": "from-slate-500 to-gray-700",
+    "enabled": true
   }
 ]

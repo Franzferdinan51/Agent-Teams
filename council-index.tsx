@@ -1,6 +1,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import './council-index.css';
 import App from './council-app';
 
 const rootElement = document.getElementById('root');

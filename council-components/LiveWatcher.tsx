@@ -221,7 +221,7 @@ export default function LiveWatcher({ onClose }: LiveWatcherProps) {
                             <div className="text-slate-600 text-[9px] uppercase">Elapsed</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-slate-400 font-black text-sm">{session.viewerCount}</div>
+                            <div className="text-slate-400 font-black text-sm">{session.viewerCount ?? '—'}</div>
                             <div className="text-slate-600 text-[9px] uppercase">👁</div>
                         </div>
                     </div>
@@ -466,7 +466,7 @@ export default function LiveWatcher({ onClose }: LiveWatcherProps) {
                                 <div className="text-[9px] text-slate-600 uppercase">Active</div>
                             </div>
                             <div className="bg-slate-900 rounded p-2 text-center">
-                                <div className="text-slate-400 font-black text-lg">{session.viewerCount}</div>
+                                <div className="text-slate-400 font-black text-lg">{session.viewerCount ?? '—'}</div>
                                 <div className="text-[9px] text-slate-600 uppercase">👁 Viewers</div>
                             </div>
                         </div>

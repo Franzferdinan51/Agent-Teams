@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Attachment, SessionMode, Settings } from '../types';
+import { Attachment, SessionMode, Settings } from '../council-types';
 import { transcribeAudio } from '../services/aiService';
-import { PUBLIC_MCP_REGISTRY } from '../constants';
+import { PUBLIC_MCP_REGISTRY } from '../council-constants';
 
 interface MessageInputProps {
   onSendMessage: (content: string, attachments: Attachment[], mode: SessionMode) => void;

@@ -307,3 +307,49 @@ python3 swarm-orchestrator.py "build a real-time analytics data pipeline" --doma
 ---
 
 *Last updated: March 26, 2026*
+
+---
+
+## Boot status — verified 2026-11-26
+
+Boot-tested on system Python 3.12.3 in an isolated venv (stdlib only — no
+packages to install; imports are `json`, `sys`, `os`, `uuid`, `pathlib`,
+`datetime`). Full report: `~/workspace/agent-teams-overhaul/reports/2.2.1-swarm.md`.
+
+**How to run it (truth):**
+
+```bash
+cd agent-swarm-system
+python3 swarm-orchestrator.py '<task>' [--count N] [--domain domain]
+python3 swarm-orchestrator.py --help   # usage, exit 0
+```
+
+The orchestrator is a **planner only**: it classifies the task, selects
+agents from `agent-registry.json` (218 agents — README's "133+" is stale),
+splits the task into per-agent subtasks, writes a JSON plan to
+`plans/plan-<id>.json`, and prints the plan plus per-agent spawn text.
+It does **not** dispatch anything itself — there is no `sessions_spawn`,
+network, env-var, or API-key call in the code. Actually spawning the
+agents is the caller's (an OpenClaw host agent's) job, using the printed
+plan. There is nothing to "cannot run" at the dispatch boundary because
+no dispatch code exists to fail.
+
+**Verified working:** no-args usage (exit 1); `--help`/`-h` (exit 0);
+auto-classified runs for build / game / research and forced-domain runs
+for audit / mobile / data / general; plan-file writing to `plans/`
+(valid JSON, verified); import-as-module use of `classify_task`,
+`select_agents`, `split_task`, `build_swarm_plan`, `load_registry`.
+
+**Fixed during boot-test (2026-11-26, `main()` only, minimal):**
+
+1. `--help`/`-h` was treated as a task and generated a junk plan → now prints usage, exit 0.
+2. `--count abc` crashed with an unhandled `ValueError` traceback → now a clean error, exit 2.
+3. `--count 0` produced a 0-agent plan and `--count -1` produced **49 agents** in the general domain (negative slice, over the documented max 15) → count is now clamped to 1–15.
+4. `--domain bogus` was silently accepted and stored in the plan → now validated against the 7 real domains, clean error, exit 2.
+
+**Known quirks (by design, not fixed):** for the domain-specific sets,
+`--count` selects a size bucket, not an exact number (e.g. build `--count 5`
+→ 5, `--count 99` → clamped bucket of 12; game `--count 8` → 10; mobile
+`--count 5` → 6; data default → 8). Only the `general` domain honours
+`--count` exactly. A trailing `--count`/`--domain` with no value is silently
+ignored. An empty task string (`""`) still produces a plan.

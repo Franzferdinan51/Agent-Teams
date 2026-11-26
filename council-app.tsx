@@ -1,13 +1,13 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Message, Settings, AuthorType, SessionStatus, BotConfig, VoteData, Attachment, SessionMode, MemoryEntry, ControlSignal, PredictionData } from './types';
+import { Message, Settings, AuthorType, SessionStatus, BotConfig, VoteData, Attachment, SessionMode, MemoryEntry, ControlSignal, PredictionData } from './council-types';
 import { getBotResponse, generateSpeech, streamBotResponse } from './services/aiService';
 import { searchMemories, searchDocuments, saveMemory } from './services/knowledgeService';
-import { COUNCIL_SYSTEM_INSTRUCTION, DEFAULT_SETTINGS } from './constants';
-import SettingsPanel from './components/SettingsPanel';
-import ChatWindow from './components/ChatWindow';
-import LiveWatcher from './components/LiveWatcher';
-import CodingInterface from './components/CodingInterface';
+import { COUNCIL_SYSTEM_INSTRUCTION, DEFAULT_SETTINGS } from './council-constants';
+import SettingsPanel from './council-components/SettingsPanel';
+import ChatWindow from './council-components/ChatWindow';
+import LiveWatcher from './council-components/LiveWatcher';
+import CodingInterface from './council-components/CodingInterface';
 
 const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -37,46 +37,23 @@ const App: React.FC = () => {
 
   const controlSignal = useRef<ControlSignal>({ stop: false, pause: false });
 
-  // ── SSE SESSION EMITTER ──────────────────────────────────
-  const API_BASE = ''; // Empty = same origin, proxied by Vite dev server
-  const emitSSE = useCallback(async (type: string, data?: any) => {
-      try {
-          await fetch(`${API_BASE}/api/session/event`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ type, data })
-          });
-      } catch { /* silent — SSE is optional */ }
-  }, []);
-
+  // ── COUNCIL API SESSION REGISTRATION ─────────────────────
+  // council-api-server.cjs (:3001, reached via the Vite proxy) keeps a
+  // session-state object: POST /api/session/start registers {topic, mode}
+  // and GET /api/session returns it (LiveWatcher polls it). There is no
+  // per-event/SSE ingest endpoint on either council server, so the old
+  // emitSSE posts to /api/session/event went nowhere and have been removed
+  // rather than left firing into a 404.
+  const [serverModes, setServerModes] = useState<{ id: string; name: string }[]>([]);
   const startSSESession = useCallback(async (topic: string, mode: SessionMode, councilors: BotConfig[]) => {
       try {
-          await fetch(`${API_BASE}/api/session/start`, {
+          await fetch(`/api/session/start`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ topic, mode, councilors: councilors.map(c => ({ id: c.id, name: c.name, role: c.role, color: c.color, model: c.model })) })
           });
-      } catch { /* silent */ }
+      } catch { /* registration is best-effort; deliberation runs in-browser */ }
   }, []);
-
-  // Broadcast session phase changes via SSE
-  useEffect(() => {
-      if (sessionStatus !== SessionStatus.IDLE) {
-          // Map SessionStatus enum to SSE phase string
-          const phaseMap: Record<string, string> = {
-              [SessionStatus.OPENING]: 'opening',
-              [SessionStatus.DEBATING]: 'debating',
-              [SessionStatus.VOTING]: 'voting',
-              [SessionStatus.RESOLVING]: 'resolving',
-              [SessionStatus.ADJOURNED]: 'adjourned',
-              [SessionStatus.PAUSED]: 'debating',
-              [SessionStatus.RECONCILING]: 'debating',
-              [SessionStatus.ENACTING]: 'resolving',
-          };
-          const phase = phaseMap[sessionStatus] || 'debating';
-          emitSSE('phase', { phase });
-      }
-  }, [sessionStatus, emitSSE]);
 
   useEffect(() => {
       const hasAck = localStorage.getItem('ai_council_cost_ack');
@@ -117,6 +94,57 @@ const App: React.FC = () => {
   useEffect(() => {
       localStorage.setItem('ai_council_settings', JSON.stringify(settings));
   }, [settings]);
+
+  // Load the councilor registry + mode list from council-api-server (:3001,
+  // via the Vite proxy). The server registry is the source of truth when it
+  // is reachable; the built-in DEFAULT_BOTS roster enriches entries it knows
+  // (persona/model/color) and remains the fallback when the API is down —
+  // in which case a Clerk message says so, visibly.
+  useEffect(() => {
+      let cancelled = false;
+      (async () => {
+          try {
+              const [councilorsRes, modesRes] = await Promise.all([
+                  fetch('/api/councilors'),
+                  fetch('/api/modes'),
+              ]);
+              if (!councilorsRes.ok) throw new Error(`councilors ${councilorsRes.status}`);
+              const registry: any[] = await councilorsRes.json();
+              if (modesRes.ok) {
+                  const modes = await modesRes.json();
+                  if (!cancelled && Array.isArray(modes)) setServerModes(modes);
+              }
+              if (cancelled || !Array.isArray(registry) || registry.length === 0) return;
+              setSettings(prev => {
+                  const enrich = (r: any): BotConfig => {
+                      const known = prev.bots.find(b => b.id === r.id)
+                          || prev.bots.find(b => b.name.toLowerCase().replace(/^the /, '') === String(r.name).toLowerCase().replace(/^the /, ''));
+                      if (known) return { ...known, enabled: r.enabled !== false };
+                      const role = r.id === 'councilor-speaker' || String(r.name).toLowerCase() === 'speaker'
+                          ? 'speaker'
+                          : (['councilor', 'specialist', 'moderator', 'swarm_agent'].includes(r.role) ? r.role : 'councilor');
+                      return {
+                          id: r.id,
+                          name: r.name,
+                          role: role as BotConfig['role'],
+                          authorType: AuthorType.LM_STUDIO,
+                          model: 'qwen/qwen3.5-9b',
+                          persona: r.expertise ? `Council member specializing in ${r.expertise}.` : 'Member of the High AI Council.',
+                          color: 'from-slate-500 to-slate-700',
+                          enabled: r.enabled !== false,
+                      };
+                  };
+                  return { ...prev, bots: registry.map(enrich) };
+              });
+          } catch (e) {
+              if (!cancelled) {
+                  addMessage({ author: 'Council Clerk', authorType: AuthorType.SYSTEM, content: 'Council API server (:3001) unreachable — deliberating with the built-in roster. Provider calls go directly to the configured LLM endpoint.' });
+              }
+          }
+      })();
+      return () => { cancelled = true; };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAckCost = () => {
       localStorage.setItem('ai_council_cost_ack', 'true');
@@ -174,10 +202,8 @@ const App: React.FC = () => {
         setDebateHeat(Math.max(-1, Math.min(1, heat)));
         return next;
     });
-    // Emit to SSE for live viewers
-    emitSSE('message', { author: message.author, authorType: message.authorType, content: message.content, roleLabel: message.roleLabel, color: message.color });
     return newMessage;
-  }, [emitSSE]);
+  }, []);
 
   const updateMessageContent = useCallback((id: string, newContent: string) => {
       let content = newContent;
@@ -215,7 +241,6 @@ const App: React.FC = () => {
   const processBotTurn = async (bot: BotConfig, history: Message[], systemPrompt: string, roleLabel?: string): Promise<string> => {
       await checkControlSignal();
       setThinkingBotIds(prev => [...prev, bot.id]);
-      emitSSE('councilor_start', { id: bot.id, name: bot.name });
       await wait(settings.ui.debateDelay); 
       await checkControlSignal();
       
@@ -224,7 +249,6 @@ const App: React.FC = () => {
       try {
           const fullResponse = await streamBotResponse(bot, history, systemPrompt, settings, (chunk) => updateMessageContent(tempMsg.id, chunk));
           setThinkingBotIds(prev => prev.filter(id => id !== bot.id));
-          emitSSE('councilor_end', { id: bot.id, name: bot.name });
           
           if (!fullResponse || !fullResponse.trim()) {
               updateMessageContent(tempMsg.id, "(No response generated)");
@@ -237,7 +261,6 @@ const App: React.FC = () => {
           return fullResponse;
       } catch (e: any) {
           setThinkingBotIds(prev => prev.filter(id => id !== bot.id));
-          emitSSE('councilor_end', { id: bot.id, name: bot.name });
           if (e.message === "SESSION_STOPPED") throw e;
           const errMsg = `(Error: ${e.message})`;
           updateMessageContent(tempMsg.id, errMsg);
@@ -382,7 +405,7 @@ const App: React.FC = () => {
     // ── IMAGE/MEDIA ATTACHMENTS → pass to AI for analysis ──
     const latestHumanMsg = initialHistory[initialHistory.length - 1];
     const hasImageAttachments = latestHumanMsg?.attachments?.some(a => a.type === 'file' || a.type === 'image') || false;
-    const imageContext = hasImageAttachments ? `\n\n[VISUAL DATA AVAILABLE]: The Petitioner has provided ${latestHumanMsg.attachments.filter(a => a.type === 'file' || a.type === 'image').length} image(s) for analysis. Councilors should INCLUDE detailed visual analysis in their responses. The Speaker must reference what can be observed in the images when framing the discussion.` : '';
+    const imageContext = hasImageAttachments ? `\n\n[VISUAL DATA AVAILABLE]: The Petitioner has provided ${(latestHumanMsg.attachments ?? []).filter(a => a.type === 'file' || a.type === 'image').length} image(s) for analysis. Councilors should INCLUDE detailed visual analysis in their responses. The Speaker must reference what can be observed in the images when framing the discussion.` : '';
 
     const customDirective = settings.ui.customDirective || "";
     const atmospherePrompt = "TONE: Professional, Objective, Legislative.";
@@ -618,7 +641,6 @@ const App: React.FC = () => {
                  const voteData = parseVotesFromResponse(voteRes, topic, initialCouncilors);
                  const voteMsg: Message = { id: `vote-dashboard-${Date.now()}`, author: 'Council Clerk', authorType: AuthorType.SYSTEM, content: "Voting Results tallied.", voteData: voteData };
                  setMessages(prev => [...prev, voteMsg]);
-                 emitSSE('vote', voteData);
                  sessionHistory.push(voteMsg);
                  setSessionStatus(SessionStatus.RESOLVING);
                  const finalPrompt = `${injectTopic(COUNCIL_SYSTEM_INSTRUCTION.PROPOSAL.SPEAKER_POST_VOTE)} VOTE OUTCOME: ${voteData.result} (${voteData.yeas} YEA, ${voteData.nays} NAY). Persona: ${speaker.persona}`;
@@ -632,7 +654,6 @@ const App: React.FC = () => {
     } finally {
         setSessionStatus(SessionStatus.ADJOURNED);
         setActiveSessionBots([]);
-        emitSSE('end', {});
     }
   };
 
@@ -727,6 +748,8 @@ const App: React.FC = () => {
         <div className="flex items-center gap-2 ml-auto">
           <span className="text-slate-500">Council:</span>
           <span className="text-emerald-400 font-bold">{settings.bots.filter(b => b.enabled).length} active</span>
+          <span className="text-slate-500">Server modes:</span>
+          <span className="text-slate-300 font-mono">{serverModes.length > 0 ? serverModes.length : '—'}</span>
         </div>
       </div>
       
@@ -765,10 +788,8 @@ const App: React.FC = () => {
                 controlSignal.current.pause = nowPaused; 
                 if (nowPaused) {
                     setSessionStatus(SessionStatus.PAUSED);
-                    emitSSE('session_pause', {});
                 } else {
                     setSessionStatus(SessionStatus.DEBATING);
-                    emitSSE('session_resume', {});
                 }
             }}
             onOpenLiveSession={() => setIsLiveSessionOpen(true)}

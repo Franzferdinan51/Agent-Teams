@@ -268,37 +268,30 @@ async function gatherLiveContext(question) {
 }
 
 // ============ COUNCILOR REGISTRY ============
+// ONE canonical roster shared with council-server.js: loaded from
+// councilors.json at the repo root (override with COUNCILORS_PATH).
+// Canonical entries carry every field (id, name, personaName, alias/aliases,
+// party, title, role category, specialty, expertise, voteWeight, model,
+// color, enabled). This array is the in-memory read model only: councilor
+// CRUD (REST + MCP add/update/remove) has always persisted custom bots to
+// settings.json (settings.bots) and never wrote the registry back to disk —
+// that persistence semantics is unchanged; the canonical file is read-only
+// at runtime.
+const COUNCILORS_PATH = process.env.COUNCILORS_PATH || path.join(__dirname, 'councilors.json');
+let COUNCILOR_REGISTRY;
+try {
+  COUNCILOR_REGISTRY = JSON.parse(fs.readFileSync(COUNCILORS_PATH, 'utf8'));
+  if (!Array.isArray(COUNCILOR_REGISTRY) || COUNCILOR_REGISTRY.length === 0) throw new Error('expected a non-empty JSON array');
+} catch (err) {
+  console.error(`FATAL: cannot load canonical councilors from ${COUNCILORS_PATH}: ${err.message}`);
+  throw err;
+}
 
-const COUNCILOR_REGISTRY = [
-  // Core Councilors
-  { id: 'councilor-speaker', name: 'Speaker', role: 'councilor', expertise: 'governance', enabled: true },
-  { id: 'councilor-technocrat', name: 'Technocrat', role: 'councilor', expertise: 'technology', enabled: true },
-  { id: 'councilor-ethicist', name: 'Ethicist', role: 'councilor', expertise: 'ethics', enabled: true },
-  { id: 'councilor-pragmatist', name: 'Pragmatist', role: 'councilor', expertise: 'practical', enabled: true },
-  { id: 'councilor-skeptic', name: 'Skeptic', role: 'councilor', expertise: 'criticism', enabled: true },
-  // Vision Councilors
-  { id: 'councilor-visual-analyst', name: 'Visual Analyst', role: 'vision', expertise: 'analysis', enabled: true },
-  { id: 'councilor-pattern-recognizer', name: 'Pattern Recognizer', role: 'vision', expertise: 'patterns', enabled: true },
-  { id: 'councilor-color-specialist', name: 'Color Specialist', role: 'vision', expertise: 'color', enabled: true },
-  { id: 'councilor-composition-expert', name: 'Composition Expert', role: 'vision', expertise: 'composition', enabled: true },
-  { id: 'councilor-context-interpreter', name: 'Context Interpreter', role: 'vision', expertise: 'context', enabled: true },
-  { id: 'councilor-detail-observer', name: 'Detail Observer', role: 'vision', expertise: 'details', enabled: true },
-  { id: 'councilor-emotion-reader', name: 'Emotion Reader', role: 'vision', expertise: 'emotions', enabled: true },
-  { id: 'councilor-symbol-interpreter', name: 'Symbol Interpreter', role: 'vision', expertise: 'symbols', enabled: true },
-  // Swarm Coding Roles
-  { id: 'councilor-architect', name: 'Architect', role: 'coding', expertise: 'architecture', enabled: true },
-  { id: 'councilor-backend', name: 'Backend Dev', role: 'coding', expertise: 'backend', enabled: true },
-  { id: 'councilor-frontend', name: 'Frontend Dev', role: 'coding', expertise: 'frontend', enabled: true },
-  { id: 'councilor-devops', name: 'DevOps', role: 'coding', expertise: 'devops', enabled: true },
-  { id: 'councilor-security', name: 'Security Expert', role: 'coding', expertise: 'security', enabled: true },
-  { id: 'councilor-qa', name: 'QA Engineer', role: 'coding', expertise: 'testing', enabled: true },
-  // Specialist Councilors
-  { id: 'councilor-risk-analyst', name: 'Risk Analyst', role: 'specialist', expertise: 'risk', enabled: true },
-  { id: 'councilor-legal-expert', name: 'Legal Expert', role: 'specialist', expertise: 'legal', enabled: true },
-  { id: 'councilor-finance-expert', name: 'Finance Expert', role: 'specialist', expertise: 'finance', enabled: true },
-  { id: 'councilor-meteorologist', name: 'Meteorologist', role: 'emergency', expertise: 'weather', enabled: true },
-  { id: 'councilor-emergency-manager', name: 'Emergency Manager', role: 'emergency', expertise: 'emergency', enabled: true },
-];
+// Resolve a councilor by canonical id, engine short alias, or any legacy
+// alias recorded on the canonical entry.
+function findCouncilor(list, id) {
+  return (list || []).find(c => c.id === id || c.alias === id || (Array.isArray(c.aliases) && c.aliases.includes(id)));
+}
 
 // Deliberation Modes
 const DELIBERATION_MODES = [
@@ -863,8 +856,8 @@ async function handleMCPTool(name, args = {}) {
       return COUNCILOR_REGISTRY.filter(c => c.role === args.role);
     
     case 'get_councilor':
-      return COUNCILOR_REGISTRY.find(c => c.id === args.id) || 
-             (settings.bots || []).find(c => c.id === args.id);
+      return findCouncilor(COUNCILOR_REGISTRY, args.id) ||
+             findCouncilor(settings.bots || [], args.id);
     
     case 'add_councilor':
       const councilor = { ...args, enabled: args.enabled !== false };
