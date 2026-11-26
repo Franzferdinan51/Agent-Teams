@@ -221,6 +221,27 @@ async function main() {
       askValues.length >= 3 && askValues.every((v) => typeof v === 'string' && v.includes('Stub council response')),
       `responders=${Object.keys(askResponses).join(',')}`);
 
+    // Hard-fail (v2.2.2): with the provider pointed at a dead endpoint,
+    // /api/ask must return 502 with an error — never canned responses.
+    await fetchJson(`${apiBase}/api/providers/lmstudio`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint: 'http://127.0.0.1:1/v1', model: 'stub-model' }),
+    });
+    const deadAsk = await fetchJson(`${apiBase}/api/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: 'Unique dead-provider probe question 2.2.2?', mode: 'deliberation' }),
+    });
+    check('/api/ask hard-fails when the provider is down',
+      deadAsk.status === 502 && typeof deadAsk.json?.error === 'string' && !deadAsk.json?.responses,
+      `status=${deadAsk.status} error=${(deadAsk.json?.error || '').slice(0, 60)}`);
+    await fetchJson(`${apiBase}/api/providers/lmstudio`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint: `${stubRoot}/v1`, model: 'stub-model' }),
+    });
+
     const mcp = await fetchJson(`${apiBase}/mcp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

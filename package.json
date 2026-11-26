@@ -1,6 +1,6 @@
 {
   "name": "agent-teams",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Multi-Agent Collaboration System \u2014 The Hive Senate with 46 councilors, P2P mesh, live LLM deliberation, and hive mind intelligence",
   "main": "src/index.js",
   "scripts": {

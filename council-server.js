@@ -352,13 +352,13 @@ const server = http.createServer(async (req, res) => {
 
     // GET / - Health
     if (pathname === '/' && req.method === 'GET') {
-        json(200, { status: 'ok', service: 'ai-council', version: '2.2.1', port: PORT });
+        json(200, { status: 'ok', service: 'ai-council', version: '2.2.2', port: PORT });
         return;
     }
 
     // GET /api/health - Health check (for hive-workflow.js compatibility)
     if (pathname === '/api/health' && req.method === 'GET') {
-        json(200, { status: 'ok', service: 'ai-council', version: '2.2.1', port: PORT, mode: 'standalone' });
+        json(200, { status: 'ok', service: 'ai-council', version: '2.2.2', port: PORT, mode: 'standalone' });
         return;
     }
 

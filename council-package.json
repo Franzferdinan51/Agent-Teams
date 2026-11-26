@@ -1,7 +1,7 @@
 {
   "name": "high-ai-council-chamber",
   "private": true,
-  "version": "2.2.1",
+  "version": "2.2.2",
   "type": "module",
   "scripts": {
     "dev": "vite",

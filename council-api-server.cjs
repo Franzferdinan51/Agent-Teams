@@ -1292,13 +1292,19 @@ ${liveContext}`;
     console.error('Live context enrichment failed:', e);
   }
 
-  res.json({
-    question,
-    liveContextApplied: enrichedQuestion !== question,
-    mode: req.body.mode || 'deliberation',
-    responses: await deliberate(question, enrichedQuestion, req.body.mode || 'deliberation', req.body.councilors),
-    timestamp: new Date().toISOString(),
-  });
+  try {
+    const responses = await deliberate(question, enrichedQuestion, req.body.mode || 'deliberation', req.body.councilors);
+    res.json({
+      question,
+      liveContextApplied: enrichedQuestion !== question,
+      mode: req.body.mode || 'deliberation',
+      responses,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (e) {
+    // Hard-fail when no LLM provider answers (v2.2.2) — never fabricate responses.
+    res.status(502).json({ error: e.message, question, timestamp: new Date().toISOString() });
+  }
 });
 
 // Settings
@@ -1666,8 +1672,9 @@ Give 2-4 concise, specific items. No preamble.`;
     // LM Studio failed
   }
 
-  // Fall back to contextual response
-  return generateContextualResponse(councilor, question, mode);
+  // No provider answered. Hard-fail (owner decision, v2.2.2): returning
+  // canned text here made a dead model produce plausible fake responses.
+  throw new Error(`No LLM provider available for councilor '${councilor.name}': MiniMax and LM Studio both failed to produce a response`);
 }
 
 async function deliberate(originalQuestion, enrichedQuestion, mode, councilorIds) {
@@ -1695,42 +1702,3 @@ async function deliberate(originalQuestion, enrichedQuestion, mode, councilorIds
   return responses;
 }
 
-// ============ CONTEXTUAL RESPONSE GENERATOR ============
-
-function generateContextualResponse(councilor, question, mode) {
-  const q = (question || '').toLowerCase();
-  
-  // Keywords detection
-  const isTech = q.includes('microservice') || q.includes('api') || q.includes('database') || q.includes('cloud') || q.includes('server') || q.includes('code') || q.includes('software');
-  const isRisk = q.includes('risk') || q.includes('security') || q.includes('vulnerable') || q.includes('threat') || q.includes('danger');
-  const isCost = q.includes('cost') || q.includes('budget') || q.includes('expensive') || q.includes('money') || q.includes('afford');
-  const isDecision = q.includes('should') || q.includes('choice') || q.includes('decision') || q.includes(' vs ') || q.includes('versus') || q.includes(' or ');
-  const isEthics = q.includes('ethical') || q.includes('privacy') || q.includes('fair') || q.includes('bias') || q.includes('right') || q.includes('wrong');
-
-  if (councilor.name === 'Speaker') {
-    if (isDecision) return 'This is a pivotal decision that will shape our direction. The council must balance all perspectives before reaching consensus.';
-    if (isEthics) return 'We gather to deliberate on a matter touching our core values. Each voice deserves careful consideration.';
-    return 'The council has heard your question. We shall weigh the arguments and provide balanced guidance.';
-  }
-  if (councilor.name === 'Technocrat') {
-    if (isTech) return 'Technically, we must evaluate scalability, performance, and integration complexity. Architecture decisions have long-term consequences.';
-    if (isRisk) return 'Security and reliability must be paramount. We need proper testing, monitoring, and fail-safes before proceeding.';
-    return 'Implementation requires careful planning of resources, tooling, and expertise. Technical debt must be considered.';
-  }
-  if (councilor.name === 'Ethicist') {
-    if (isEthics) return 'We must examine the moral dimensions carefully. Does this serve the greater good? Are we respecting individual rights?';
-    if (isRisk) return 'We have an ethical duty to protect stakeholders from harm. Transparency and accountability are essential.';
-    return 'Ethics demands we consider fairness, privacy, and the broader impact of our choices on society.';
-  }
-  if (councilor.name === 'Pragmatist') {
-    if (isCost) return 'We need realistic cost-benefit analysis. What is the ROI? What are hidden costs? Let us ground this in numbers.';
-    if (isTech) return 'Focus on what delivers value. Simplify where possible. Technical excellence matters, but so does speed to market.';
-    return 'Cut through theory. What actually works? Success means measurable outcomes, not just good intentions.';
-  }
-  if (councilor.name === 'Skeptic') {
-    if (isDecision) return 'What are we assuming? What could fail catastrophically? I see red flags that concern me deeply.';
-    if (isRisk) return 'Has this been proven? What do failure cases look like? I am skeptical of optimistic projections.';
-    return 'Unconvinced. Show me evidence. Too many initiatives fail from overconfidence and underestimating challenges.';
-  }
-  return councilor.opening || councilor.default_response || 'The council deliberates...';
-}

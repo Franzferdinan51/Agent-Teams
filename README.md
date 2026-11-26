@@ -90,7 +90,7 @@ Settings changed through council-api at runtime are persisted to `settings.json`
 
 ## Tests
 
-- **`npm test`** — `test/run-tests.js` boots a stub LLM (`test/stub-llm.js`, canned OpenAI-compatible responses, no real API calls) plus both council servers and runs **20 checks, all passing**: health, councilors, roster parity between the two servers and the canonical `councilors.json`, providers, a full deliberation session, MoA presets + a MoA run, council-api providers, `POST /api/llm/provider`, `POST /api/llm/test`, `POST /api/ask`, MCP `tools/list`, and CLI health/councilors smoke checks.
+- **`npm test`** — `test/run-tests.js` boots a stub LLM (`test/stub-llm.js`, canned OpenAI-compatible responses, no real API calls) plus both council servers and runs **21 checks, all passing**: health, councilors, roster parity between the two servers and the canonical `councilors.json`, providers, a full deliberation session, MoA presets + a MoA run, council-api providers, `POST /api/llm/provider`, `POST /api/llm/test`, `POST /api/ask`, the `/api/ask` hard-fail check (dead provider → HTTP 502, never canned responses), MCP `tools/list`, and CLI health/councilors smoke checks.
 - **MoA plugin tests** — in `moa/openclaw-plugin/`: `npm test` runs its vitest suite (green).
 - **`node test-moa.js`** — manual MoA check; point `LM_STUDIO_URL` at any OpenAI-compatible endpoint (a real LM Studio with a model loaded, or the stub).
 

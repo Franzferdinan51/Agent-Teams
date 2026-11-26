@@ -4,6 +4,15 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.2.2] - 2026-11-26 - /api/ask hard-fails when no LLM provider answers
+
+### Changed
+- **`POST /api/ask` failure behavior (owner decision):** when every configured LLM provider (MiniMax, then LM Studio) fails to produce a response, the endpoint now returns **HTTP 502** with an `error` message instead of plausible canned councilor text. Previously a dead model silently produced fake "responses" indistinguishable from real ones. The canned-response generator (`generateContextualResponse`) is removed entirely — no code path fabricates council answers. Successful responses are unchanged, and the deliberate() cache only ever stores real provider output. The MCP deliberation tools surface the same failure as a tool error.
+- Version unified at 2.2.2.
+
+### Added
+- Test: `npm test` gains a dead-provider check — with the LM Studio endpoint pointed at a dead port, `/api/ask` must return 502 with an error and no `responses` (21 checks total).
+
 ## [2.2.1] - 2026-11-26 - Completion Pass: Chamber Rework, Councilor Unification, Swarm Verification
 
 ### Added
