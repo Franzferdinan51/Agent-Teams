@@ -44,8 +44,8 @@ LM_STUDIO_KEY=sk-local-key
 LM_LINK_URL=http://localhost:1234
 LM_LINK_KEY=sk-local-key
 
-# Windows LM Link (example IP)
-WINDOWS_LM_LINK=http://192.168.1.100:1234
+# Windows LM Link (remote LM Studio — replace with that PC's own IP; local default is http://127.0.0.1:1234)
+WINDOWS_LM_LINK=http://<your-windows-pc-ip>:1234
 ```
 
 ---
@@ -110,7 +110,7 @@ Edit `config/models.json`:
 {
   "provider": "lmlink",
   "model": "qwen3.6-35b",
-  "endpoint": "http://192.168.1.100:1234/v1",
+  "endpoint": "http://<your-windows-pc-ip>:1234/v1",
   "apiKey": "lm-link-key"
 }
 ```

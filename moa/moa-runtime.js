@@ -14,7 +14,7 @@ const { ProviderManager } = require('../providers/provider-adapter.js');
 // Initialize providers using the same setup as council-server.js
 const providers = new ProviderManager();
 const LM_STUDIO_URL = process.env.LM_STUDIO_URL || 'http://127.0.0.1:1234';
-const LM_STUDIO_KEY = process.env.LM_STUDIO_KEY || 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf';
+const LM_STUDIO_KEY = process.env.LM_STUDIO_KEY || '';
 providers.registerProvider('lmstudio', {
   baseUrl: LM_STUDIO_URL + '/v1',
   apiKey: LM_STUDIO_KEY,

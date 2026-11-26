@@ -17,8 +17,8 @@
 const http = require('http');
 const url = require('url');
 const { ProviderManager, ContextManager } = require('./providers/provider-adapter.js');
-const LM_STUDIO_URL = 'http://100.68.208.113:1234';
-const LM_STUDIO_KEY = 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf';
+const LM_STUDIO_URL = process.env.LMSTUDIO_URL || process.env.LM_STUDIO_URL || 'http://127.0.0.1:1234';
+const LM_STUDIO_KEY = process.env.LMSTUDIO_API_KEY || process.env.LM_STUDIO_KEY || process.env.LMSTUDIO_KEY || '';
 const PORT = 3003;
 
 // ─── LM Studio Provider Setup ─────────────────────────────────────
@@ -405,13 +405,13 @@ const server = http.createServer(async (req, res) => {
 
     // GET / - Health
     if (pathname === '/' && req.method === 'GET') {
-        json(200, { status: 'ok', service: 'ai-council', version: '1.0.0', port: PORT });
+        json(200, { status: 'ok', service: 'ai-council', version: '2.2.0', port: PORT });
         return;
     }
 
     // GET /api/health - Health check (for hive-workflow.js compatibility)
     if (pathname === '/api/health' && req.method === 'GET') {
-        json(200, { status: 'ok', service: 'ai-council', version: '1.0.0', port: PORT, mode: 'standalone' });
+        json(200, { status: 'ok', service: 'ai-council', version: '2.2.0', port: PORT, mode: 'standalone' });
         return;
     }
 

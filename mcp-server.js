@@ -15,10 +15,12 @@ const url = require('url');
 // CONFIG
 // ═══════════════════════════════════════════════════════════════════
 
-const HIVE_PORT = 3131;
-const COUNCIL_HOST = 'localhost';
-const COUNCIL_PORT = 3006;
-const MCP_PORT = process.env.MCP_PORT || 3456;
+const HIVE_HOST = process.env.HIVE_HOST || 'localhost';
+const HIVE_PORT = parseInt(process.env.HIVE_PORT || '3131');
+const COUNCIL_HOST = process.env.COUNCIL_HOST || 'localhost';
+// council-api-server.cjs (default 3001) serves /api/councilors, /api/session, /api/health used below; nothing listens on the old hardcoded 3006
+const COUNCIL_PORT = parseInt(process.env.COUNCIL_PORT || '3001');
+const MCP_PORT = parseInt(process.env.MCP_PORT || '3456');
 const SCRIPTS_DIR = path.join(__dirname, 'scripts');
 
 // ═══════════════════════════════════════════════════════════════════
@@ -38,13 +40,13 @@ function httpGet(host, port, p) {
 }
 
 function apiGet(path) {
-    return httpGet('localhost', HIVE_PORT, `/api${path}`);
+    return httpGet(HIVE_HOST, HIVE_PORT, `/api${path}`);
 }
 
 function apiPost(path, body) {
     return new Promise((resolve) => {
         const data = JSON.stringify(body);
-        const req = http.request({ hostname: 'localhost', port: HIVE_PORT, path: `/api${path}`, method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } }, (res) => {
+        const req = http.request({ hostname: HIVE_HOST, port: HIVE_PORT, path: `/api${path}`, method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } }, (res) => {
             let result = '';
             res.on('data', c => result += c);
             res.on('end', () => { try { resolve(JSON.parse(result)); } catch { resolve(null); } });
@@ -107,7 +109,7 @@ async function handleTool(toolName, args) {
     switch (toolName) {
         case 'senate_list': { const d = await apiGet('/senate'); return { success: true, senators: d?.senators || [], total: d?.total || 0 }; }
         case 'senate_decrees': { const d = await apiGet('/decrees'); return { success: true, decrees: d?.decrees || [] }; }
-        case 'senate_create_decree': { const r = await apiPost('/decrees', { title: a.title, content: a.content }); return r || { success: false }; }
+        case 'senate_create_decree': { const r = await apiPost('/decree', { title: a.title, content: a.content }); return r || { success: false }; }
         case 'senate_caucuses': { const d = await apiGet('/senate'); return { success: true, caucuses: d?.caucuses || [] }; }
         case 'senate_votes': { const d = await apiGet('/votes'); return { success: true, votes: d?.votes || [], total: d?.total || 0 }; }
         case 'council_status': { const d = await apiGet('/council'); const ch = await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/health'); return { success: true, connected: d?.connected || false, version: d?.version || '3.x', councilors: d?.councilors || 46, councilRunning: !!ch, modes: d?.modes || [] }; }
@@ -139,7 +141,9 @@ async function handleTool(toolName, args) {
 const connections = new Set();
 
 function sendJson(res, data) {
-    res.write(JSON.stringify(data));
+    // Must end the response — previously write()-only, so every /mcp JSON-RPC reply hung the client connection open
+    if (!res.headersSent) res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(data));
 }
 
 function sendEvent(res, event, data) {

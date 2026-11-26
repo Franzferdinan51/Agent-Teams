@@ -1,3 +1,12 @@
 #!/bin/bash
-cd /data/data/com.termux/files/home/.openclaw/workspace/Agent-Teams
-node council-server.js > /data/data/com.termux/files/home/.openclaw/workspace/council.log 2>&1
+# start-council.sh - Start the Council Server (port 3003) from this repo
+cd "$(dirname "$0")"
+
+if [ -f ./.env ]; then
+    set -a
+    # shellcheck disable=SC1091
+    . ./.env
+    set +a
+fi
+
+exec node council-server.js > /tmp/council.log 2>&1

@@ -707,7 +707,9 @@
     </main>
     
     <script>
-        const API = 'http://localhost:3007';
+        // Same-origin WebUI API (webui/server.js): /api/council, /api/councilors,
+        // /api/council/ask, /api/health — the WebUI proxies the council API on :3001.
+        const API = '';
         let currentMode = 'proposal';
         let councilors = [];
         let votes = { yea: 0, nay: 0, abstain: 0 };
@@ -720,43 +722,39 @@
             await checkStatus();
         }
         
-        // Check API status
+        // Check API status — WebUI /api/council proxies council-api /api/health
         async function checkStatus() {
             try {
-                const res = await fetch(`${API}/council/status`);
+                const res = await fetch(`${API}/api/council`);
                 const data = await res.json();
-                document.getElementById('statusText').textContent = `${data.totalCouncilors || 46} Councilors`;
+                document.getElementById('statusText').textContent = data.connected
+                    ? `${data.councilors || 0} Councilors`
+                    : 'API Offline';
             } catch (e) {
                 document.getElementById('statusText').textContent = 'API Offline';
             }
         }
-        
-        // Load councilors
+
+        // Load councilors — WebUI /api/councilors proxies council-api /api/councilors
         async function loadCouncilors() {
             try {
-                const res = await fetch(`${API}/council/list`);
+                const res = await fetch(`${API}/api/councilors`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
-                councilors = data.councilors || data || [];
+                const list = data.councilors || data || [];
+                councilors = list.map(c => ({
+                    ...c,
+                    party: c.party || c.role || c.expertise || 'Neutral',
+                    vote: c.vote || 'pending'
+                }));
                 document.getElementById('councilorCount').textContent = councilors.length;
                 renderCouncilors();
             } catch (e) {
-                // Use demo data if API fails
-                councilors = generateDemoCouncilors();
-                document.getElementById('councilorCount').textContent = councilors.length;
-                renderCouncilors();
+                councilors = [];
+                document.getElementById('councilorCount').textContent = '0';
+                document.getElementById('councilorsList').innerHTML =
+                    '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Could not load councilors — council API unreachable.</div>';
             }
-        }
-        
-        function generateDemoCouncilors() {
-            const parties = ['Liberal', 'Conservative', 'Libertarian', 'Green', 'Independent', ' Progressive', 'Centrist'];
-            const names = ['Marcus', 'Elena', 'Chen', 'Amara', 'Viktor', 'Sofia', 'Jamal', 'Yuki', 'Hassan', 'Ingrid', 
-                          'Liam', 'Priya', 'Oscar', 'Freya', 'Raj', 'Zara', 'Felix', 'Maya', 'Ivan', 'Luna'];
-            return names.map((name, i) => ({
-                id: `councilor_${i}`,
-                name: name,
-                party: parties[i % parties.length],
-                vote: 'pending'
-            }));
         }
         
         function renderCouncilors(filter = 'all') {
@@ -812,85 +810,43 @@
             document.getElementById('debateStream').innerHTML = '<div class="loading"><div class="spinner"></div>Council is deliberating...</div>';
             
             try {
-                const res = await fetch(`${API}/council/deliberate`, {
+                // WebUI /api/council/ask proxies council-api /api/ask, which runs a
+                // real deliberation and returns { responses: { councilorId: text } }.
+                // The backend returns no vote tally, so votes stay at zero rather
+                // than being fabricated.
+                const res = await fetch(`${API}/api/council/ask`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        question, 
-                        mode: currentMode,
-                        topic: question.substring(0, 50)
-                    })
+                    body: JSON.stringify({ question, mode: currentMode })
                 });
-                
+
                 const data = await res.json();
-                
-                if (data.deliberation) {
-                    debateHistory = data.deliberation.debate || [];
-                    votes = data.deliberation.votes || { yea: 0, nay: 0, abstain: 0 };
-                    
-                    // Update councilor votes if available
-                    if (data.deliberation.councilorVotes) {
-                        data.deliberation.councilorVotes.forEach((v, i) => {
-                            if (councilors[i]) councilors[i].vote = v;
-                        });
-                    }
-                    
-                    stats.debates++;
-                    stats.topics++;
-                    stats.arguments += debateHistory.length;
-                } else {
-                    // Demo deliberation
-                    debateHistory = generateDemoDebate(question);
-                    votes = { yea: Math.floor(Math.random() * 20) + 10, nay: Math.floor(Math.random() * 15) + 5, abstain: Math.floor(Math.random() * 8) };
-                    councilors.forEach((c, i) => {
-                        if (i < votes.yea) c.vote = 'yea';
-                        else if (i < votes.yea + votes.nay) c.vote = 'nay';
-                        else c.vote = 'abstain';
-                    });
-                    stats.debates++;
-                    stats.topics++;
-                    stats.arguments += debateHistory.length;
+                if (!res.ok || !data.responses) {
+                    throw new Error(data.error || `Deliberation failed (HTTP ${res.status})`);
                 }
-                
-                renderDebate();
-                updateVotes();
-                renderCouncilors();
-                updateStats();
-                
-            } catch (e) {
-                // Demo fallback
-                debateHistory = generateDemoDebate(question);
-                votes = { yea: Math.floor(Math.random() * 20) + 10, nay: Math.floor(Math.random() * 15) + 5, abstain: Math.floor(Math.random() * 8) };
-                councilors.forEach((c, i) => {
-                    if (i < votes.yea) c.vote = 'yea';
-                    else if (i < votes.yea + votes.nay) c.vote = 'nay';
-                    else c.vote = 'abstain';
+
+                debateHistory = Object.entries(data.responses).map(([id, text]) => {
+                    const match = councilors.find(c => c.id === id || c.id === `councilor-${id}`);
+                    return { speaker: match ? match.name : id, text, stance: '' };
                 });
+                votes = { yea: 0, nay: 0, abstain: 0 };
+
+                stats.debates++;
+                stats.topics++;
+                stats.arguments += debateHistory.length;
+
                 renderDebate();
                 updateVotes();
                 renderCouncilors();
                 updateStats();
+
+            } catch (e) {
+                document.getElementById('debateStream').innerHTML =
+                    `<div class="empty-state"><div class="empty-icon">⚠️</div><div>Deliberation failed: ${e.message}</div></div>`;
             }
-            
+
             btn.disabled = false;
             btn.textContent = '⚡ Begin Deliberation';
-        }
-        
-        function generateDemoDebate(question) {
-            const speakers = ['Marcus', 'Elena', 'Chen', 'Amara', 'Viktor'];
-            const arguments = [
-                `I believe this proposal deserves careful consideration. The implications are significant.`,
-                `I agree with the core intent, but we must examine the practical implications more closely.`,
-                `From my perspective, this raises important questions about implementation and resources.`,
-                `The evidence supports moving forward with caution but optimism.`,
-                `I urge the council to consider the long-term implications before deciding.`
-            ];
-            
-            return speakers.map((speaker, i) => ({
-                speaker,
-                text: arguments[i],
-                stance: i % 2 === 0 ? 'yea' : 'nay'
-            }));
         }
         
         function renderDebate() {
@@ -950,23 +906,15 @@
             if (!councilor) return;
             
             const container = document.getElementById('counselList');
-            const counselItem = document.createElement('div');
-            counselItem.className = 'counsel-item';
-            counselItem.innerHTML = `
-                <div style="font-weight:600;font-size:13px">${councilor.name}</div>
-                <div style="font-size:12px;color:var(--text2)">${councilor.party} • Consulting...</div>
-            `;
-            container.innerHTML = '';
-            container.appendChild(counselItem);
-            
-            // Demo response
-            setTimeout(() => {
-                counselItem.innerHTML = `
+            // No backend endpoint exists for a private one-councilor consultation,
+            // so say so instead of showing a canned fake reply.
+            container.innerHTML = `
+                <div class="counsel-item">
                     <div style="font-weight:600;font-size:13px">${councilor.name}</div>
                     <div style="font-size:12px;color:var(--text2)">${councilor.party}</div>
-                    <div style="margin-top:8px;font-size:13px;color:var(--text)">"My private assessment is that we should proceed with caution. There are valid concerns on both sides."</div>
-                `;
-            }, 1000);
+                    <div style="margin-top:8px;font-size:13px;color:var(--text)">Private counsel is not available: the council API has no per-councilor consultation endpoint.</div>
+                </div>
+            `;
         }
         
         // Propose motion
@@ -978,18 +926,9 @@
                 return;
             }
             
-            try {
-                await fetch(`${API}/council/motion`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ motion, action })
-                });
-            } catch (e) {
-                console.log('Motion submitted (demo mode)');
-            }
-            
-            input.value = '';
-            alert(`Motion "${motion}" submitted for ${action}!`);
+            // No backend endpoint exists for motions on either council server,
+            // so fail honestly instead of reporting a submission that went nowhere.
+            alert(`Motion not submitted: the council API has no motion endpoint, so "${motion}" was not recorded.`);
         }
         
         // Initialize on load

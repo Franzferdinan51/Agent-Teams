@@ -19,3 +19,13 @@ workspace/agents/*.json
 # Environment
 .env
 *.local
+
+# Backups and pre-built council UI (regenerate with the council-package.json vite build)
+council-dist/
+*.bak
+
+# Runtime PID file written by start-all.sh
+.agent-teams.pids
+
+# Runtime settings written by council-api-server.cjs at repo root
+settings.json

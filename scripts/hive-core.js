@@ -281,9 +281,9 @@ class HiveLLM {
     // ═══════════════════════════════════════════
     
     async callLMStudio(model, prompt, system) {
-        // LM Studio on Windows PC (192.168.1.81:1234)
-        const LM_STUDIO_URL = process.env.LMSTUDIO_URL || 'http://192.168.1.81:1234/v1';
-        const LM_STUDIO_KEY = process.env.LMSTUDIO_KEY || process.env.LM_API_KEY || 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf';
+        // LM Studio (local default; override with LMSTUDIO_URL)
+        const LM_STUDIO_URL = process.env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1';
+        const LM_STUDIO_KEY = process.env.LMSTUDIO_KEY || process.env.LM_API_KEY || '';
         
         // Model mapping (LM Studio model name → actual loaded model)
         // Use qwen3.5-9b as primary since it's actually loaded

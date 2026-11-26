@@ -16,7 +16,7 @@ The `ProviderManager` looks for these variables if they are not explicitly passe
 | Variable | Description | Default/Example |
 |----------|-------------|----------------|
 | `LM_STUDIO_BASE_URL` | The base URL for the LM Studio API. | `http://100.68.208.113:1234/v1` |
-| `LM_STUDIO_API_KEY` | Bearer token for authentication. | `sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf` |
+| `LM_STUDIO_API_KEY` | Bearer token for authentication. | `SET-VIA-ENV` |
 
 ### Model Token Budgets (Enforced via Adapter)
 

@@ -1,6 +1,6 @@
 {
   "name": "openclaw-plugin-agent-teams-mo",
-  "version": "0.1.0",
+  "version": "2.2.0",
   "type": "module",
   "private": true,
   "scripts": {
@@ -18,12 +18,12 @@
     "openclaw": ">=2026.5.17"
   },
   "dependencies": {
-    "typebox": "^1.1.38"
+    "typebox": "^1.4.7"
   },
   "devDependencies": {
     "openclaw": "latest",
-    "typescript": "^5.9.0",
-    "vitest": "^3.2.0"
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.2"
   },
   "openclaw": {
     "extensions": [

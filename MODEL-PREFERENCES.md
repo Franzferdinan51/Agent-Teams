@@ -29,7 +29,7 @@ export MINIMAX_API_KEY="sk-cp-..."
 **Why**: Terminal-Bench + GPQA leader, free local inference
 
 ```
-export LM_LINK_URL="http://100.116.54.125:1234"
+export LM_LINK_URL="http://<your-windows-pc-ip>:1234"
 export LM_LINK_KEY="sk-lm-..."
 ```
 
@@ -150,7 +150,7 @@ curl -X POST https://api.minimax.io/v1/chat/completions \
   -d '{"model": "MiniMax-M2.7", "messages": [{"role": "user", "content": "Hello"}]}'
 
 # Check Windows Qwen (LM Link)
-curl http://100.116.54.125:1234/v1/models
+curl http://<your-windows-pc-ip>:1234/v1/models
 
 # Check Mac Gemma (LM Studio)
 curl http://localhost:1234/v1/models

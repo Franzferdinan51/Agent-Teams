@@ -3,7 +3,7 @@ const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
 
 const API = {
     base: '',
-    status: () => fetch('/api/status').then(r => r.json()).catch(() => null),
+    status: () => fetch('/api/health').then(r => r.json()).catch(() => null),
     council: () => fetch('/api/council').then(r => r.json()).catch(() => null),
     councilors: () => fetch('/api/councilors').then(r => r.json()).catch(() => ({councilors:[]})),
     session: () => fetch('/api/council/session').then(r => r.json()).catch(() => null),
@@ -68,7 +68,7 @@ const app = createApp({
                 // Build services list
                 services.value = [
                     { name: 'Hive WebUI', port: 3131, status: 'online', type: 'web' },
-                    { name: 'Council API', port: 3007, status: councilConnected.value ? 'online' : 'offline', type: 'api' },
+                    { name: 'Council API', port: 3001, status: councilConnected.value ? 'online' : 'offline', type: 'api' },
                     { name: 'Full API + MCP', port: 3001, status: 'online', type: 'api' },
                     { name: 'OpenClaw Gateway', port: 18789, status: 'check', type: 'gateway' },
                     { name: 'LM Studio', port: 1234, status: 'unknown', type: 'llm' },
@@ -100,10 +100,6 @@ const app = createApp({
         const checkService = async (service) => {
             if (service.port === 3131) {
                 const res = await fetch('/api/health').catch(() => null);
-                return res ? 'online' : 'offline';
-            }
-            if (service.port === 3007) {
-                const res = await fetch('http://localhost:3007/api/health').catch(() => null);
                 return res ? 'online' : 'offline';
             }
             if (service.port === 3001) {
@@ -231,7 +227,7 @@ const app = createApp({
 │              ▼                      ▼                      ▼      │
 │  ┌──────────────────┐  ┌──────────────────┐  ┌────────────────┐ │
 │  │  Council API     │  │  Full API + MCP  │  │  OpenClaw       │ │
-│  │  (3007)          │  │  (3001)          │  │  Gateway        │ │
+│  │  (3001)          │  │  (3001)          │  │  Gateway        │ │
 │  │  • 46 Councilors │  │  • 55 Tools      │  │  (18789)        │ │
 │  │  • Deliberation  │  │  • Agent Control │  │  • Duck CLI     │ │
 │  │  • Voting        │  │  • Mesh API      │  │  • Tools        │ │

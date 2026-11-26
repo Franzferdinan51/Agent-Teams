@@ -7,11 +7,11 @@
  *   OR: alias council="node /path/to/cli.js"
  * 
  * Environment:
- *   COUNCIL_API   API base URL (default: http://localhost:3007)
+ *   COUNCIL_API   API base URL (default: http://localhost:3001)
  *   COUNCIL_KEY   API key (optional)
  */
 
-const API = process.env.COUNCIL_API || 'http://localhost:3007';
+const API = process.env.COUNCIL_API || 'http://localhost:3001';
 const API_KEY = process.env.COUNCIL_KEY || '';
 const args = process.argv.slice(2);
 

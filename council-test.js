@@ -6,8 +6,8 @@ const http = require('http');
 const url = require('url');
 
 const PORT = process.env.COUNCIL_PORT || 3003;
-const LM_STUDIO_URL = 'http://100.68.208.113:1234';
-const LM_STUDIO_KEY = 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf';
+const LM_STUDIO_URL = process.env.LMSTUDIO_URL || process.env.LM_STUDIO_URL || 'http://127.0.0.1:1234';
+const LM_STUDIO_KEY = process.env.LMSTUDIO_API_KEY || process.env.LM_STUDIO_KEY || process.env.LMSTUDIO_KEY || '';
 const sessions = new Map();
 let sessionCounter = 0;
 

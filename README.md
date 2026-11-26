@@ -1,1007 +1,130 @@
-# 🏛️ Hive Nation v2.2.0
+# Agent-Teams
 
-[![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](https://github.com/Franzferdinan51/Agent-Teams)
-[![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
-[![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
+**Version 2.2.0** · Node.js ≥ 18 · MIT
 
-**Multi-Agent Orchestration powered by Mixture of Agents (MoA).** Multiple specialized models analyze your task in parallel, an aggregator synthesizes their perspectives, and you get one high-quality response. Based on [Hermes Agent MoA](https://hermes-agent.nousresearch.com) by [Nous Research](https://nousresearch.com).
+Agent-Teams is the merged successor of the owner's earlier **AI-Council** and **AI-Consensus-Council** projects (both deprecated in its favour). It is a multi-model deliberation council: a set of councilor personas deliberates a topic through a local or remote LLM (LM Studio by default), with a Mixture-of-Agents (MoA) runtime, two complementary HTTP servers, an MCP tool surface, a WebUI, and a CLI. The two servers are **not** duplicates — `council-server.js` is the deliberation + MoA engine, and `council-api-server.cjs` is the control plane (councilor CRUD, settings, vision/browser tools, and MCP over HTTP). See the service map below; pick a port deliberately, because same-named routes on 3003 and 3001 return different shapes.
 
----
+## Quickstart
 
-## ⚡ Get Started (30 seconds)
-
-> **MoA is based on [Hermes Agent](https://hermes-agent.nousresearch.com) by [Nous Research](https://nousresearch.com).** Reference models run in parallel, an aggregator synthesizes their advice into one response.
-
-```bash
-# 1. Clone
-git clone https://github.com/Franzferdinan51/Agent-Teams.git && cd Agent-Teams
-
-# 2. Install
-npm install
-
-# 3. Run MoA — ask anything, multiple models answer at once
-node council-cli.js moa "should I refactor auth as microservices?"
-```
-
-**Or via REST:**
-```bash
-curl -X POST http://localhost:3003/api/moa/run \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "your question", "preset": "default"}'
-```
-
-**That's it.** No config required to try it. See [docs/MOA.md](docs/MOA.md) for full setup, presets, and integration guides.
-
----
-
-## 📋 Requirements
-
-| Requirement | Version | Notes |
-|-------------|---------|-------|
-| **Node.js** | 18+ | [Download](https://nodejs.org/) |
-| **npm** | 9+ | Comes with Node.js |
-| **Git** | Any recent | For cloning |
-
-### Optional (for LLM-powered deliberation)
-
-| Provider | Required | Notes |
-|----------|----------|-------|
-| **MiniMax API Key** | Recommended | [Get from platform.minimax.io](https://platform.minimax.io/) |
-| **LM Studio** | Alternative | [Download](https://lmstudio.ai/) - Local, free |
-| **OpenRouter API Key** | Alternative | [Get from openrouter.ai](https://openrouter.ai/) - Free tier |
-
----
-
-## 🚀 Setup (5 Minutes)
-
-### Step 1: Clone the Repo
-
-```bash
-git clone https://github.com/Franzferdinan51/Agent-Teams.git
-cd Agent-Teams
-```
-
-### Step 2: Install Dependencies
+Prerequisites: Node.js ≥ 18 (see `engines` in `package.json`) and npm.
 
 ```bash
 npm install
+cp .env.example .env   # then edit .env if needed — LM Studio defaults to http://127.0.0.1:1234
 ```
 
-This will install:
-- `express` - Web server
-- `cors` - Cross-origin support
-- `ws` - WebSocket support
-
-### Step 3: Configure LLM (Optional but Recommended)
-
-**Option A: MiniMax (Recommended - Best Quality)**
+Start everything (council engine, council API, and WebUI, with PID-file management):
 
 ```bash
-# Get your API key from: https://platform.minimax.io/
-export MINIMAX_API_KEY=sk-your-key-here
+./start-all.sh         # starts council (3003), council-api (3001), webui (3131)
+./start-all.sh stop    # stops only the PIDs recorded in ./.agent-teams.pids
 ```
 
-**Option B: LM Studio (Free - Local)**
-
-1. Download [LM Studio](https://lmstudio.ai/)
-2. Download a model (e.g., Gemma-4, Qwen-3)
-3. Start LM Studio and enable "Local Server" (port 1234)
+Or start services individually:
 
 ```bash
-export LMSTUDIO_URL=http://127.0.0.1:1234/v1
-export LMSTUDIO_KEY=sk-lm-any-key
+npm run start:council      # council-server.js — deliberation + MoA engine, port 3003
+npm run start:council-api  # council-api-server.cjs — control plane + MCP, port 3001 (PORT env)
+npm run start:webui        # webui/server.js — WebUI, port 3131 (PORT env)
+npm run start:mcp          # mcp-server.js — standalone MCP server, port 3456 (MCP_PORT env)
 ```
 
-**Option C: OpenRouter (Free Tier)**
+Verify the install without any real LLM (the test harness boots a stub LLM — no real API calls):
 
 ```bash
-# Get key from: https://openrouter.ai/keys
-export OPENROUTER_API_KEY=sk-or-your-key
+npm test
 ```
 
-### Step 4: Start Services
+Handy checks once services are running:
 
 ```bash
-# Start everything at once
-./start-all.sh
+npm run council:status     # GET http://localhost:3003/api/health
+npm run council:providers  # GET http://localhost:3003/api/providers
+npm run council:list       # councilor count via council-server (3003)
+npm run council:mcp-tools  # MCP tools/list via council-api (3001)
+npm run mcp:status         # GET http://localhost:3456/health (standalone MCP server)
+node council-cli.js --help # CLI v3 — set COUNCIL_API first, see CLI note below
 ```
 
-Or start individually:
+> **CLI note:** `council-cli.js` reads its API base from the `COUNCIL_API` env var. Its built-in fallback in the source is still the stale `http://localhost:3007` (nothing listens there), so always set it explicitly, e.g. `COUNCIL_API=http://localhost:3001 node council-cli.js health`.
 
-```bash
-# Council API (port 3007)
-npm run start:council
+## Service map
 
-# WebUI (port 3131)
-npm run start:webui
-```
+| Component | File | Port | Role |
+|---|---|---|---|
+| Deliberation + MoA engine | `council-server.js` | **3003** (hardcoded) | Bare-`http` server. Routes: `GET /api/health`, `GET /api/councilors`, `GET /api/providers`, `GET /api/modes`, `POST /api/session/start`, `GET /api/session/:id`, `GET /api/moa/presets`, `POST /api/moa/run`. Talks to LM Studio via `LMSTUDIO_URL` / `LM_STUDIO_URL`. |
+| Control plane + MCP over HTTP | `council-api-server.cjs` | **3001** (`PORT` env, default 3001) | Express server. Councilor CRUD, settings persistence (`settings.json`, a gitignored runtime file), vision + browser tools, `POST /api/ask`, `POST /api/llm/provider`, `POST /api/llm/test`, and MCP over HTTP at `POST /mcp` (verified `tools/list` = 55 tools). |
+| Standalone MCP server | `mcp-server.js` | **3456** (`MCP_PORT` env, default 3456) | MCP over HTTP + SSE, 23 tools. Talks to council-api (`COUNCIL_PORT` env, default 3001) and the WebUI hive API (`HIVE_PORT` env, default 3131). Separate from the `/mcp` endpoint on 3001. |
+| WebUI | `webui/server.js` | **3131** (`PORT` env, default 3131) | Web UI; proxies the council-api (`COUNCIL_PORT`, default 3001). |
+| CLI | `council-cli.js` | — (client) | CLI v3. API base via the `COUNCIL_API` env var (see CLI note above). |
+| MoA runtime | `moa/moa-runtime.js` | — (library) | Mixture-of-Agents runtime used by `council-server.js` and `test-moa.js`. Presets include `tiny`, `default`, `coding`, `security`. |
+| MoA OpenClaw plugin | `moa/openclaw-plugin/` | — | OpenClaw plugin with its own vitest suite (green). |
+| Agent API (separate) | `agent-api-server/server.js` | **3001** (`PORT` env, default 3001) | Separate small Express agent API; its package is `ai-council-agent-api`. **Port collision:** its default 3001 is the same as council-api's — if you run both, start this one on a distinct `PORT`. Not started by `start-all.sh`. |
+| Python swarm orchestrator | `agent-swarm-system/swarm-orchestrator.py` | — | Python swarm orchestrator plus an agent registry (`agent-registry.json`). Not started by `start-all.sh`. |
 
-### Step 5: Open in Browser
+**Councilor counts differ by server.** The two servers load different councilor data: the stub test run observed 53 councilors via council-server (3003) and 24 via council-api (3001). Neither number is "the" count — query the server you are actually using (`GET /api/councilors`).
 
-**WebUI:** http://localhost:3131
+### Deliberation modes
 
-**Council API:** http://localhost:3003/api/health
+The servers expose different mode lists — again, the port decides:
 
----
+- **council-server (3003), `GET /api/modes` / `MODES`:** `adversarial`, `standard`, `consensus`, `socratic`, `creative`, `analytical`, `emergency`, `vision`, `swarm_coding`, `strategic`, `multi`.
+- **council-api (3001), `GET /api/modes` / `DELIBERATION_MODES`:** `deliberation`, `legislative`, `inquiry`, `swarm`, `swarm_coding`, `prediction`, `deep_research`, `vision`, `emergency`, `risk_assessment`, `collaborative`.
 
-## 🎯 What's Built-In
+## Configuration
 
-| Component | Description | Port |
-|-----------|-------------|------|
-| **Mixture of Agents (MoA)** | Multiple reference models analyze in parallel, aggregator synthesizes | 3007 |
-| **OpenClaw Plugin** | Native MoA tools (`moa_run`, etc.) as OpenClaw agent tools | — |
-| **Council Server** | LLM-powered deliberation with 46 councilors | 3007 |
-| **Multi-Provider LLM** | MiniMax, LM Studio (local), OpenRouter | - |
-| **WebUI** | Live dashboard with real-time updates | 3131 |
-| **46 Councilors** | Diverse AI perspectives (Technocrat, Ethicist, etc.) | - |
-| **Senate (94)** | Binding decrees from Council recommendations | - |
-| **Agent Teams** | Spawn specialized agents for tasks | - |
-| **Hive Mesh** | P2P agent communication | 4000 |
+All configuration is via environment variables; copy `.env.example` to `.env` and fill in what you need. `.env` is gitignored. Key entries from `.env.example`:
 
----
+| Variable | Default / notes |
+|---|---|
+| `LM_STUDIO_URL`, `LMSTUDIO_URL` | `http://127.0.0.1:1234` — LM Studio base URL (no trailing `/v1` in `LM_STUDIO_URL`; set both aliases to the same value). |
+| `LM_STUDIO_KEY`, `LMSTUDIO_API_KEY`, `LMSTUDIO_KEY` | Empty by default; only needed if your LM Studio server requires auth. |
+| `MINIMAX_API_KEY`, `OPENROUTER_API_KEY` | Cloud provider keys (optional). |
+| `AGENT_MESH_API_KEY` | For the separate agent-mesh-api repo / mesh scripts. |
+| `PORT` | `3001` for council-api. WebUI also uses `PORT` (default 3131 when run via its own defaults / `start-all.sh`). |
+| `COUNCIL_PORT`, `COUNCIL_HOST` | `3001` / `localhost` — the council-api the WebUI and MCP server proxy to. Note: council-server's port is hardcoded to 3003 and is not set by `PORT`. |
+| `BRAVE_API_KEY`, `BROWSEROS_MCP_URL` | Optional integrations; `BROWSEROS_MCP_URL` defaults to `http://127.0.0.1:9000/mcp`. |
+| `MESH_URL`, `LOG_LEVEL` | `http://localhost:4000`, `INFO`. |
 
-## 🏛️ Architecture (v2.2.0)
+Settings changed through council-api at runtime are persisted to `settings.json` next to `council-api-server.cjs` — a runtime file, not source; it is gitignored.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    🏛️ HIVE NATION v2.2.0 🏛️                       │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  🤖 MIXTURE OF AGENTS (MoA) — PRIMARY INTERFACE [Hermes/Nous] │   │
-│  │  - Reference models fan out in parallel (Promise.all)        │   │
-│  │  - Aggregator synthesizes all perspectives into one response│   │
-│  │  - 3 presets: default, coding, security                     │   │
-│  │  - REST: POST /api/moa/run  |  CLI: council moa          │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                              ↓                                      │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  COUNCIL SERVER — 46 diverse LLM-powered councilors        │   │
-│  │  - 9 deliberation modes: adversarial, consensus, swarm...     │   │
-│  │  - Live SSE streaming | Auto-voting                           │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                              ↓                                      │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  SENATE — 94 senators, 3 parties                          │   │
-│  │  - Converts recommendations → binding DECREES               │   │
-│  │  - MUST/SHALL/NEVER enforcement language                   │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                              ↓                                      │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  EXECUTIVE — Meta-Agent executes decrees                   │   │
-│  │  - Spawns agent teams | Monitors results                    │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────┘
-```
+## Tests
 
-### LLM Providers
+- **`npm test`** — `test/run-tests.js` boots a stub LLM (`test/stub-llm.js`, canned OpenAI-compatible responses, no real API calls) plus both council servers and runs **17 checks, all passing**: health, councilors, providers, a full deliberation session, MoA presets + a MoA run, council-api providers, `POST /api/llm/provider`, `POST /api/llm/test`, `POST /api/ask`, MCP `tools/list`, and CLI health/councilors smoke checks.
+- **MoA plugin tests** — in `moa/openclaw-plugin/`: `npm test` runs its vitest suite (green).
+- **`node test-moa.js`** — manual MoA check; point `LM_STUDIO_URL` at any OpenAI-compatible endpoint (a real LM Studio with a model loaded, or the stub).
 
-| Provider | Type | Config |
-|----------|------|--------|
-| **MiniMax** | API (primary) | `MINIMAX_API_KEY` env var |
-| **LM Studio** | Local (free) | `LMSTUDIO_KEY`, `LMSTUDIO_URL` |
-| **OpenRouter** | API (free tier) | `OPENROUTER_API_KEY` env var |
+## Chamber UI — status
 
-### Key Files
+The React Chamber UI (`council-app.tsx`, `council-index.tsx`, `council-components/`, `council-package.json`) is **not currently buildable**. Build wiring was added in 2.2.0 (root `index.html` + `vite.config.ts` with `outDir: council-dist`, and a fixed entry import), but the app imports `services/aiService` and `services/knowledgeService` modules that **do not exist in this repo**, so there is no working build command to document. Do not treat `council-dist/` output as freshly built from source. This is a known, plainly-stated gap — the HTTP services, WebUI, and CLI above are the working surfaces.
 
-| File | Purpose |
-|------|---------|
-| `council-cli.js` | CLI — MoA commands (`council moa "..."`) |
-| `council-server.js` | REST API server — MoA + Council endpoints (port 3007) |
-| `moa/moa-runtime.js` | Core MoA engine — parallel reference fan-out + aggregator |
-| `moa/config.json` | MoA presets — default, coding, security, tiny |
-| `moa/index.js` | Public API entry point |
-| `moa/openclaw-plugin/` | OpenClaw plugin — native MoA tools (`moa_run`, etc.) |
-| `councilors.json` | 46 councilor definitions |
-| `webui/server.js` | Web dashboard |
-| `webui/public/index.html` | WebUI frontend |
-| `scripts/hive-*.js` | 80+ Hive scripts |
-| `docs/MOA.md` | Full MoA guide (setup, API, integration) |
+## Security
 
----
+- **All API keys are env-only since 2.2.0.** No key values live in scripts or source; `.env.example` documents the variables with placeholders only. Never commit a real `.env`.
+- **Rotate if you used older versions:** versions before 2.2.0 committed an LM Studio key in `start-all.sh`. If you ever ran or shared a checkout from that era, rotate that LM Studio key — treat it as exposed.
 
-## 🎮 Usage
+## Changelog
 
-### Run Mixture of Agents (MoA)
+See [CHANGELOG.md](CHANGELOG.md) for the full history. Summary of **2.2.0**:
 
-```bash
-# Via CLI — ask anything
-node council-cli.js moa "should I refactor the auth system?"
+- Secrets scrubbed to env-only; `start-all.sh` rewritten (PID-file management, no broad `pkill`, agent-mesh-api service removed — it is a separate repo now, not started here).
+- Stale LM Studio endpoints replaced with `127.0.0.1` defaults; LM Studio URL/key now env-driven on council-server.
+- Missing root dependencies added (`express`, `cors`) and all dependencies updated to current stable; root npm scripts fixed to the real ports (3003 / 3001 / 3456).
+- Council-server audit outcome: both servers kept, with documented roles (deliberation/MoA engine on 3003 vs control plane on 3001) — see the service map above.
+- council-api: new `POST /api/llm/provider` and `POST /api/llm/test` endpoints.
+- WebUI drift fixes: health probe, session shape, and `council-new.html` repointed to real endpoints with honest failures.
+- MCP server fixes: `COUNCIL_PORT` default corrected 3006 → 3001, a JSON-RPC response hang fixed, 23 tools verified; council-api's `POST /mcp` verified at 55 tools.
+- New 17-check stub-based test suite: `npm test` (no real LLM needed).
+- MoA OpenClaw plugin test fixed (vitest suite green).
+- Chamber build wiring added (root `index.html`, `vite.config.ts` → `council-dist`) — build still blocked on the missing `services/*` modules, see above.
+- `council-dist` build output and `.bak` files untracked from git.
+- Version unified at **2.2.0** (`VERSION` and every `package.json`).
 
-# With a specific preset
-node council-cli.js moa "audit this code" --preset security
+## Repository layout (top level)
 
-# List all presets
-node council-cli.js moa list
-
-# Via REST API
-curl -X POST http://localhost:3003/api/moa/run \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "explain this code", "preset": "coding"}'
-
-# Via JavaScript
-node -e "const {runMoA}=require('./moa/runtime'); runMoA('your prompt','default',[]).then(console.log)"
-```
-
-### Start a Deliberation
-
-```bash
-# Via API
-curl -X POST http://localhost:3003/api/session/start \
-  -H "Content-Type: application/json" \
-  -d '{"topic":"Should AI have rights?","mode":"proposal"}'
-
-# Watch in WebUI
-open http://localhost:3131
-```
-
-### MoA Presets
-
-| Preset | References | Aggregator | Best For |
-|--------|-----------|------------|----------|
-| `default` | qwen3.5-9b, gemma-26b, gemma-12b | ornith 35B | General analysis |
-| `coding` | qwopus coder, qwen3.5-9b | ornith 35B | Architecture, code review |
-| `security` | gemma-26b, ornith 35B | ornith 35B | Security audits |
-
-### Switch LLM Provider
-
-```bash
-# Use LM Studio (local)
-curl -X POST http://localhost:3003/api/llm/provider \
-  -H "Content-Type: application/json" \
-  -d '{"provider":"lmstudio"}'
-
-# Check status
-curl http://localhost:3003/api/llm/status
-```
-
-### CLI Commands
-
-```bash
-npm run start:council    # Start Council only
-npm run start:webui      # Start WebUI only  
-npm run start:all        # Start both
-npm run hive:status      # Check Hive status
-```
-
----
-
-## 📦 Files
-
-```
-Agent-Teams/
-├── council-server.js    # LLM-powered Council (NEW!)
-├── councilors.json      # 46 councilor definitions (NEW!)
-├── start-all.sh         # Start all services (NEW!)
-├── webui/               # Web dashboard
-├── scripts/             # 80+ Hive scripts
-├── agents/              # Agent definitions
-├── skills/              # Agent skills
-└── docs/                # Documentation
-```
-
----
-
-## 🌐 WebUI Features
-
-- **📡 Live View** - Watch deliberations in real-time
-- **⚖️ Council Tab** - See all 46 councilors
-- **📊 Stats** - Messages, votes, elapsed time
-- **🔄 Auto-refresh** - Updates every 2 seconds
-- **🎨 Dark Theme** - Premium command center design
-
----
-
-## ⚡ Quick Commands
-
-```bash
-# Start everything
-./start-all.sh
-
-# Check services
-curl http://localhost:3003/api/health
-curl http://localhost:3131/api/health
-
-# Test LLM
-curl -X POST http://localhost:3003/api/llm/test
-
-# List providers
-curl http://localhost:3003/api/llm/providers | jq .
-```
-
----
-
-## 📚 Documentation
-
-- [START-HERE.md](START-HERE.md) - Getting started
-- [docs/](docs/) - Full documentation
-- [docs/MOA.md](docs/MOA.md) - **Mixture of Agents guide** (setup, presets, API, integration)
-- [scripts/](scripts/) - Hive scripts reference
-
----
-
-## 🧪 Testing
-
-```bash
-# Test MoA presets load
-node council-cli.js moa list
-
-# Test MoA end-to-end
-node council-cli.js moa "What is 2+2?"
-
-# Test MoA REST API
-curl -X POST http://localhost:3003/api/moa/run \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "hello world in python", "preset": "coding"}'
-
-# Test Council
-curl http://localhost:3003/api/councilors | jq '.councilors | length'
-
-# Test LLM
-curl -X POST http://localhost:3003/api/llm/test | jq '.content'
-
-# Test deliberation
-curl -X POST http://localhost:3003/api/session/start \
-  -H "Content-Type: application/json" \
-  -d '{"topic":"Test","mode":"proposal"}'
-
-sleep 20
-curl http://localhost:3003/api/session | jq '{phase, stats}'
-```
-
----
-
-## 🔧 Configuration
-
-Set environment variables:
-
-```bash
-# LLM Providers
-export MINIMAX_API_KEY=your_key
-export LMSTUDIO_KEY=your_key
-export LMSTUDIO_URL=http://127.0.0.1:1234
-export OPENROUTER_API_KEY=your_key
-
-# Ports
-export PORT=3131
-```
-
----
-
-## 📝 Changelog
-
-### v2.1.0 (2026-04-19)
-- **Merged** AI Council into Agent-Teams (no more separate repo)
-- **Added** Multi-provider LLM support (MiniMax, LM Studio, OpenRouter)
-- **Added** Real LLM-generated deliberations (no more fake votes)
-- **Added** `start-all.sh` for one-command startup
-- **Updated** 46 integrated councilors with descriptions
-- **Fixed** Qwen reasoning_content parsing issue
-- **Updated** WebUI to connect to local council
-
-### v2.0.0 (Previous)
-- Initial release with Senate and Agent Teams
-
----
-
-## 🏛️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    🏛️ HIVE NATION v2.0.1 🏛️                       │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  COUNCIL (46 diverse councilors)                            │   │
-│  │  - 9 deliberation modes (adversarial, consensus, swarm...)  │   │
-│  │  - Real LLM calls (MiniMax, OpenRouter)                    │   │
-│  │  - Prevents "Yes-Man Syndrome"                             │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                              ↓                                      │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  SENATE (94 senators, 3 parties)                            │   │
-│  │  - Convert Council recommendations into binding DECREES     │   │
-│  │  - MUST/SHALL/NEVER enforcement language                   │   │
-│  │  - Democratic elections, weighted voting                    │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                              ↓                                      │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  TEAMS (8 templates, parallel execution)                    │   │
-│  │  - Research, Code, Security, Emergency, Planning, etc.      │   │
-│  │  - Execute per Senate decree                                │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### Government Loop
-
-```
-1. PROBLEM identified
-       ↓
-2. COUNCIL debates (46 diverse voices)
-       ↓
-3. Council reaches consensus
-       ↓
-4. SENATE passes decree (THE LAW - binding)
-       ↓
-5. TEAMS execute per decree
-```
-
----
-
-## ⚡ Services
-
-| Service | Port | URL | Status |
-|---------|------|-----|--------|
-| **Hive WebUI** | 3131 | http://localhost:3131 | ✅ Live |
-| **Council** | 3006 | http://localhost:3006 | ✅ 46 councilors |
-| **MCP Server** | 3456 | http://localhost:3456 | ✅ 23 tools |
-| **Automation** | 3457 | http://localhost:3457 | ⏳ Start manually |
-
----
-
-## 🌐 WebUI Dashboard
-
-**Access:** http://localhost:3131
-
-### Tabs
-
-| Tab | Features |
-|-----|----------|
-| 📊 **Overview** | Live stats, quick actions, decrees, votes, agents |
-| 🏛️ **Senate** | Issue decrees, senator roster |
-| 🗳️ **Voting** | Historical votes, statistics |
-| 🤖 **Agents** | Rankings, scoring |
-| 👥 **Teams** | Spawn teams (8 templates), templates reference |
-| 🧠 **Memory** | Store/search memories |
-| 🧠 **Council** | Councilors, modes, deliberations |
-| ⚡ **Automation** | Job management |
-| 📈 **System** | Health, services |
-
-### WebUI Commands
-
-```bash
-# Restart WebUI
-pkill -f "node.*webui/server" && cd ~/Desktop/AgentTeam-GitHub && node webui/server.js &
-
-# Check logs
-tail -f /tmp/hive.log
-```
-
----
-
-## 🤖 Agent Teams
-
-### 8 Templates
-
-| Template | Roles | Best For |
-|----------|-------|----------|
-| 🔬 **Research** | researcher + writer + reviewer | Research workflows |
-| 💻 **Code** | coder + reviewer + security | Code development |
-| 🛡️ **Security** | security + reviewer + communicator | Security audits |
-| 🚨 **Emergency** | security + communicator + planner | Incident response |
-| 📋 **Planning** | planner + researcher + communicator | Strategic planning |
-| 📊 **Analysis** | researcher + analyst + writer | Data analysis |
-| 🚀 **DevOps** | coder + security + communicator | Deployment |
-| 🐝 **Swarm** | multiple specialists | Parallel tasks |
-
-### Spawn a Team
-
-```bash
-# Via CLI
-node agents/teams/hive-teams.js spawn research "Build REST API"
-
-# Via WebUI → Teams tab → Spawn Team button
-```
-
----
-
-## 🏛️ Senate Decrees
-
-**THE LAW** — Binding enforcement language:
-
-| Pattern | Enforcement | Example |
-|---------|-------------|---------|
-| `MUST` | Absolute | "All agents MUST encrypt data" |
-| `SHALL` | Absolute | "Agents SHALL verify sources" |
-| `NEVER` | Absolute | "NEVER delete memory without approval" |
-| `FORBIDDEN` | Absolute | "FORBIDDEN: unauthorized access" |
-| `PREFER` | Advisory | "PREFER local models for privacy" |
-
-### Issue a Decree
-
-```bash
-# Via CLI
-node scripts/hive-senate-complete.js issue "Privacy" "All agents MUST encrypt sensitive data"
-
-# Via WebUI → Senate tab → New Decree button
-```
-
----
-
-## 🧠 AI Council
-
-**46 diverse councilors** with adversarial deliberation:
-
-### Deliberation Modes
-
-| Mode | Purpose |
-|------|---------|
-| `balanced` | Neutral analysis |
-| `adversarial` | Devil's advocate |
-| `consensus` | Find agreement |
-| `brainstorm` | Creative solutions |
-| `swarm` | Parallel thinking |
-| `legislature` | Formal debate |
-| `prediction` | Future forecasting |
-| `inspector` | Critical review |
-| `devil-advocate` | Challenge assumptions |
-
-### Council Workflow
-
-```bash
-# Run deliberation
-node scripts/hive-workflow.js council "Should we adopt microservices?"
-
-# Check council status
-curl http://localhost:3006/status
-```
-
----
-
-## ⚡ Automation Engine v2
-
-**Persistent task runner with triggers:**
-
-```bash
-# Start automation
-node scripts/hive-automation-v2.js start
-
-# Add jobs
-node scripts/hive-automation-v2.js add cron "0 2 * * *" "Backup" backup
-node scripts/hive-automation-v2.js add webhook "security-alert" "Alert" alert
-node scripts/hive-automation-v2.js add decree "privacy" "Enforce Privacy" privacy
-
-# List jobs
-node scripts/hive-automation-v2.js list
-
-# Stats
-node scripts/hive-automation-v2.js stats
-```
-
-### Trigger Types
-
-| Type | Trigger |
-|------|---------|
-| **cron** | Schedule (e.g., `0 2 * * *` = 2 AM daily) |
-| **webhook** | HTTP POST to `/webhook/:id` |
-| **event** | Job completes/fails/starts |
-| **decree** | Senate passes matching decree |
-
----
-
-## 🔌 MCP Server
-
-**23 tools** exposed via JSON-RPC:
-
-```bash
-# Start MCP
-node mcp-server.js
-
-# Endpoints
-# - http://localhost:3456/mcp   (JSON-RPC)
-# - http://localhost:3456/sse    (SSE)
-# - http://localhost:3456/health
-```
-
-### Tool Categories
-
-| Category | Tools |
-|----------|-------|
-| **Senate** | senate_list, senate_decrees, senate_create_decree |
-| **Council** | council_status, council_councilors, council_modes, council_session |
-| **Teams** | teams_list, teams_spawn, teams_templates, teams_add_task |
-| **Memory** | memory_list, memory_create, memory_recall |
-| **Scoring** | scoring_list, scoring_agent |
-| **Dashboard** | dashboard_status, system_health |
-| **Governance** | governance_status, governance_run |
-
----
-
-## 💻 CLI Commands
-
-### Quick Reference
-
-```bash
-# Senate
-node scripts/hive-senate-complete.js dashboard
-node scripts/hive-senate-complete.js issue "Title" "Content"
-
-# Council
-node scripts/hive-workflow.js council "Question"
-
-# Teams
-node agents/teams/hive-teams.js list
-node agents/teams/hive-teams.js spawn research "Task"
-
-# Automation
-node scripts/hive-automation-v2.js start
-node scripts/hive-automation-v2.js list
-
-# Execute (full pipeline demo)
-node scripts/hive-execute.js
-```
-
----
-
-## 📁 Project Structure
-
-```
-AgentTeams/
-├── webui/
-│   ├── server.js              # WebUI server (Express)
-│   └── public/
-│       └── index.html         # Dashboard UI (v2.0.1 overhaul)
-├── scripts/
-│   ├── hive-core.js           # Core (LLM + persistence)
-│   ├── hive-workflow.js       # Governance pipeline
-│   ├── hive-execute.js        # Full system demo
-│   ├── hive-automation-v2.js  # Automation engine v2
-│   ├── hive-senate-complete.js
-│   ├── hive-voting.js
-│   └── hive-memory.js
-├── mcp-server.js              # MCP server (23 tools)
-├── agents/teams/
-│   └── hive-teams.js          # Team system
-├── plugins/
-│   └── openclaw/              # OpenClaw integration
-└── data/
-    ├── core/state.json        # Persistent state
-    └── automation/
-        ├── jobs.json          # Automation jobs
-        └── triggers.json     # Trigger configs
-```
-
----
-
-## 🎯 Key Features
-
-- ✅ **46 Councilors** with adversarial deliberation
-- ✅ **94 Senators** (3 parties, weighted voting)
-- ✅ **Senate Decrees** (MUST/SHALL/NEVER enforcement)
-- ✅ **8 Team Templates** with parallel execution
-- ✅ **Automation Engine v2** (cron/webhook/event/decree)
-- ✅ **Persistent State** (JSON survives restarts)
-- ✅ **Real LLM Calls** (MiniMax, OpenRouter)
-- ✅ **MCP Server** (23 tools)
-- ✅ **WebUI Dashboard** (9 tabs, fully functional)
-- ✅ **OpenClaw Plugin** (Duck CLI integration)
-
----
-
-## 🔧 v2.0.1 Fixes (2026-04-19)
-
-### What's Fixed
-
-| Issue | Fix |
-|-------|-----|
-| Cold-Start Bug | State always initialized |
-| Live LLM Integration | Real API calls (MiniMax, OpenRouter) |
-| Persistent State | JSON files survive restarts |
-| Inter-Agent Messaging | Real message passing with routing |
-| WebUI Broken Tabs | Complete overhaul - all tabs working |
-| Duplicate Navigation | Restructured 9 proper tabs |
-| Missing Animations | Added bg gradients, hover effects, glow |
-
-### WebUI Enhancements
-
-- **Animated background** with floating gradients
-- **Quick actions panel** on overview
-- **Glowing brand icon** with pulse
-- **Card hover effects** with border glow
-- **Toast notifications** (success/error/info)
-- **8 team templates** (was 5)
-- **Memory search** functionality
-- **Automation tab** (job management)
-
----
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-node scripts/hive-execute.js
-
-# Test API endpoints
-curl http://localhost:3131/api/dashboard
-curl http://localhost:3131/api/decrees
-curl http://localhost:3131/api/teams
-
-# Verify persistence
-# Restart server, data should survive
-```
-
----
-
-## 🦆 Branding
-
-**Mascots:** 🦆 Duck | 🐝 Bee | 🦞 Lobster
-
-**Parties:**
-- 🦆 **Quack Party** — Research & Analysis (blue)
-- 🐝 **Honey Party** — Development & Security (gold)
-- 🦞 **Claw Party** — Planning & Communication (red)
-
----
-
-## 📜 License
-
-MIT License
-
----
-
-**Version 2.0.1** — Built for production multi-agent governance 🏛️⚖️🦆
----
-
-## 📁 Complete File Structure
-
-```
-Agent-Teams/
-├── 📦 Core Council (v2.1.0)
-│   ├── council-server.js      # LLM-powered deliberation API
-│   ├── councilors.json        # 46 councilor definitions
-│   ├── council-app.tsx        # React frontend for Council
-│   └── council-mcp-server.js  # MCP tool server
-│
-├── 📦 Agent System
-│   └── agent-api-server/      # Agent API server
-│       ├── api_server.py      # Main API
-│       └── package.json
-│
-├── 🌐 WebUI
-│   ├── webui/server.js       # Web dashboard server
-│   └── webui/public/         # Frontend files
-│
-├── 🧠 Hive Scripts (80+)
-│   ├── hive-council.js       # Council integration
-│   ├── hive-senate.js        # Senate system
-│   └── scripts/hive-*.js     # All hive scripts
-│
-└── 📚 Documentation
-    ├── docs/                 # Full documentation
-    └── README.md
-```
-
----
-
-## 🧪 Testing the Full System
-
-### 1. Test Council API
-```bash
-npm run council:status
-npm run council:test
-npm run council:providers
-```
-
-### 2. Start Full Council App
-```bash
-npm run start:council-app
-# Opens React UI on port 3002
-```
-
-### 3. Start Agent API
-```bash
-npm run start:agent-api
-```
-
-### 4. Start MCP Server (for tools)
-```bash
-npm run start:mcp
-```
-
-### 5. Start Deliberation
-```bash
-npm run council:deliberate
-```
-
----
-
-## 🔧 Full Setup for All Features
-
-```bash
-# 1. Clone and install
-git clone https://github.com/Franzferdinan51/Agent-Teams.git
-cd Agent-Teams
-npm install
-
-# 2. Set environment variables
-export MINIMAX_API_KEY=your_key
-export LMSTUDIO_KEY=sk-lm-any-key
-
-# 3. Start everything
-./start-all.sh
-
-# 4. Optionally start additional services
-npm run start:council-app   # React UI (port 3002)
-npm run start:agent-api      # Agent API
-npm run start:mcp            # MCP tools
-```
-
----
-
-## 📊 All Available Ports
-
-| Service | Port | Description |
-|---------|------|-------------|
-| Council API | 3007 | LLM deliberation |
-| Council App | 3002 | React frontend |
-| WebUI | 3131 | Hive dashboard |
-| Agent API | 8080 | Agent server |
-| MCP Server | 3850 | Tool protocol |
-| Mesh API | 4000 | P2P mesh |
-
-
----
-
-## 🎨 Complete Feature List (v2.1.0)
-
-### Core Council Features
-| Feature | Description | Status |
-|---------|-------------|--------|
-| LLM-Powered Deliberation | Real AI-generated debate | ✅ |
-| 46 Councilors | Diverse AI perspectives | ✅ |
-| Multi-Provider LLM | MiniMax, LM Studio, OpenRouter | ✅ |
-| Real Voting | LLM-determined vote outcomes | ✅ |
-| SSE Streaming | Live updates to WebUI | ✅ |
-| 9 Deliberation Modes | proposal, deliberation, swarm, etc. | ✅ |
-
-### React UI Components (council-components/)
-| Component | Description |
-|-----------|-------------|
-| `ChatMessage.tsx` | Chat message with avatars |
-| `ChatWindow.tsx` | Main chat interface |
-| `CouncilorDeck.tsx` | Councilor selection cards |
-| `LiveSession.tsx` | Live deliberation view |
-| `LiveWatcher.tsx` | Real-time watcher mode |
-| `MessageInput.tsx` | Message input with auto-complete |
-| `OrchestrationPanel.tsx` | Swarm task orchestration |
-| `CodingInterface.tsx` | Code generation interface |
-| `SettingsPanel.tsx` | LLM provider settings |
-| `Toast.tsx` | Notification toasts |
-
-### Server Features (council-server.js)
-| Endpoint | Description |
-|----------|-------------|
-| `GET /api/health` | Health check with provider status |
-| `GET /api/llm/providers` | List all LLM providers |
-| `GET /api/llm/status` | Current LLM status |
-| `POST /api/llm/test` | Test LLM connection |
-| `POST /api/llm/provider` | Switch LLM provider |
-| `GET /api/session` | Get current session |
-| `POST /api/session/start` | Start deliberation |
-| `GET /api/session/messages` | Get all messages |
-| `POST /api/session/event` | Push session event |
-| `GET /api/councilors` | List all councilors |
-| `GET /api/events` | SSE event stream |
-
-### Additional Services
-| Service | Port | Description |
-|---------|------|-------------|
-| council-server.js | 3007 | Main Council API |
-| council-api-server.cjs | 3001 | Full API + MCP |
-| council-mcp-server.js | 3850 | MCP tool server |
-| webui/server.js | 3131 | Hive Dashboard |
-| agent-api-server/ | 8080 | Agent system |
-
-### React App (council-app.tsx)
-- Full Council React UI (50KB)
-- Live session watching
-- Councilor deck selection
-- Message input with councilor selection
-- Settings panel for LLM providers
-
-### Documentation
-| File | Description |
-|------|-------------|
-| docs/COUNCILORS.md | Councilor profiles |
-| docs/VISION-COUNCIL.md | Vision analysis system |
-| docs/SWARM-CODING.md | Swarm coding mode |
-| docs/COUNCIL-QUICKSTART.md | Quick start guide |
-
----
-
-## 🚀 Quick Command Reference
-
-```bash
-# Start all services
-npm run start:all
-
-# Start individual services
-npm run start:council      # Council API (3007)
-npm run start:webui        # WebUI (3131)
-npm run start:council-app  # React app (3002)
-npm run start:council-api  # Full API (3001)
-npm run start:mcp          # MCP tools (3850)
-
-# Test Council
-npm run council:status     # Check health
-npm run council:test       # Test LLM
-npm run council:deliberate # Start deliberation
-npm run council:providers  # List providers
-npm run council:list      # Count councilors
-```
-
----
-
-## 📊 Services & Ports
-
-| Port | Service | File |
-|------|---------|------|
-| 3001 | Full API + MCP | council-api-server.cjs |
-| 3002 | React App | (needs npm install) |
-| 3007 | Council API | council-server.js |
-| 3131 | Hive WebUI | webui/server.js |
-| 3850 | MCP Server | council-mcp-server.js |
-| 8080 | Agent API | agent-api-server/ |
-
----
-
-## 🔧 Environment Variables
-
-```bash
-# Required for LLM
-MINIMAX_API_KEY=your_key        # MiniMax (primary)
-
-# Optional
-OPENROUTER_API_KEY=your_key    # OpenRouter
-LMSTUDIO_KEY=sk-lm-any         # LM Studio (local)
-LMSTUDIO_URL=http://localhost:1234/v1
-PORT=3007                       # Council port
-```
-
----
-
-## 📁 Complete File Structure (All Merged)
-
-```
-Agent-Teams/
-├── 🏛️ Council System
-│   ├── council-server.js      # LLM deliberation API
-│   ├── council-api-server.cjs # Full API + MCP
-│   ├── council-mcp-server.js # MCP tools
-│   ├── council-app.tsx        # React frontend
-│   ├── councilors.json        # 46 councilors
-│   ├── council-components/    # React components
-│   │   ├── ChatMessage.tsx
-│   │   ├── ChatWindow.tsx
-│   │   ├── CouncilorDeck.tsx
-│   │   ├── LiveSession.tsx
-│   │   ├── LiveWatcher.tsx
-│   │   ├── MessageInput.tsx
-│   │   ├── OrchestrationPanel.tsx
-│   │   ├── CodingInterface.tsx
-│   │   ├── SettingsPanel.tsx
-│   │   └── Toast.tsx
-│   ├── council-constants.ts   # Model configs
-│   ├── council-types.ts       # TypeScript types
-│   ├── council-cli.js         # CLI tool
-│   └── council-dist/          # Pre-built UI
-│
-├── 🤖 Agent System
-│   ├── agent-api-server/      # Agent API
-│   └── agent-swarm-system/     # Swarm orchestration
-│
-├── 🌐 Hive WebUI
-│   ├── webui/server.js
-│   └── webui/public/
-│
-├── 🧠 Hive Scripts (80+)
-│   ├── hive-council.js
-│   └── scripts/hive-*.js
-│
-└── 📚 Documentation
-    ├── docs/
-    └── README.md
-```
-
+- `council-server.js`, `council-api-server.cjs`, `mcp-server.js`, `webui/` — the HTTP services above.
+- `moa/` — MoA runtime and the OpenClaw plugin.
+- `council-cli.js` — CLI v3.
+- `agent-api-server/`, `agent-swarm-system/` — separate components, not started by `start-all.sh` (see service map).
+- `test/` — the stub-LLM test harness behind `npm test`; `test-moa.js` at the root is the manual MoA check.
+- `docs/` — additional documentation; where a doc disagrees with this README or the code on ports/defaults, the code wins.

@@ -154,7 +154,7 @@ Config:
 
 1. Download [LM Studio](https://lmstudio.ai/) on Windows
 2. Start server
-3. Find Windows PC's IP address (e.g., `192.168.1.100`)
+3. Find Windows PC's IP address (use that PC's own LAN IP — do not copy an example IP; for LM Studio on this same machine the default is `http://127.0.0.1:1234`)
 4. Update firewall to allow port 1234
 
 Config:
@@ -162,7 +162,7 @@ Config:
 {
   "provider": "lmlink",
   "model": "qwen3.6-35b",
-  "endpoint": "http://192.168.1.100:1234/v1",
+  "endpoint": "http://<your-windows-pc-ip>:1234/v1",
   "apiKey": "lm-link",
   "enabled": true
 }

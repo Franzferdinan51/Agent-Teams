@@ -203,7 +203,7 @@ If using local models via LM Studio, ensure the LM Studio server is running and 
 
 ```javascript
 LM_STUDIO_URL = process.env.LM_STUDIO_URL || 'http://100.68.208.113:1234'
-LM_STUDIO_KEY = process.env.LM_STUDIO_KEY || 'sk-lm-xWvfQHZF:L8P76SQakhEA95U8DDNf'
+LM_STUDIO_KEY = process.env.LM_STUDIO_KEY || ''
 ```
 
 To override:

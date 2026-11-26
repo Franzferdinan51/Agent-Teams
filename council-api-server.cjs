@@ -21,9 +21,10 @@ const SETTINGS_FILE = path.join(__dirname, 'settings.json');
 // Default settings
 const defaultSettings = {
   bots: [],
+  activeProvider: 'lmstudio',
   providers: {
     openrouter: { apiKey: '', endpoint: '' },
-    lmstudio: { endpoint: 'http://100.116.54.125:1234/v1' },
+    lmstudio: { endpoint: process.env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1' },
     google: { apiKey: '' },
     anthropic: { apiKey: '' },
   },
@@ -1322,6 +1323,65 @@ app.put('/api/providers/:name', (req, res) => {
   settings.providers[req.params.name] = { ...settings.providers[req.params.name], ...req.body };
   saveSettings(settings);
   res.json({ ok: true, provider: settings.providers[req.params.name] });
+});
+
+// LLM provider selection (called by the WebUI as POST /api/llm/provider {provider})
+app.post('/api/llm/provider', (req, res) => {
+  const provider = req.body?.provider;
+  if (!provider || typeof provider !== 'string') {
+    return res.status(400).json({ success: false, error: 'provider required' });
+  }
+  const settings = loadSettings();
+  if (!settings.providers) settings.providers = {};
+  if (!settings.providers[provider]) settings.providers[provider] = {};
+  settings.activeProvider = provider;
+  saveSettings(settings);
+  res.json({ success: true, ok: true, provider, providers: settings.providers });
+});
+
+// LLM provider test (called by the WebUI as POST /api/llm/test)
+// Tests the active provider (or req.body.provider when given). For lmstudio
+// this probes GET <endpoint>/models with a short timeout.
+app.post('/api/llm/test', async (req, res) => {
+  const settings = loadSettings();
+  const provider = req.body?.provider || settings.activeProvider || 'lmstudio';
+  const cfg = settings.providers?.[provider] || {};
+  const started = Date.now();
+
+  // Generic OpenAI-compatible probe: GET <endpoint>/models
+  const probeModels = async (endpoint) => {
+    const base = String(endpoint || '').replace(/\/+$/, '');
+    if (!base) throw new Error('no endpoint configured');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    try {
+      const r = await fetch(`${base}/models`, {
+        signal: controller.signal,
+        headers: cfg.apiKey ? { 'Authorization': `Bearer ${cfg.apiKey}` } : {},
+      });
+      if (!r.ok) throw new Error(`models probe returned HTTP ${r.status}`);
+      const data = await r.json().catch(() => ({}));
+      const models = Array.isArray(data.data) ? data.data.map(m => m.id).filter(Boolean) : [];
+      return { endpoint: base, models, modelCount: models.length };
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  try {
+    if (provider === 'lmstudio') {
+      const endpoint = cfg.endpoint || process.env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1';
+      const probe = await probeModels(endpoint);
+      return res.json({ success: true, ok: true, provider, ...probe, latencyMs: Date.now() - started });
+    }
+    if (cfg.endpoint) {
+      const probe = await probeModels(cfg.endpoint);
+      return res.json({ success: true, ok: true, provider, ...probe, latencyMs: Date.now() - started });
+    }
+    return res.json({ success: false, ok: false, provider, error: `provider '${provider}' has no endpoint configured`, latencyMs: Date.now() - started });
+  } catch (e) {
+    return res.json({ success: false, ok: false, provider, error: e.name === 'AbortError' ? 'provider test timed out after 5s' : e.message, latencyMs: Date.now() - started });
+  }
 });
 
 // UI

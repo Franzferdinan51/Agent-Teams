@@ -4,6 +4,33 @@ All notable changes to AgentTeams will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.2.0] - 2026-11-25 - Security, Ports & Test Overhaul
+
+### Security
+- All API keys are env-only: secrets scrubbed from scripts and source; `.env.example` documents every variable with placeholders only. Older versions committed an LM Studio key in `start-all.sh` — rotate that key if you used an older version.
+- `start-all.sh` rewritten: PID-file management (`.agent-teams.pids`), no broad `pkill`, repo-local `.env` only, and the agent-mesh-api service removed (it lives in a separate repo and is no longer started here).
+
+### Fixed
+- Stale LM Studio endpoints replaced with `127.0.0.1` defaults; council-server LM Studio URL/key are now env-driven (`LMSTUDIO_URL`/`LM_STUDIO_URL`, key env-only).
+- Missing root dependencies added (`express`, `cors`); all dependencies updated to current stable.
+- Root npm scripts fixed to the real ports: council-server 3003, council-api 3001, standalone MCP 3456.
+- MCP server: `COUNCIL_PORT` default corrected 3006 → 3001, JSON-RPC response hang fixed, 23 tools verified.
+- WebUI drift fixes: health probe, session shape, and `council-new.html` repointed to real endpoints with honest failures.
+- MoA OpenClaw plugin test fixed (vitest suite green).
+
+### Added
+- Council-server audit outcome: both servers kept with documented roles — `council-server.js` is the deliberation + MoA engine (port 3003), `council-api-server.cjs` is the control plane (port 3001: councilor CRUD, settings, vision/browser tools, MCP over HTTP at `POST /mcp`, verified 55 tools).
+- council-api: new `POST /api/llm/provider` and `POST /api/llm/test` endpoints.
+- New stub-based test suite: `npm test` runs `test/run-tests.js` (stub LLM in `test/stub-llm.js`, no real API calls) — 17 checks, all passing.
+- Chamber build wiring: root `index.html` + `vite.config.ts` (`outDir: council-dist`) and a fixed entry import. The Chamber build is still blocked: the app imports `services/aiService` and `services/knowledgeService` modules that do not exist in the repo.
+
+### Changed
+- Version unified at 2.2.0 (`VERSION` and all `package.json` files).
+- `council-dist` build output and `.bak` files untracked from git.
+- README rewritten to verified reality (service map, real ports, honest Chamber UI status).
+
+---
+
 ## [1.7.0] - 2026-04-19 - CLI + MCP + Cross-Platform
 
 ### NEW: Full CLI System

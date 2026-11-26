@@ -19,7 +19,7 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 const SCRIPTS_DIR = path.join(__dirname, '..', 'scripts');
 const COUNCIL_HOST = process.env.COUNCIL_HOST || 'localhost';
 const COUNCIL_PORT = parseInt(process.env.COUNCIL_PORT || '3001');
-const LM_STUDIO_URL = process.env.LMSTUDIO_URL || 'http://192.168.1.81:1234/v1';
+const LM_STUDIO_URL = process.env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1';
 
 // Rate limiting config (from env)
 const RATE_LIMIT = parseInt(process.env.RATE_LIMIT || '100');
@@ -287,7 +287,7 @@ const server = http.createServer(async (req, res) => {
             sseClients: sseClients.size,
             rateLimitEntries: rateLimitMap.size,
             services: {
-                council: !!await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/status'),
+                council: !!await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/health'),
                 hiveCore: !!HiveCore
             }
         }));
@@ -488,7 +488,7 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname === '/api/council') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        const data = await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/status');
+        const data = await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/health');
         res.end(JSON.stringify({ connected: !!data, version: data?.version || '3.x', modes: ['balanced', 'adversarial', 'consensus', 'swarm'], councilors: 46 }));
         return;
     }
@@ -535,6 +535,12 @@ const server = http.createServer(async (req, res) => {
             try {
                 const { provider } = JSON.parse(body);
                 const result = await httpPost(COUNCIL_HOST, COUNCIL_PORT, '/api/llm/provider', { provider });
+                if (!result) {
+                    // council-api-server.cjs does not implement /api/llm/provider (404) — report truthfully instead of false success
+                    res.writeHead(502, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, provider, error: 'Council API does not implement /api/llm/provider' }));
+                    return;
+                }
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: true, provider }));
             } catch (e) {
@@ -570,8 +576,9 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname === '/api/council/messages') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        const data = await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/session/messages');
-        res.end(JSON.stringify(data || { messages: [] }));
+        // council-api-server.cjs has no /api/session/messages route; the session object from /api/session carries messages[]
+        const data = await httpGet(COUNCIL_HOST, COUNCIL_PORT, '/api/session');
+        res.end(JSON.stringify({ messages: data?.messages || [] }));
         return;
     }
 
@@ -592,7 +599,7 @@ const server = http.createServer(async (req, res) => {
                 if (startRes && startRes.ok) {
                     broadcastSSE({ type: 'council-started', topic, mode });
                     res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: true, sessionId: startRes.sessionId, message: `Deliberation started: ${topic}` }));
+                    res.end(JSON.stringify({ success: true, sessionId: startRes.sessionId || startRes.session?.id || null, message: `Deliberation started: ${topic}` }));
                 } else {
                     res.writeHead(500, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ success: false, error: 'Failed to start deliberation' }));
@@ -614,10 +621,11 @@ const server = http.createServer(async (req, res) => {
                 const { question, mode } = JSON.parse(body);
                 // Use /api/ask endpoint which is for agent-initiated deliberations
                 const startRes = await httpPost(COUNCIL_HOST, COUNCIL_PORT, '/api/ask', { question, mode: mode || 'deliberation' });
-                if (startRes && startRes.sessionId) {
+                // council-api-server.cjs /api/ask returns {question, mode, responses, timestamp} — no sessionId field
+                if (startRes && (startRes.sessionId || startRes.responses)) {
                     broadcastSSE({ type: 'council-agent-started', question, mode });
                     res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: true, sessionId: startRes.sessionId, message: `Agent started deliberation: ${question}` }));
+                    res.end(JSON.stringify({ success: true, sessionId: startRes.sessionId || null, responses: startRes.responses || [], message: `Agent started deliberation: ${question}` }));
                 } else {
                     res.writeHead(500, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ success: false, error: 'Failed to start deliberation' }));
@@ -681,7 +689,7 @@ const server = http.createServer(async (req, res) => {
     // COUNCIL API PROXY (for unified WebUI)
     // ═══════════════════════════════════════════
     
-    // Proxy all /council/* requests to Council server (3007)
+    // Proxy all /council/* requests to Council server (COUNCIL_PORT, default 3001)
     if (pathname.startsWith('/council') || pathname.startsWith('/llm') || pathname.startsWith('/session')) {
         const councilPath = '/api' + pathname;
         let body = '';
